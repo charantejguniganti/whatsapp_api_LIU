@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LIU — Live It Up | Mam's Concierge Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #F7F3EE;
+      --card-bg: #FFFFFF;
+      --card-subtle: #FDFBF8;
+      --text-main: #27211E;
+      --text-muted: #847C76;
+      --text-light: #A49D97;
+      --border: #ECE5DC;
+      --border-light: #F4EFEA;
+      --primary-terra: #6B4938;
+      --primary-hover: #54392B;
+      --pill-active: #EFE7DE;
+      --tag-green-bg: #E8F5E9;
+      --tag-green-text: #2E7D32;
+      --tag-blue-bg: #E3F2FD;
+      --tag-blue-text: #1976D2;
+      --tag-amber-bg: #FFF3E0;
+      --tag-amber-text: #E65100;
+      --tag-purple-bg: #F3E5F5;
+      --tag-purple-text: #7B1FA2;
+      --shadow-sm: 0 2px 6px rgba(45, 30, 20, 0.03);
+      --shadow-md: 0 4px 16px rgba(45, 30, 20, 0.05);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --font-serif: 'Playfair Display', serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── SIDEBAR ────────────────────────────────────────── */
+    .sidebar {
+      width: 200px;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 28px 16px 24px 20px;
+      border-right: 1px solid var(--border);
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .brand-container {
+      text-align: center;
+      margin-bottom: 36px;
+      padding-top: 4px;
+    }
+
+    .brand-title {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #2D231E;
+      line-height: 1;
+    }
+
+    .brand-subtitle {
+      font-size: 8.5px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .nav-item:hover {
+      color: var(--text-main);
+      background: rgba(220, 210, 200, 0.4);
+    }
+
+    .nav-item.active {
+      background: #FFFFFF;
+      color: var(--primary-terra);
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      opacity: 0.85;
+    }
+
+    .sidebar-footer {
+      position: relative;
+      padding: 16px 8px 8px 8px;
+    }
+
+    .leaf-watermark {
+      position: absolute;
+      bottom: -15px;
+      left: -20px;
+      width: 140px;
+      height: 140px;
+      opacity: 0.12;
+      pointer-events: none;
+      filter: sepia(0.5);
+    }
+
+    .brand-taglines {
+      position: relative;
+      z-index: 1;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #A0948B;
+      line-height: 1.6;
+      font-weight: 600;
+    }
+
+    /* ─── MAIN CONTENT ─────────────────────────────────────── */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      padding: 24px 28px 24px 28px;
+      background: var(--bg);
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .welcome-text h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: -0.3px;
+    }
+
+    .welcome-text p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .search-box {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 9px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 320px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .search-box input {
+      border: none;
+      outline: none;
+      font-family: inherit;
+      font-size: 13px;
+      width: 100%;
+      color: var(--text-main);
+      background: transparent;
+    }
+
+    .search-box input::placeholder {
+      color: var(--text-light);
+    }
+
+    .icon-btn {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .badge-dot {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      width: 7px;
+      height: 7px;
+      background: #E53935;
+      border-radius: 50%;
+      border: 2px solid #FFFFFF;
+    }
+
+    .profile-pill {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 4px 14px 4px 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .avatar-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #2D231E;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .profile-info {
+      text-align: left;
+      line-height: 1.2;
+    }
+
+    .profile-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .profile-role {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Metric Cards Bar */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+    }
+
+    .metric-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .metric-icon-wrap.pink { background: #FCEBEA; color: #D84A38; }
+    .metric-icon-wrap.orange { background: #FEF3EB; color: #DE7234; }
+    .metric-icon-wrap.blue { background: #EBF3FC; color: #2B78E4; }
+    .metric-icon-wrap.green { background: #EAF7ED; color: #2E8540; }
+
+    .metric-content {
+      flex: 1;
+    }
+
+    .metric-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .metric-num {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .metric-growth {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #2E7D32;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .metric-sub {
+      font-size: 10.5px;
+      color: var(--text-light);
+    }
+
+    /* ─── 3-COLUMN WORKSPACE ───────────────────────────────── */
+    .workspace-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 310px 1fr 330px;
+      gap: 16px;
+      min-height: 0; /* Important for inner scrollbars */
+    }
+
+    /* Common Card Styling */
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    /* ── COLUMN 1: CONVERSATIONS LIST ── */
+    .conversations-header {
+      padding: 16px 16px 12px 16px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .conversations-header h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .conv-search {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .conv-search input {
+      width: 100%;
+      background: #FDFBF8;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px 7px 32px;
+      font-size: 12.5px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .conv-search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.4;
+      font-size: 13px;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .filter-pill {
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 16px;
+      background: #F4EFEA;
+      color: var(--text-muted);
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-pill.active {
+      background: #6B4938;
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .filter-icon-btn {
+      margin-left: auto;
+      background: none;
+      border: none;
+      cursor: pointer;
+      opacity: 0.6;
+      font-size: 14px;
+    }
+
+    .conversations-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .conv-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #FAF6F0;
+      cursor: pointer;
+      transition: background 0.15s;
+      position: relative;
+    }
+
+    .conv-item:hover {
+      background: #FBF8F4;
+    }
+
+    .conv-item.selected {
+      background: #FAF3EC;
+      border-left: 3px solid var(--primary-terra);
+    }
+
+    .avatar-sm {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #EDE6DF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: #6B4938;
+    }
+
+    .conv-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .conv-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 3px;
+    }
+
+    .conv-phone {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .conv-time {
+      font-size: 10.5px;
+      color: var(--text-light);
+    }
+
+    .conv-preview {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tag-pill {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 12px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .tag-green { background: var(--tag-green-bg); color: var(--tag-green-text); }
+    .tag-blue { background: var(--tag-blue-bg); color: var(--tag-blue-text); }
+    .tag-amber { background: var(--tag-amber-bg); color: var(--tag-amber-text); }
+    .tag-purple { background: var(--tag-purple-bg); color: var(--tag-purple-text); }
+
+    /* ── COLUMN 2: ACTIVE CHAT ── */
+    .chat-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-user-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-title-info h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .chat-title-info p {
+      font-size: 11.5px;
+      color: var(--text-light);
+    }
+
+    .chat-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-date-divider {
+      text-align: center;
+      margin: 14px 0 16px 0;
+      position: relative;
+    }
+
+    .chat-date-divider span {
+      background: #FAF6F0;
+      padding: 3px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      color: var(--text-light);
+    }
+
+    .chat-messages-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .chat-row {
+      display: flex;
+      gap: 10px;
+      max-width: 80%;
+    }
+
+    .chat-row.incoming {
+      align-self: flex-start;
+    }
+
+    .chat-row.outgoing {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .msg-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #EDE6DF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #6B4938;
+      flex-shrink: 0;
+    }
+
+    .msg-avatar.ai {
+      background: #6B4938;
+      color: #FFFFFF;
+      font-size: 9px;
+      letter-spacing: 0.5px;
+    }
+
+    .bubble-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-bubble {
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .chat-row.incoming .chat-bubble {
+      background: #F6F2EC;
+      color: var(--text-main);
+      border-top-left-radius: 4px;
+    }
+
+    .chat-row.outgoing .chat-bubble {
+      background: #FCEEE3;
+      color: var(--text-main);
+      border-top-right-radius: 4px;
+    }
+
+    .bubble-meta {
+      font-size: 10px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    .chat-row.incoming .bubble-meta { text-align: left; }
+    .chat-row.outgoing .bubble-meta { text-align: right; }
+
+    /* Chat Input Bar */
+    .chat-input-bar {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #FFFFFF;
+    }
+
+    .chat-input-bar input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 10px 16px;
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      background: #FAF8F5;
+    }
+
+    .chat-send-btn {
+      background: #6B4938;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .chat-send-btn:hover {
+      background: #54392B;
+    }
+
+    /* ── COLUMN 3: DETAILS & CONCIERGE ACTIONS ── */
+    .details-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-light);
+      padding: 10px 16px 0 16px;
+      gap: 16px;
+    }
+
+    .details-tab {
+      padding: 8px 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+    }
+
+    .details-tab.active {
+      color: var(--primary-terra);
+      font-weight: 600;
+      border-bottom-color: var(--primary-terra);
+    }
+
+    .details-content-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 20px;
+    }
+
+    .section-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 12px;
+    }
+
+    .cust-info-card {
+      margin-bottom: 20px;
+    }
+
+    .cust-phone-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      opacity: 0.6;
+    }
+
+    .meta-key-val {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .meta-key-val .key { color: var(--text-muted); }
+    .meta-key-val .val { font-weight: 500; color: var(--text-main); }
+
+    /* Takeover & Resume Action Buttons */
+    .takeover-box {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 18px 0 22px 0;
+    }
+
+    .btn-takeover-main {
+      background: #6B4938;
+      color: #FFFFFF;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 13.5px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-takeover-main:hover {
+      background: #54392B;
+    }
+
+    .btn-resume-main {
+      background: #EFE7DE;
+      color: #6B4938;
+      border: 1px solid #D8C7B5;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-resume-main:hover {
+      background: #E4D8CC;
+    }
+
+    .tag-container {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .tag-pill-large {
+      padding: 5px 12px;
+      border-radius: 14px;
+      font-size: 11.5px;
+      font-weight: 500;
+    }
+
+    .tag-pill-large.brown {
+      background: #F4ECE3;
+      color: #8C5332;
+    }
+
+    .tag-pill-large.orange {
+      background: #FAF0E6;
+      color: #B25D25;
+    }
+
+    .bullet-list {
+      list-style: none;
+      margin-bottom: 20px;
+    }
+
+    .bullet-list li {
+      position: relative;
+      padding-left: 14px;
+      font-size: 12px;
+      color: var(--text-main);
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+
+    .bullet-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .next-steps-card {
+      background: #FDFBF8;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+    }
+
+    .next-steps-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    /* ─── TOAST NOTIFICATION ───────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 28px;
+      background: #2D231E;
+      color: #FFFFFF;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+      z-index: 999;
+      box-shadow: var(--shadow-md);
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── MODAL LOGIN (Minimal Dev Overlay) ────────────────── */
+    #login-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(39, 33, 30, 0.45);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-box {
+      background: #FFFFFF;
+      border-radius: var(--radius-lg);
+      padding: 32px 36px;
+      width: 360px;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+    }
+    .modal-box h2 {
+      font-family: var(--font-serif);
+      font-size: 24px;
+      margin-bottom: 6px;
+      color: #2D231E;
+    }
+    .modal-box p {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+    }
+    .modal-box input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 13.5px;
+      outline: none;
+    }
+    .modal-box button {
+      width: 100%;
+      background: #6B4938;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      padding: 11px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── SIDEBAR ─────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div>
+      <div class="brand-container">
+        <div class="brand-title">LIU</div>
+        <div class="brand-subtitle">LIVE IT UP</div>
+      </div>
+
+      <nav>
+        <ul class="nav-list">
+          <li>
+            <a class="nav-item active" href="#dashboard">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              Dashboard
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="#conversations" onclick="setActiveNav(this)">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              Conversations
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="#enquiries" onclick="setActiveNav(this)">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+              Enquiries
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="#calendar" onclick="setActiveNav(this)">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Calendar
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="#reports" onclick="setActiveNav(this)">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+              Reports
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="#services" onclick="setActiveNav(this)">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+              Services
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="#team" onclick="setActiveNav(this)">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              Team
+            </a>
+          </li>
+          <li>
+            <a class="nav-item" href="#settings" onclick="setActiveNav(this)">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+              Settings
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <svg class="leaf-watermark" viewBox="0 0 100 100" fill="currentColor">
+        <path d="M20,90 Q40,40 85,20 Q65,60 20,90 Z" />
+        <path d="M30,90 Q50,55 90,40 Q70,75 30,90 Z" />
+      </svg>
+      <div class="brand-taglines">
+        <div>CONFIDENCE</div>
+        <div>WELLNESS</div>
+        <div>YOU</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ─── MAIN DASHBOARD ──────────────────────────────────── -->
+  <main class="main-wrapper">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="welcome-text">
+        <h1>Good Morning, Mam! ☀️</h1>
+        <p>Here's what's happening with your enquiries today.</p>
+      </div>
+
+      <div class="top-actions">
+        <div class="search-box">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A49D97" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="global-search" placeholder="Search by phone number, name or keyword..." oninput="handleSearch(this.value)" />
+        </div>
+
+        <button class="icon-btn" title="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#847C76" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="badge-dot"></span>
+        </button>
+
+        <div class="profile-pill" onclick="promptLoginOrSwitch()">
+          <div class="avatar-circle">M</div>
+          <div class="profile-info">
+            <div class="profile-name">Mam</div>
+            <div class="profile-role">Admin</div>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#847C76" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- Top Metric Cards -->
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon-wrap pink">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <div class="metric-content">
+          <div class="metric-row">
+            <div class="metric-num" id="stat-new">12</div>
+            <div class="metric-growth">↑ 25%</div>
+          </div>
+          <div class="metric-label">New Enquiries</div>
+          <div class="metric-sub">vs last week</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-wrap orange">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="metric-content">
+          <div class="metric-row">
+            <div class="metric-num" id="stat-progress">28</div>
+            <div class="metric-growth">↑ 10%</div>
+          </div>
+          <div class="metric-label">In Progress</div>
+          <div class="metric-sub">vs last week</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-wrap blue">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="metric-content">
+          <div class="metric-row">
+            <div class="metric-num" id="stat-waiting">8</div>
+            <div class="metric-growth">↑ 14%</div>
+          </div>
+          <div class="metric-label">Waiting for Customer</div>
+          <div class="metric-sub">vs last week</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-wrap green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <div class="metric-content">
+          <div class="metric-row">
+            <div class="metric-num" id="stat-closed">36</div>
+            <div class="metric-growth">↑ 18%</div>
+          </div>
+          <div class="metric-label">Closed</div>
+          <div class="metric-sub">vs last week</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3-Column Workspace -->
+    <div class="workspace-grid">
+      <!-- Col 1: Conversations List -->
+      <div class="panel-card">
+        <div class="conversations-header">
+          <h2>Conversations</h2>
+          <div class="conv-search">
+            <span class="conv-search-icon">🔍</span>
+            <input type="text" id="conv-search-input" placeholder="Search phone number or keyword..." oninput="handleSearch(this.value)" />
+          </div>
+          <div class="filter-pills">
+            <button class="filter-pill active" onclick="setFilter('all', this)">All (<span id="count-all">84</span>)</button>
+            <button class="filter-pill" onclick="setFilter('new', this)">New (<span id="count-new">12</span>)</button>
+            <button class="filter-pill" onclick="setFilter('progress', this)">In Progress (<span id="count-prog">28</span>)</button>
+            <button class="filter-icon-btn" title="More filters">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#847C76" stroke-width="2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="conversations-list" id="conv-list-container">
+          <!-- Dynamically populated conversations -->
+        </div>
+      </div>
+
+      <!-- Col 2: Active Chat Area -->
+      <div class="panel-card">
+        <div class="chat-header">
+          <div class="chat-user-wrap">
+            <div class="avatar-sm" id="active-chat-avatar">P</div>
+            <div class="chat-title-info">
+              <h3 id="active-chat-phone">+91 98765 43210</h3>
+              <p id="active-chat-lastseen">Last seen today at 10:24 AM</p>
+            </div>
+          </div>
+          <div class="chat-header-actions">
+            <span class="tag-pill tag-green" id="active-chat-status">New</span>
+            <button class="filter-icon-btn" title="Options">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#847C76" stroke-width="2">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="chat-messages-scroll" id="chat-messages-container">
+          <!-- Date divider -->
+          <div class="chat-date-divider">
+            <span>13 Oct 2026</span>
+          </div>
+
+          <!-- Messages injected via JS -->
+        </div>
+
+        <div class="chat-input-bar">
+          <button class="filter-icon-btn" title="Attach file">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#847C76" stroke-width="2">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+            </svg>
+          </button>
+          <input type="text" id="chat-reply-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendReply()" />
+          <button class="chat-send-btn" onclick="sendReply()" title="Send">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Col 3: Details & Concierge Controls -->
+      <div class="panel-card">
+        <div class="details-tabs">
+          <div class="details-tab active" onclick="switchDetailTab('details', this)">Details</div>
+          <div class="details-tab" onclick="switchDetailTab('summary', this)">Summary</div>
+          <div class="details-tab" onclick="switchDetailTab('notes', this)">Notes</div>
+        </div>
+
+        <div class="details-content-scroll" id="details-panel-body">
+          <div class="cust-info-card">
+            <div class="section-label">Customer Information</div>
+            <div class="cust-phone-row">
+              <span id="detail-phone">+91 98765 43210</span>
+              <button class="copy-btn" onclick="copyPhone()" title="Copy Phone Number">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#847C76" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
+
+            <div class="meta-key-val">
+              <span class="key">First Contact</span>
+              <span class="val" id="detail-first-contact">13 Oct 2026, 10:20 AM</span>
+            </div>
+            <div class="meta-key-val">
+              <span class="key">Last Message</span>
+              <span class="val" id="detail-last-msg">13 Oct 2026, 10:24 AM</span>
+            </div>
+            <div class="meta-key-val" style="align-items: center;">
+              <span class="key">Status</span>
+              <span class="tag-pill tag-green" id="detail-status-pill">● New</span>
+            </div>
+            <div class="meta-key-val" style="align-items: center;">
+              <span class="key">Owner</span>
+              <span class="val" id="detail-owner" style="color:var(--text-muted); font-size:12px;">🤖 AI Assistant (Liv)</span>
+            </div>
+          </div>
+
+          <!-- Human Takeover & Resume Actions -->
+          <div class="takeover-box">
+            <button class="btn-takeover-main" id="btn-takeover" onclick="handleTakeover()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              Take Over (Human)
+            </button>
+            <button class="btn-resume-main" id="btn-resume" onclick="handleResume()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              Resume AI
+            </button>
+          </div>
+
+          <!-- Services of Interest -->
+          <div class="section-label">Services of Interest</div>
+          <div class="tag-container" id="detail-services-tags">
+            <span class="tag-pill-large brown">Pilates</span>
+            <span class="tag-pill-large orange">Fitness & Wellness</span>
+          </div>
+
+          <!-- Customer Requirements -->
+          <div class="section-label">Customer Requirements</div>
+          <ul class="bullet-list" id="detail-requirements">
+            <li>Wants to know about Pilates classes</li>
+            <li>Asked for package prices</li>
+            <li>Wants recommendation for beginners</li>
+          </ul>
+
+          <!-- Next Steps -->
+          <div class="next-steps-card">
+            <div class="next-steps-header">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B4938" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Next Steps
+            </div>
+            <ul class="bullet-list" style="margin-bottom:0;" id="detail-next-steps">
+              <li>Share detailed schedule</li>
+              <li>Offer free consultation if interested</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast">Takeover confirmed!</div>
+
+  <!-- ─── LOGIN OVERLAY MODAL ─────────────────────────────── -->
+  <div id="login-modal">
+    <div class="modal-box">
+      <h2>Mam Admin Sign In</h2>
+      <p>Enter your credentials to access the concierge dashboard.</p>
+      <input type="text" id="login-user" placeholder="Username (e.g. admin)" value="admin" />
+      <input type="password" id="login-pass" placeholder="Password" value="admin123" />
+      <button onclick="performLogin()">Access Dashboard</button>
+    </div>
+  </div>
+
+  <script>
+    // ─── STATE MANAGEMENT ─────────────────────────────────
+    let currentFilter = 'all';
+    let searchQuery = '';
+    let selectedPhone = null;
+    let token = localStorage.getItem('liu_admin_token') || '';
+    let allConversations = [];
+
+    // ─── INITIALIZATION ───────────────────────────────────
+    async function initDashboard() {
+      if (!token) {
+        promptLoginOrSwitch();
+        return;
+      }
+
+      try {
+        // Fetch Live Stats
+        const statsRes = await fetch('/admin/stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (statsRes.status === 401) {
+          localStorage.removeItem('liu_admin_token');
+          token = '';
+          promptLoginOrSwitch();
+          return;
+        }
+        if (statsRes.ok) {
+          const stats = await statsRes.json();
+          document.getElementById('stat-new').innerText = stats.pendingNotification ?? 0;
+          document.getElementById('stat-progress').innerText = stats.humanTakeover ?? 0;
+          document.getElementById('stat-waiting').innerText = stats.aiResumed ?? 0;
+          document.getElementById('stat-closed').innerText = stats.total ?? 0;
+
+          document.getElementById('count-all').innerText = stats.total ?? 0;
+          document.getElementById('count-new').innerText = stats.pendingNotification ?? 0;
+          document.getElementById('count-prog').innerText = stats.humanTakeover ?? 0;
+        }
+
+        // Fetch Live Leads from Neon PostgreSQL
+        const leadsRes = await fetch('/admin/leads', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (leadsRes.ok) {
+          const data = await leadsRes.json();
+          const leads = data.leads || [];
+
+          allConversations = leads.map(l => {
+            const isHuman = l.state === 'HUMAN_TAKEOVER';
+            const status = isHuman ? 'In Progress' : (l.notificationSent ? 'New' : 'Active');
+            const statusClass = isHuman ? 'tag-blue' : (l.notificationSent ? 'tag-green' : 'tag-amber');
+            const name = l.customerName || 'Customer';
+            const avatar = name.charAt(0).toUpperCase();
+
+            return {
+              phone: l.phone,
+              name: name,
+              avatar: avatar,
+              status: status,
+              statusClass: statusClass,
+              time: l.lastMessageAt ? new Date(l.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent',
+              lastMsg: l.lastMessage || l.interest || 'No messages yet',
+              firstContact: l.notifiedAt ? new Date(l.notifiedAt).toLocaleString() : 'Recent',
+              lastContact: l.lastMessageAt ? new Date(l.lastMessageAt).toLocaleString() : 'Today',
+              state: l.state,
+              services: l.interest ? [l.interest] : ['Wellness & Image Consulting'],
+              requirements: l.summary ? [l.summary] : ['Customer enquiry on WhatsApp'],
+              nextSteps: ['Follow up with customer schedule', 'Offer consultation booking'],
+              messages: []
+            };
+          });
+
+          renderConversationsList();
+
+          if (allConversations.length > 0) {
+            selectConversation(allConversations[0].phone);
+          } else {
+            renderEmptyWorkspace();
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load live data:', e);
+        showToast('Error connecting to backend API');
+      }
+    }
+
+    function renderEmptyWorkspace() {
+      const container = document.getElementById('conv-list-container');
+      container.innerHTML = `
+        <div style="padding: 32px 16px; text-align: center; color: var(--text-muted); font-size: 13px;">
+          <div style="font-size: 24px; margin-bottom: 8px;">💬</div>
+          No active customer conversations yet in database.<br>
+          <span style="font-size: 11.5px; color: var(--text-light);">Messages sent to WhatsApp or /simulate will appear here in real-time.</span>
+        </div>
+      `;
+
+      document.getElementById('active-chat-phone').innerText = 'No conversation selected';
+      document.getElementById('active-chat-avatar').innerText = '—';
+      document.getElementById('active-chat-status').innerText = 'Idle';
+      document.getElementById('active-chat-lastseen').innerText = '—';
+      document.getElementById('chat-messages-container').innerHTML = `
+        <div style="padding: 48px; text-align: center; color: var(--text-muted); font-size: 13.5px;">
+          Select a customer from the left or wait for incoming WhatsApp messages.
+        </div>
+      `;
+
+      document.getElementById('detail-phone').innerText = '—';
+      document.getElementById('detail-first-contact').innerText = '—';
+      document.getElementById('detail-last-msg').innerText = '—';
+      document.getElementById('detail-status-pill').innerText = '● Idle';
+      document.getElementById('detail-owner').innerText = '🤖 AI Assistant (Liv)';
+      document.getElementById('detail-services-tags').innerHTML = '<span style="font-size:12px; color:var(--text-muted);">None</span>';
+      document.getElementById('detail-requirements').innerHTML = '<li>Awaiting customer goals</li>';
+      document.getElementById('detail-next-steps').innerHTML = '<li>Ready for inbound enquiries</li>';
+    }
+
+    // ─── RENDER CONVERSATION LIST ─────────────────────────
+    function renderConversationsList() {
+      const container = document.getElementById('conv-list-container');
+      const filtered = allConversations.filter(c => {
+        const matchesFilter = 
+          currentFilter === 'all' ? true :
+          currentFilter === 'new' ? c.status === 'New' :
+          currentFilter === 'progress' ? c.status === 'In Progress' : true;
+        
+        const q = searchQuery.toLowerCase();
+        const matchesSearch = 
+          c.phone.toLowerCase().includes(q) ||
+          c.name.toLowerCase().includes(q) ||
+          c.lastMsg.toLowerCase().includes(q);
+
+        return matchesFilter && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="padding: 24px 16px; text-align: center; color: var(--text-muted); font-size: 12.5px;">
+            No conversations match this filter.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(c => `
+        <div class="conv-item ${c.phone === selectedPhone ? 'selected' : ''}" onclick="selectConversation('${c.phone}')">
+          <div class="avatar-sm">${c.avatar}</div>
+          <div class="conv-info">
+            <div class="conv-top-row">
+              <span class="conv-phone">${c.phone}</span>
+              <span class="conv-time">${c.time}</span>
+            </div>
+            <div class="conv-preview">${c.lastMsg}</div>
+            <span class="tag-pill ${c.statusClass}">${c.status}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ─── SELECT CONVERSATION ──────────────────────────────
+    async function selectConversation(phone) {
+      selectedPhone = phone;
+      const conv = allConversations.find(c => c.phone === phone);
+      if (!conv) return;
+
+      renderConversationsList();
+
+      // Update Center Chat Column
+      document.getElementById('active-chat-phone').innerText = conv.phone;
+      document.getElementById('active-chat-avatar').innerText = conv.avatar;
+      document.getElementById('active-chat-status').innerText = conv.status;
+      document.getElementById('active-chat-status').className = `tag-pill ${conv.statusClass}`;
+      document.getElementById('active-chat-lastseen').innerText = `Last seen ${conv.time}`;
+
+      // Fetch Live Conversation Transcript from Backend
+      const chatContainer = document.getElementById('chat-messages-container');
+      chatContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-muted);">Loading full transcript...</div>';
+
+      try {
+        const res = await fetch(`/admin/leads/${encodeURIComponent(phone)}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const detail = await res.json();
+          const history = detail.history || [];
+          conv.messages = history.map(h => ({
+            role: h.role,
+            text: h.content,
+            time: 'Transcript'
+          }));
+
+          if (detail.conversation?.state) {
+            conv.state = detail.conversation.state;
+          }
+          if (detail.summary) {
+            conv.requirements = [detail.summary];
+          }
+          if (detail.lead?.data?.interest) {
+            conv.services = [detail.lead.data.interest];
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch lead transcript:', err);
+      }
+
+      const msgsHtml = conv.messages.length > 0 ? conv.messages.map(m => `
+        <div class="chat-row ${m.role === 'user' ? 'incoming' : 'outgoing'}">
+          <div class="msg-avatar ${m.role === 'assistant' ? 'ai' : ''}">
+            ${m.role === 'assistant' ? 'LIU' : conv.avatar}
+          </div>
+          <div class="bubble-wrap">
+            <div class="chat-bubble">${(m.text || '').replace(/\n/g, '<br>')}</div>
+            <div class="bubble-meta">${m.time}</div>
+          </div>
+        </div>
+      `).join('') : '<div style="padding: 32px; text-align: center; color: var(--text-muted); font-size: 13px;">No message history recorded yet for this number.</div>';
+
+      chatContainer.innerHTML = `
+        <div class="chat-date-divider"><span>Active Transcript</span></div>
+        ${msgsHtml}
+      `;
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      // Update Right Details Column
+      document.getElementById('detail-phone').innerText = conv.phone;
+      document.getElementById('detail-first-contact').innerText = conv.firstContact;
+      document.getElementById('detail-last-msg').innerText = conv.lastContact;
+      document.getElementById('detail-status-pill').innerText = `● ${conv.status}`;
+      document.getElementById('detail-status-pill').className = `tag-pill ${conv.statusClass}`;
+
+      const isHuman = conv.state === 'HUMAN_TAKEOVER';
+      document.getElementById('detail-owner').innerText = isHuman ? '👤 Mam (Human)' : '🤖 AI Assistant (Liv)';
+      
+      const btnTakeover = document.getElementById('btn-takeover');
+      if (isHuman) {
+        btnTakeover.style.opacity = '0.5';
+        btnTakeover.innerText = '✓ Claimed by Mam';
+      } else {
+        btnTakeover.style.opacity = '1';
+        btnTakeover.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          Take Over (Human)
+        `;
+      }
+
+      // Services tags
+      document.getElementById('detail-services-tags').innerHTML = (conv.services || []).map((s, i) => `
+        <span class="tag-pill-large ${i % 2 === 0 ? 'brown' : 'orange'}">${s}</span>
+      `).join('');
+
+      // Requirements
+      document.getElementById('detail-requirements').innerHTML = (conv.requirements || []).map(r => `
+        <li>${r}</li>
+      `).join('');
+
+      // Next steps
+      document.getElementById('detail-next-steps').innerHTML = (conv.nextSteps || []).map(n => `
+        <li>${n}</li>
+      `).join('');
+    }
+
+    // ─── ACTIONS ──────────────────────────────────────────
+    async function handleTakeover() {
+      if (!selectedPhone) return;
+      const conv = allConversations.find(c => c.phone === selectedPhone);
+      if (!conv) return;
+
+      try {
+        const res = await fetch(`/admin/leads/${encodeURIComponent(conv.phone)}/takeover`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}` 
+          }
+        });
+        if (res.ok) {
+          conv.state = 'HUMAN_TAKEOVER';
+          conv.status = 'In Progress';
+          conv.statusClass = 'tag-blue';
+          showToast(`👤 Claimed ${conv.phone}. Liv is paused.`);
+          selectConversation(conv.phone);
+        } else {
+          showToast('Failed to claim conversation');
+        }
+      } catch (e) {
+        showToast('Error claiming conversation');
+      }
+    }
+
+    async function handleResume() {
+      if (!selectedPhone) return;
+      const conv = allConversations.find(c => c.phone === selectedPhone);
+      if (!conv) return;
+
+      try {
+        const res = await fetch(`/admin/leads/${encodeURIComponent(conv.phone)}/resume`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}` 
+          }
+        });
+        if (res.ok) {
+          conv.state = 'AI_RESUMED';
+          conv.status = 'Active';
+          conv.statusClass = 'tag-green';
+          showToast(`🤖 AI Assistant (Liv) resumed for ${conv.phone}.`);
+          selectConversation(conv.phone);
+        } else {
+          showToast('Failed to resume AI');
+        }
+      } catch (e) {
+        showToast('Error resuming AI');
+      }
+    }
+
+    async function sendReply() {
+      const input = document.getElementById('chat-reply-input');
+      const text = input.value.trim();
+      if (!text || !selectedPhone) return;
+
+      const conv = allConversations.find(c => c.phone === selectedPhone);
+      if (!conv) return;
+
+      conv.messages.push({
+        role: 'assistant',
+        time: 'Just now',
+        text: text
+      });
+      conv.lastMsg = text;
+      input.value = '';
+      selectConversation(conv.phone);
+      showToast('Message sent');
+    }
+
+    function setFilter(filter, el) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      renderConversationsList();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val;
+      renderConversationsList();
+    }
+
+    function switchDetailTab(tab, el) {
+      document.querySelectorAll('.details-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function setActiveNav(el) {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function copyPhone() {
+      if (!selectedPhone) return;
+      navigator.clipboard.writeText(selectedPhone);
+      showToast('Phone number copied to clipboard!');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    function promptLoginOrSwitch() {
+      document.getElementById('login-modal').style.display = 'flex';
+    }
+
+    async function performLogin() {
+      const u = document.getElementById('login-user').value.trim();
+      const p = document.getElementById('login-pass').value;
+      try {
+        const res = await fetch('/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+        });
+        const data = await res.json();
+        if (data.token) {
+          token = data.token;
+          localStorage.setItem('liu_admin_token', token);
+          showToast('Signed in successfully!');
+          document.getElementById('login-modal').style.display = 'none';
+          initDashboard();
+        } else {
+          showToast(data.error || 'Login failed');
+        }
+      } catch (e) {
+        showToast('Login request error');
+      }
+    }
+
+    // Run on load
+    window.addEventListener('DOMContentLoaded', initDashboard);
+  </script>
+</body>
+</html>

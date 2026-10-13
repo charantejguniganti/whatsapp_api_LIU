@@ -1,0 +1,29 @@
+# Dependency directories
+node_modules/
+
+# Environment — NEVER commit
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Editor artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build output
+dist/
+build/
