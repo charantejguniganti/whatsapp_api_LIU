@@ -187,4 +187,65 @@ router.post('/leads/:phone/resume', async (req, res, next) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// GET /admin/whatsapp/status
+// ---------------------------------------------------------------------------
+router.get('/whatsapp/status', async (req, res, next) => {
+  try {
+    const { getBaileysStatus } = await import('../whatsapp/baileysClient.js');
+    return res.json(getBaileysStatus());
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /admin/whatsapp/start
+// ---------------------------------------------------------------------------
+router.post('/whatsapp/start', async (req, res, next) => {
+  try {
+    const { initBaileys, getBaileysStatus } = await import('../whatsapp/baileysClient.js');
+    await initBaileys(true);
+    return res.json(getBaileysStatus());
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /admin/leads/:phone/reply (Mam sends message from dashboard)
+// ---------------------------------------------------------------------------
+router.post('/leads/:phone/reply', async (req, res, next) => {
+  try {
+    const phone = decodeURIComponent(req.params.phone);
+    const { message } = req.body ?? {};
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: 'message required' });
+    }
+
+    const store = await getStore();
+    const { sendTextMessage } = await import('../whatsapp/client.js');
+
+    // Send reply via active channel (Baileys or Meta Cloud API)
+    await sendTextMessage(phone, message.trim());
+
+    // Update conversation history
+    const historyKey = `history:${phone}`;
+    const history = (await store.get(historyKey)) ?? [];
+    const updated = [...history, { role: 'assistant', content: message.trim() }].slice(-20);
+    await store.set(historyKey, updated);
+
+    // Update conversation timestamp
+    const existingConv = (await store.get(`conv:${phone}`)) ?? { phone };
+    await store.set(`conv:${phone}`, {
+      ...existingConv,
+      updatedAt: new Date().toISOString(),
+    });
+
+    return res.json({ ok: true, phone, message: message.trim() });
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;

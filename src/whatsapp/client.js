@@ -91,6 +91,16 @@ async function sendMessage(to, payload) {
  * @param {boolean} [preview=false] - Enable link preview
  */
 export async function sendTextMessage(to, text, preview = false) {
+  try {
+    const { getBaileysStatus, sendBaileysMessage } = await import('./baileysClient.js');
+    const bStatus = getBaileysStatus();
+    if (bStatus.status === 'connected') {
+      return await sendBaileysMessage(to, text);
+    }
+  } catch (err) {
+    // fallback to default
+  }
+
   return sendMessage(to, {
     type: 'text',
     text: {

@@ -22,6 +22,11 @@ const server = app.listen(config.PORT, () => {
   logger.info(`   Health:   http://localhost:${config.PORT}/health`);
   logger.info(`   Simulate: http://localhost:${config.PORT}/simulate`);
   logger.info(`   Webhook:  http://localhost:${config.PORT}/webhook`);
+
+  // Start Baileys WhatsApp client in background
+  import('./whatsapp/baileysClient.js').then(({ initBaileys }) => {
+    initBaileys().catch(err => logger.error({ err }, 'Failed to start Baileys in background'));
+  }).catch(() => {});
 });
 
 // ---------------------------------------------------------------------------
