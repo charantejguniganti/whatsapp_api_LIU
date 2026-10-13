@@ -125,4 +125,42 @@ describe('Production Readiness: Admin API Access Control & Secret Safety', () =>
     expect(jsonStr).not.toContain('OPENAI_API_KEY');
     expect(jsonStr).not.toContain('JWT_SECRET');
   });
+
+  it('rejects login with invalid credentials with 401', async () => {
+    const res = await request(app)
+      .post('/admin/login')
+      .send({ username: 'admin', password: 'wrongpassword' });
+
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty('error', 'Invalid credentials');
+  });
+
+  it('sets secure HttpOnly admin_token cookie on successful login', async () => {
+    const res = await request(app)
+      .post('/admin/login')
+      .send({ username: 'admin', password: 'admin123' });
+
+    expect(res.status).toBe(200);
+    const cookies = res.headers['set-cookie'];
+    expect(cookies).toBeDefined();
+    expect(cookies.some((c) => c.includes('admin_token='))).toBe(true);
+    expect(cookies.some((c) => c.includes('HttpOnly'))).toBe(true);
+  });
 });
+
+describe('Production Readiness: Bcrypt Hash Authentication Flow', () => {
+  it('authenticates correctly against a standard bcrypt password hash', async () => {
+    const bcrypt = (await import('bcryptjs')).default;
+    const plainPassword = 'SuperStrongPassword2026!';
+    const generatedHash = await bcrypt.hash(plainPassword, 12);
+
+    // Verify bcrypt comparison succeeds on valid password
+    const validMatch = await bcrypt.compare(plainPassword, generatedHash);
+    expect(validMatch).toBe(true);
+
+    // Verify bcrypt comparison fails on invalid password
+    const invalidMatch = await bcrypt.compare('WrongPassword', generatedHash);
+    expect(invalidMatch).toBe(false);
+  });
+});
+

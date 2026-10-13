@@ -911,9 +911,10 @@
       background: #FFFFFF;
       border-radius: var(--radius-lg);
       padding: 32px 36px;
-      width: 360px;
+      width: 380px;
       text-align: center;
       box-shadow: var(--shadow-md);
+      position: relative;
     }
     .modal-box h2 {
       font-family: var(--font-serif);
@@ -924,27 +925,97 @@
     .modal-box p {
       font-size: 12.5px;
       color: var(--text-muted);
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
     .modal-box input {
       width: 100%;
-      padding: 10px 14px;
+      padding: 11px 14px;
       border: 1px solid var(--border);
       border-radius: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       font-size: 13.5px;
+      font-family: inherit;
       outline: none;
+      transition: border-color 0.15s;
+      background: #FAF8F5;
+      color: var(--text-main);
     }
-    .modal-box button {
+    .modal-box input:focus {
+      border-color: #6B4938;
+      background: #FFFFFF;
+    }
+    .password-wrap {
+      position: relative;
+      width: 100%;
+      margin-bottom: 14px;
+    }
+    .password-wrap input {
+      margin-bottom: 0;
+      padding-right: 44px;
+    }
+    .password-toggle-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+    .password-toggle-btn:hover {
+      color: var(--text-main);
+    }
+    .password-toggle-btn:focus-visible {
+      outline: 2px solid #6B4938;
+    }
+    .modal-box button.btn-submit {
       width: 100%;
       background: #6B4938;
       color: #FFFFFF;
       border: none;
       border-radius: 8px;
-      padding: 11px;
+      padding: 12px;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    .modal-box button.btn-submit:hover:not(:disabled) {
+      background: #54392B;
+    }
+    .modal-box button.btn-submit:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+    .login-error-msg {
+      color: #C62828;
+      background: #FFEBEE;
+      border: 1px solid #FFCDD2;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      margin-bottom: 14px;
+      text-align: left;
+      display: none;
+    }
+    .btn-spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #FFFFFF;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
     }
   </style>
 </head>
@@ -1331,13 +1402,58 @@
   <div id="toast">Takeover confirmed!</div>
 
   <!-- ─── LOGIN OVERLAY MODAL ─────────────────────────────── -->
-  <div id="login-modal">
+  <div id="login-modal" role="dialog" aria-modal="true" aria-labelledby="login-title">
     <div class="modal-box">
-      <h2>Mam Admin Sign In</h2>
+      <h2 id="login-title">Mam Admin Sign In</h2>
       <p>Enter your credentials to access the concierge dashboard.</p>
-      <input type="text" id="login-user" placeholder="Username (e.g. admin)" value="admin" />
-      <input type="password" id="login-pass" placeholder="Password" value="admin123" />
-      <button onclick="performLogin()">Access Dashboard</button>
+
+      <div id="login-error" class="login-error-msg" role="alert"></div>
+
+      <form id="login-form" onsubmit="event.preventDefault(); performLogin();">
+        <label for="login-user" style="display:none;">Username</label>
+        <input 
+          type="text" 
+          id="login-user" 
+          placeholder="Username" 
+          autocomplete="username" 
+          required 
+        />
+
+        <div class="password-wrap">
+          <label for="login-pass" style="display:none;">Password</label>
+          <input 
+            type="password" 
+            id="login-pass" 
+            placeholder="Password" 
+            autocomplete="current-password" 
+            required 
+          />
+          <button 
+            type="button" 
+            id="toggle-password-btn" 
+            class="password-toggle-btn" 
+            onclick="togglePasswordVisibility()" 
+            aria-label="Show password" 
+            title="Show password"
+          >
+            <!-- Eye icon (password hidden) -->
+            <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <!-- Eye-off icon (password visible, hidden by default) -->
+            <svg id="eye-off-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
+          </button>
+        </div>
+
+        <button type="submit" id="login-submit-btn" class="btn-submit">
+          <span id="login-btn-spinner" class="btn-spinner" style="display:none;"></span>
+          <span id="login-btn-text">Access Dashboard</span>
+        </button>
+      </form>
     </div>
   </div>
 
@@ -1713,30 +1829,111 @@
     }
 
     function promptLoginOrSwitch() {
-      document.getElementById('login-modal').style.display = 'flex';
+      const modal = document.getElementById('login-modal');
+      modal.style.display = 'flex';
+      clearLoginError();
+      const userField = document.getElementById('login-user');
+      if (userField) userField.focus();
+    }
+
+    function togglePasswordVisibility() {
+      const passInput = document.getElementById('login-pass');
+      const toggleBtn = document.getElementById('toggle-password-btn');
+      const eyeIcon = document.getElementById('eye-icon');
+      const eyeOffIcon = document.getElementById('eye-off-icon');
+
+      if (!passInput) return;
+
+      const isHidden = passInput.type === 'password';
+      passInput.type = isHidden ? 'text' : 'password';
+
+      if (eyeIcon && eyeOffIcon) {
+        eyeIcon.style.display = isHidden ? 'none' : 'block';
+        eyeOffIcon.style.display = isHidden ? 'block' : 'none';
+      }
+
+      if (toggleBtn) {
+        const actionLabel = isHidden ? 'Hide password' : 'Show password';
+        toggleBtn.setAttribute('aria-label', actionLabel);
+        toggleBtn.setAttribute('title', actionLabel);
+      }
+    }
+
+    function showLoginError(msg) {
+      const errBox = document.getElementById('login-error');
+      if (errBox) {
+        errBox.textContent = msg;
+        errBox.style.display = 'block';
+      }
+    }
+
+    function clearLoginError() {
+      const errBox = document.getElementById('login-error');
+      if (errBox) {
+        errBox.textContent = '';
+        errBox.style.display = 'none';
+      }
     }
 
     async function performLogin() {
-      const u = document.getElementById('login-user').value.trim();
-      const p = document.getElementById('login-pass').value;
+      const userInput = document.getElementById('login-user');
+      const passInput = document.getElementById('login-pass');
+      const submitBtn = document.getElementById('login-submit-btn');
+      const btnSpinner = document.getElementById('login-btn-spinner');
+      const btnText = document.getElementById('login-btn-text');
+
+      clearLoginError();
+
+      const username = (userInput ? userInput.value : '').trim();
+      const password = passInput ? passInput.value : '';
+
+      if (!username || !password) {
+        showLoginError('Please enter both username and password.');
+        return;
+      }
+
+      // Set Loading State
+      if (submitBtn) submitBtn.disabled = true;
+      if (btnSpinner) btnSpinner.style.display = 'inline-block';
+      if (btnText) btnText.textContent = 'Signing in...';
+
       try {
         const res = await fetch('/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: u, password: p })
+          credentials: 'same-origin', // Ensure HTTP-only cookie is sent and received
+          body: JSON.stringify({ username, password })
         });
-        const data = await res.json();
-        if (data.token) {
+
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok && data.token) {
           token = data.token;
           localStorage.setItem('liu_admin_token', token);
           showToast('Signed in successfully!');
+
+          // Hide modal and reset fields
           document.getElementById('login-modal').style.display = 'none';
-          initDashboard();
+          if (userInput) userInput.value = '';
+          if (passInput) passInput.value = '';
+
+          // Reset password view to masked
+          if (passInput && passInput.type === 'text') {
+            togglePasswordVisibility();
+          }
+
+          await initDashboard();
         } else {
-          showToast(data.error || 'Login failed');
+          const errMsg = data.error || (res.status === 401 ? 'Invalid username or password.' : 'Login failed. Please check server logs.');
+          showLoginError(errMsg);
         }
       } catch (e) {
-        showToast('Login request error');
+        console.error('Login request network error:', e);
+        showLoginError('Network error connecting to /admin/login. Please check your internet connection and backend status.');
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        if (btnSpinner) btnSpinner.style.display = 'none';
+        if (btnText) btnText.textContent = 'Access Dashboard';
       }
     }
 
