@@ -26,6 +26,11 @@ const MOCK_RESPONSES = [
       "Our session pricing and availability depend on your specific programme, format (individual or group), and goals. We provide customised options rather than fixed public rates. Would you like me to connect you with our team for current schedules and fee details?",
   },
   {
+    keywords: ['package', 'packages', 'bundle', 'bundles', 'programme', 'programmes', 'options', 'plans'],
+    reply:
+      "At LIU, we offer signature tailored packages across Wellness, Grooming, and Executive Presence! ✨\n\n1. Executive Presence (Image Consulting, Communication Skills, Posture & Body Language)\n2. Personal Style Makeover (Image Scope, Colour Analysis, Wardrobe Evaluation)\n3. Wellness Reset (Pilates/Yoga, Sound Healing, Nutrition)\n4. Complete Transformation (Full holistic package)\n\nWhich area would you love to focus on first?",
+  },
+  {
     keywords: ['corporate', 'company', 'workplace', 'employee', 'employees', 'institutional', 'student', 'students', 'college', 'school', 'university', 'campus', 'workshop', 'workshops'],
     reply:
       "LIU designs tailored wellness, grooming, and professional development programmes for corporate organisations and educational institutions. We offer customised workshops to fit your group's needs. Would you like our team to get in touch?",
