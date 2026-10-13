@@ -591,16 +591,19 @@
     .chat-row {
       display: flex;
       gap: 10px;
-      max-width: 80%;
+      max-width: 78%;
+      width: fit-content;
     }
 
     .chat-row.incoming {
       align-self: flex-start;
+      margin-right: auto;
     }
 
     .chat-row.outgoing {
       align-self: flex-end;
       flex-direction: row-reverse;
+      margin-left: auto;
     }
 
     .msg-avatar {
@@ -2088,6 +2091,25 @@
     window.addEventListener('DOMContentLoaded', () => {
       initDashboard();
       setInterval(checkWhatsAppStatus, 10000);
+      // Auto-refresh live chats every 4 seconds
+      setInterval(() => {
+        if (token) {
+          loadLiveData();
+          if (selectedPhone) {
+            // refresh transcript without wiping scroll
+            fetch(`/admin/leads/${encodeURIComponent(selectedPhone)}`, {
+              headers: { Authorization: `Bearer ${token}` }
+            }).then(r => r.json()).then(detail => {
+              if (detail && detail.history) {
+                const conv = allConversations.find(c => c.phone === selectedPhone);
+                if (conv && detail.history.length !== conv.messages?.length) {
+                  selectConversation(selectedPhone);
+                }
+              }
+            }).catch(() => {});
+          }
+        }
+      }, 4000);
     });
   </script>
 </body>

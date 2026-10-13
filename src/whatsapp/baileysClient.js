@@ -114,7 +114,12 @@ export async function initBaileys(forceRestart = false) {
         const remoteJid = msg.key.remoteJid;
         if (!remoteJid || remoteJid.endsWith('@g.us') || remoteJid === 'status@broadcast') continue;
 
-        const customerPhone = '+' + remoteJid.replace('@s.whatsapp.net', '');
+        // Extract phone number or clean identifier
+        let customerPhone = remoteJid.split('@')[0];
+        if (!customerPhone.startsWith('+')) {
+          customerPhone = '+' + customerPhone;
+        }
+
         const text =
           msg.message?.conversation ||
           msg.message?.extendedTextMessage?.text ||
@@ -247,7 +252,7 @@ export async function sendBaileysMessage(phone, text) {
   if (!sock || connectionStatus !== 'connected') {
     throw new Error('WhatsApp Web is not connected');
   }
-  const cleanPhone = phone.replace(/[\s+\-()]/g, '');
-  const jid = `${cleanPhone}@s.whatsapp.net`;
+  const clean = phone.replace(/[\s+]/g, '');
+  const jid = clean.includes('@') ? clean : `${clean}@s.whatsapp.net`;
   return await sock.sendMessage(jid, { text });
 }
