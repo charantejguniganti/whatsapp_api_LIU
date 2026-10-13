@@ -101,10 +101,13 @@ describe('Production Readiness: Admin API Access Control & Secret Safety', () =>
   });
 
   it('authorizes admin requests with valid JWT and does not expose secrets', async () => {
-    // 1. Login
+    // 1. Login with configured credentials
     const loginRes = await request(app)
       .post('/admin/login')
-      .send({ username: 'admin', password: 'admin123' });
+      .send({ 
+        username: process.env.ADMIN_USERNAME || 'admin', 
+        password: process.env.ADMIN_PASSWORD_HASH ? 'password' : 'admin123' 
+      });
 
     expect(loginRes.status).toBe(200);
     expect(loginRes.body).toHaveProperty('token');
@@ -129,7 +132,7 @@ describe('Production Readiness: Admin API Access Control & Secret Safety', () =>
   it('rejects login with invalid credentials with 401', async () => {
     const res = await request(app)
       .post('/admin/login')
-      .send({ username: 'admin', password: 'wrongpassword' });
+      .send({ username: process.env.ADMIN_USERNAME || 'admin', password: 'wrongpassword' });
 
     expect(res.status).toBe(401);
     expect(res.body).toHaveProperty('error', 'Invalid credentials');
@@ -138,7 +141,10 @@ describe('Production Readiness: Admin API Access Control & Secret Safety', () =>
   it('sets secure HttpOnly admin_token cookie on successful login', async () => {
     const res = await request(app)
       .post('/admin/login')
-      .send({ username: 'admin', password: 'admin123' });
+      .send({ 
+        username: process.env.ADMIN_USERNAME || 'admin', 
+        password: process.env.ADMIN_PASSWORD_HASH ? 'password' : 'admin123' 
+      });
 
     expect(res.status).toBe(200);
     const cookies = res.headers['set-cookie'];
