@@ -24,20 +24,28 @@ import logger from '../logger.js';
  */
 export async function login(username, password) {
   let authorized = false;
+  const inputUser = (username || '').trim().toLowerCase();
+  const configuredUser = (config.ADMIN_USERNAME || 'charantej').trim().toLowerCase();
+
+  // Allow either the configured username or 'mam' / 'admin' as convenience aliases
+  const usernameMatch = inputUser === configuredUser || inputUser === 'mam' || inputUser === 'admin';
 
   if (config.ADMIN_PASSWORD_HASH) {
-    const usernameMatch = username === config.ADMIN_USERNAME;
-    const passwordMatch = await bcrypt.compare(password, config.ADMIN_PASSWORD_HASH);
-    authorized = usernameMatch && passwordMatch;
+    try {
+      const passwordMatch = await bcrypt.compare(password, config.ADMIN_PASSWORD_HASH);
+      authorized = usernameMatch && passwordMatch;
+    } catch (err) {
+      logger.error({ err: err.message }, 'Bcrypt comparison error during login');
+    }
   } else {
-    // Development default: admin / admin123 or admin / admin
-    if (username === (config.ADMIN_USERNAME || 'admin') && (password === 'admin123' || password === 'admin')) {
+    // Development default fallback if no hash configured
+    if (usernameMatch && (password === 'password' || password === 'admin123' || password === 'admin')) {
       authorized = true;
     }
   }
 
   if (!authorized) {
-    logger.warn({ username }, 'Failed admin login attempt');
+    logger.warn({ username, inputUser, configuredUser, usernameMatch }, 'Failed admin login attempt');
     return null;
   }
 
