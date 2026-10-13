@@ -53,7 +53,8 @@ export async function initBaileys(forceRestart = false) {
 
     logger.info({ version }, 'Starting Baileys WhatsApp client...');
 
-    sock = makeWASocket.default({
+    const createSocket = typeof makeWASocket === 'function' ? makeWASocket : makeWASocket.default;
+    sock = createSocket({
       version,
       auth: state,
       printQRInTerminal: true,
