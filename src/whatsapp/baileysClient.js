@@ -110,12 +110,22 @@ export async function initBaileys(forceRestart = false) {
         // Skip messages sent from ourselves unless testing
         if (msg.key.fromMe) continue;
 
-        // Skip status broadcasts or group chats (only 1-on-1 customer chats)
+        // Skip status broadcasts, group chats, and linked device JIDs (only 1-on-1 customer chats)
         const remoteJid = msg.key.remoteJid;
-        if (!remoteJid || remoteJid.endsWith('@g.us') || remoteJid === 'status@broadcast') continue;
+        if (
+          !remoteJid ||
+          remoteJid.endsWith('@g.us') ||
+          remoteJid === 'status@broadcast' ||
+          remoteJid.endsWith('@lid')   // Linked Device ID — not a real customer phone
+        ) continue;
 
-        // Extract phone number or clean identifier
+        // Extract phone number — remoteJid is like "919196366401538@s.whatsapp.net"
         let customerPhone = remoteJid.split('@')[0];
+        // Sanity-check: must be all digits (possibly with leading +)
+        if (!/^\+?\d+$/.test(customerPhone)) {
+          logger.warn({ remoteJid }, 'Skipping message with non-numeric JID');
+          continue;
+        }
         if (!customerPhone.startsWith('+')) {
           customerPhone = '+' + customerPhone;
         }

@@ -1506,7 +1506,20 @@
     let token = localStorage.getItem('liu_admin_token') || '';
     let allConversations = [];
 
-    // ─── INITIALIZATION ───────────────────────────────────
+function formatPhone(raw) {
+      if (!raw) return raw;
+      let num = raw.split('@')[0];
+      if (!num.startsWith('+')) num = '+' + num;
+      const indiaMatch = num.match(/^\\+91(\\d{5})(\\d{5})\$/);
+      if (indiaMatch) return '+91 ' + indiaMatch[1] + ' ' + indiaMatch[2];
+      const countryMatch = num.match(/^\\+(\\d{1,3})(\\d+)\$/);
+      if (countryMatch) {
+        const cc = countryMatch[1];
+        const local = countryMatch[2].replace(/(\\d{5})(?=\\d)/g, '\ ');
+        return '+' + cc + ' ' + local;
+      }
+      return num;
+    }    // ─── INITIALIZATION ───────────────────────────────────
     async function initDashboard() {
       if (!token) {
         promptLoginOrSwitch();
@@ -1645,7 +1658,7 @@
           <div class="avatar-sm">${c.avatar}</div>
           <div class="conv-info">
             <div class="conv-top-row">
-              <span class="conv-phone">${c.phone}</span>
+              <span class="conv-phone">${formatPhone(c.phone)}</span>
               <span class="conv-time">${c.time}</span>
             </div>
             <div class="conv-preview">${c.lastMsg}</div>
@@ -1664,7 +1677,7 @@
       renderConversationsList();
 
       // Update Center Chat Column
-      document.getElementById('active-chat-phone').innerText = conv.phone;
+      document.getElementById('active-chat-phone').innerText = formatPhone(conv.phone);
       document.getElementById('active-chat-avatar').innerText = conv.avatar;
       document.getElementById('active-chat-status').innerText = conv.status;
       document.getElementById('active-chat-status').className = `tag-pill ${conv.statusClass}`;
@@ -1720,7 +1733,7 @@
       chatContainer.scrollTop = chatContainer.scrollHeight;
 
       // Update Right Details Column
-      document.getElementById('detail-phone').innerText = conv.phone;
+      document.getElementById('detail-phone').innerText = formatPhone(conv.phone);
       document.getElementById('detail-first-contact').innerText = conv.firstContact;
       document.getElementById('detail-last-msg').innerText = conv.lastContact;
       document.getElementById('detail-status-pill').innerText = `● ${conv.status}`;
