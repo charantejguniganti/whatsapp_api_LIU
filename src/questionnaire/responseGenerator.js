@@ -8,23 +8,41 @@
 import { formatQuestion, QUESTIONS } from './questions.js';
 
 // ---------------------------------------------------------------------------
-// Welcome message
+// Welcome messages (split into 3 sequential parts)
 // ---------------------------------------------------------------------------
 
-export const WELCOME_MESSAGE =
-  `Hello! Welcome to Live It Up (LIU). 🌟\n\n` +
+export const WELCOME_INTRO = `Hello! Welcome to Live It Up (LIU). 🌟`;
+
+export const WELCOME_QUESTIONS_PREP =
   `I'm *Liv*, your personal assistant. I'd love to understand your goals and help you discover the right experience for you.\n\n` +
   `I have just *a few quick questions* to personalise your experience. Let's get started! 😊`;
+
+export const WELCOME_MESSAGE = `${WELCOME_INTRO}\n\n${WELCOME_QUESTIONS_PREP}`;
+
+/**
+ * Returns the 3 sequential welcome messages:
+ * 1. Intro greeting
+ * 2. Assistant description & questions notice
+ * 3. Question 1
+ * @returns {string[]}
+ */
+export function getWelcomeMessages() {
+  return [
+    WELCOME_INTRO,
+    WELCOME_QUESTIONS_PREP,
+    formatQuestion(QUESTIONS[0]),
+  ];
+}
 
 // ---------------------------------------------------------------------------
 // Question messages
 // ---------------------------------------------------------------------------
 
 /**
- * Returns the full welcome + first question message.
+ * Returns the full welcome + first question message as a single string.
  */
 export function buildWelcomeAndQ1() {
-  return `${WELCOME_MESSAGE}\n\n${formatQuestion(QUESTIONS[0])}`;
+  return getWelcomeMessages().join('\n\n');
 }
 
 /**

@@ -33,6 +33,7 @@ import {
 } from './questions.js';
 import {
   buildWelcomeAndQ1,
+  getWelcomeMessages,
   buildQuestionMessage,
   buildOtherPrompt,
   buildRecommendationMessage,
@@ -166,8 +167,10 @@ export function createQuestionnaireManager(store) {
         await repo.deleteSession(phone);
         const newSession = await repo.createSession(phone);
         logger.info({ phone }, 'Quiz restarted');
+        const welcomeMsgs = getWelcomeMessages();
         return {
-          reply: RESTART_REPLY + buildWelcomeAndQ1(),
+          reply: RESTART_REPLY + welcomeMsgs.join('\n\n'),
+          messages: [RESTART_REPLY.trim(), ...welcomeMsgs],
           handover: false,
           quizDone: false,
         };
@@ -194,8 +197,10 @@ export function createQuestionnaireManager(store) {
       if (isGreeting(trimmed)) {
         const newSession = await repo.createSession(phone);
         logger.info({ phone }, 'Quiz started');
+        const welcomeMsgs = getWelcomeMessages();
         return {
-          reply: buildWelcomeAndQ1(),
+          reply: welcomeMsgs.join('\n\n'),
+          messages: welcomeMsgs,
           handover: false,
           quizDone: false,
         };

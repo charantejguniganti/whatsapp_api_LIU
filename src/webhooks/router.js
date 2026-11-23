@@ -174,7 +174,17 @@ async function processInboundMessage(msg, store, leadService, convService, quizM
   // ── Questionnaire flow ─────────────────────────────────────────────────
   const quizResult = await quizManager.processMessage(msg.from, msg.text);
   if (quizResult !== null) {
-    await sendTextMessage(msg.from, quizResult.reply);
+    // Send questionnaire replies (supports multi-message sequence with 2-second delay)
+    const outgoingMessages = quizResult.messages && quizResult.messages.length > 0
+      ? quizResult.messages
+      : [quizResult.reply];
+
+    for (let i = 0; i < outgoingMessages.length; i++) {
+      if (i > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+      await sendTextMessage(msg.from, outgoingMessages[i]);
+    }
 
     const histKey = `history:${msg.from}`;
     const hist = (await store.get(histKey)) ?? [];

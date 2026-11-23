@@ -59,6 +59,10 @@ describe('Test 1 – Valid options for all nine questions', () => {
     expect(r1).not.toBeNull();
     expect(r1.reply).toContain('Welcome to Live It Up');
     expect(r1.reply).toContain('Question 1');
+    expect(r1.messages).toHaveLength(3);
+    expect(r1.messages[0]).toContain('Hello! Welcome to Live It Up');
+    expect(r1.messages[1]).toContain('Liv');
+    expect(r1.messages[2]).toContain('Question 1 of 9');
 
     const r2 = await manager.processMessage(phone, 'A');
     expect(r2.reply).toContain('Question 2');

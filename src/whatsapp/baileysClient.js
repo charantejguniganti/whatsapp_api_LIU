@@ -169,8 +169,17 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
   // ── Questionnaire flow (highest priority after human-takeover check) ────
   const quizResult = await quizManager.processMessage(customerPhone, text);
   if (quizResult !== null) {
-    // Send questionnaire reply
-    await socket.sendMessage(remoteJid, { text: quizResult.reply });
+    // Send questionnaire replies (supports multi-message sequence with 2-second delay)
+    const outgoingMessages = quizResult.messages && quizResult.messages.length > 0
+      ? quizResult.messages
+      : [quizResult.reply];
+
+    for (let i = 0; i < outgoingMessages.length; i++) {
+      if (i > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+      await socket.sendMessage(remoteJid, { text: outgoingMessages[i] });
+    }
 
     // Record in conversation history
     const updatedHistory = [
