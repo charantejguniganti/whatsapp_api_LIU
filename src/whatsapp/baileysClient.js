@@ -23,6 +23,14 @@ import {
   isChatTombstoned,
 } from '../conversations/service.js';
 import { createQuestionnaireManager } from '../questionnaire/stateManager.js';
+import {
+  resolveSenderIdentity,
+  handleContactsSync,
+  saveLidPnMapping,
+  isPnUser,
+  isLidUser,
+  extractVerifiedPhoneNumber,
+} from './identityResolver.js';
 import logger from '../logger.js';
 import config from '../config/index.js';
 
@@ -105,6 +113,32 @@ export async function initBaileys(forceRestart = false) {
       }
     });
 
+    // ── Contacts sync events (contacts.upsert, contacts.update, messaging-history.set) ──
+    sock.ev.on('contacts.upsert', async (contacts) => {
+      try {
+        await handleContactsSync(store, sock, contacts);
+      } catch (err) {
+        logger.debug({ err }, 'Error handling contacts.upsert');
+      }
+    });
+
+    sock.ev.on('contacts.update', async (updates) => {
+      try {
+        await handleContactsSync(store, sock, updates);
+      } catch (err) {
+        logger.debug({ err }, 'Error handling contacts.update');
+      }
+    });
+
+    sock.ev.on('messaging-history.set', async ({ contacts }) => {
+      try {
+        if (contacts) await handleContactsSync(store, sock, contacts);
+      } catch (err) {
+        logger.debug({ err }, 'Error handling messaging-history.set');
+      }
+    });
+
+    // ── Incoming messages ──
     sock.ev.on('messages.upsert', async (m) => {
       if (m.type !== 'notify') return;
 
@@ -114,16 +148,13 @@ export async function initBaileys(forceRestart = false) {
 
         // Skip status broadcasts (only customer chats and group chats)
         const remoteJid = msg.key.remoteJid;
-        if (!remoteJid || remoteJid === 'status@broadcast') continue;
+        if (!remoteJid || remoteJid === 'status@broadcast' || remoteJid.endsWith('@broadcast')) continue;
 
-        const isGroup = remoteJid.endsWith('@g.us');
-        // Extract phone number or identifier (handles both @s.whatsapp.net and @lid)
-        let customerPhone = remoteJid.split('@')[0];
-        if (!customerPhone.startsWith('+')) {
-          customerPhone = '+' + customerPhone;
-        }
+        // Resolve identity using verified Baileys mechanisms (LID to PN mapping)
+        const identity = await resolveSenderIdentity(sock, msg, store);
+        if (identity.isBroadcast) continue;
 
-        const pushName = msg.pushName || null;
+        const customerPhone = identity.phone;
         const msgTimestamp = msg.messageTimestamp
           ? (typeof msg.messageTimestamp === 'number'
               ? (msg.messageTimestamp > 1e11 ? new Date(msg.messageTimestamp).toISOString() : new Date(msg.messageTimestamp * 1000).toISOString())
@@ -131,9 +162,13 @@ export async function initBaileys(forceRestart = false) {
           : new Date().toISOString();
 
         // Check if chat is tombstoned (deleted locally from this application's database)
-        // This prevents WhatsApp synchronization from resurrecting deleted chats
-        if (await isChatTombstoned(store, customerPhone, msgTimestamp)) {
-          logger.info({ customerPhone }, 'Skipping message for locally deleted chat (tombstoned)');
+        // Check both customerPhone and lid to ensure no re-import of deleted chats
+        const isTombstoned =
+          (await isChatTombstoned(store, customerPhone, msgTimestamp)) ||
+          (identity.lid && (await isChatTombstoned(store, identity.lid, msgTimestamp)));
+
+        if (isTombstoned) {
+          logger.info({ customerPhone, lid: identity.lid }, 'Skipping message for locally deleted chat (tombstoned)');
           continue;
         }
 
@@ -144,13 +179,22 @@ export async function initBaileys(forceRestart = false) {
 
         if (!text || text.trim().length === 0) continue;
 
-        logger.info({ from: customerPhone, text, pushName }, 'Inbound message received via linked WhatsApp');
+        logger.info(
+          {
+            from: customerPhone,
+            verifiedPhone: identity.verifiedPhone,
+            isVerified: identity.isVerifiedPhone,
+            lid: identity.lid,
+            text,
+            pushName: identity.pushName,
+          },
+          'Inbound message received via linked WhatsApp'
+        );
 
         try {
-          await handleInboundBaileysMessage(sock, remoteJid, customerPhone, text, store, {
-            pushName,
+          await handleInboundBaileysMessage(sock, identity.replyJid, customerPhone, text, store, {
+            ...identity,
             msgTimestamp,
-            isGroup,
           });
         } catch (err) {
           logger.error({ err, customerPhone }, 'Error processing Baileys inbound message');
@@ -163,6 +207,46 @@ export async function initBaileys(forceRestart = false) {
   } finally {
     isStarting = false;
   }
+}
+
+async function saveConversationRecord(store, customerPhone, meta, update) {
+  const existingConv = (await store.get(`conv:${customerPhone}`)) ?? { phone: customerPhone };
+
+  // Deduplication check: If an unverified LID was stored previously, and we now resolved it to verifiedPhone
+  if (meta.lid && customerPhone !== meta.lid) {
+    try {
+      const oldLidConv = await store.get(`conv:${meta.lid}`);
+      if (oldLidConv) {
+        const oldHistory = (await store.get(`history:${meta.lid}`)) ?? [];
+        if (oldHistory.length > 0) {
+          const currentHistory = (await store.get(`history:${customerPhone}`)) ?? [];
+          const combined = [...oldHistory, ...currentHistory].slice(-20);
+          await store.set(`history:${customerPhone}`, combined);
+        }
+        await store.delete(`conv:${meta.lid}`);
+        await store.delete(`history:${meta.lid}`);
+      }
+    } catch (e) {}
+  }
+
+  const updatedRecord = {
+    ...existingConv,
+    phone: customerPhone,
+    jid: meta.remoteJid || meta.jid || existingConv.jid || null,
+    replyJid: meta.replyJid || existingConv.replyJid || null,
+    senderJid: meta.senderJid || existingConv.senderJid || null,
+    lid: meta.lid || existingConv.lid || null,
+    verifiedPhone: meta.verifiedPhone || existingConv.verifiedPhone || null,
+    isVerifiedPhone: meta.isVerifiedPhone ?? existingConv.isVerifiedPhone ?? false,
+    pushName: meta.pushName || existingConv.pushName || null,
+    savedName: meta.savedName || existingConv.savedName || null,
+    isGroup: meta.isGroup || existingConv.isGroup || false,
+    groupName: meta.groupName || existingConv.groupName || null,
+    ...update,
+  };
+
+  await store.set(`conv:${customerPhone}`, updatedRecord);
+  return updatedRecord;
 }
 
 async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, text, store, meta = {}) {
@@ -182,15 +266,10 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
     const updatedHistory = [...history, { role: 'user', content: text, timestamp: msgTimestamp }].slice(-20);
     await store.set(historyKey, updatedHistory);
 
-    const existingConv = (await store.get(`conv:${customerPhone}`)) ?? { phone: customerPhone };
-    await store.set(`conv:${customerPhone}`, {
-      ...existingConv,
-      phone: customerPhone,
-      pushName: pushName || existingConv.pushName || null,
-      isGroup: isGroup || existingConv.isGroup || false,
-      groupName: groupName || existingConv.groupName || null,
+    await saveConversationRecord(store, customerPhone, meta, {
       lastMessage: text,
       lastMessageTimestamp: msgTimestamp,
+      lastMessageRole: 'user',
       updatedAt: msgTimestamp,
     });
     return;
@@ -221,15 +300,10 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
     await store.set(historyKey, updatedHistory);
 
     // Update conversation record for dashboard (sorted by lastMessageTimestamp)
-    const existingConv = (await store.get(`conv:${customerPhone}`)) ?? { phone: customerPhone };
-    await store.set(`conv:${customerPhone}`, {
-      ...existingConv,
-      phone: customerPhone,
-      pushName: pushName || existingConv.pushName || null,
-      isGroup: isGroup || existingConv.isGroup || false,
-      groupName: groupName || existingConv.groupName || null,
+    await saveConversationRecord(store, customerPhone, meta, {
       lastMessage: text,
       lastMessageTimestamp: replyTimestamp,
+      lastMessageRole: 'assistant',
       updatedAt: replyTimestamp,
     });
 
@@ -276,15 +350,10 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
       ].slice(-20);
       await store.set(historyKey, updatedHistory);
 
-      const existingConv = (await store.get(`conv:${customerPhone}`)) ?? { phone: customerPhone };
-      await store.set(`conv:${customerPhone}`, {
-        ...existingConv,
-        phone: customerPhone,
-        pushName: pushName || existingConv.pushName || null,
-        isGroup: isGroup || existingConv.isGroup || false,
-        groupName: groupName || existingConv.groupName || null,
+      await saveConversationRecord(store, customerPhone, meta, {
         lastMessage: text,
         lastMessageTimestamp: replyTime,
+        lastMessageRole: 'assistant',
         updatedAt: replyTime,
       });
 
@@ -327,15 +396,10 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
   await socket.sendMessage(remoteJid, { text: result.reply });
 
   // Update conversation record for dashboard (latest message timestamp first)
-  const existingConv = (await store.get(`conv:${customerPhone}`)) ?? { phone: customerPhone };
-  await store.set(`conv:${customerPhone}`, {
-    ...existingConv,
-    phone: customerPhone,
-    pushName: pushName || existingConv.pushName || null,
-    isGroup: isGroup || existingConv.isGroup || false,
-    groupName: groupName || existingConv.groupName || null,
+  await saveConversationRecord(store, customerPhone, meta, {
     lastMessage: text,
     lastMessageTimestamp: replyTimestamp,
+    lastMessageRole: 'assistant',
     updatedAt: replyTimestamp,
   });
 
@@ -358,11 +422,10 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
     });
 
     await store.set(`summary:${customerPhone}`, summary);
-    const updated = (await store.get(`conv:${customerPhone}`)) ?? { phone: customerPhone };
-    await store.set(`conv:${customerPhone}`, {
-      ...updated,
+    await saveConversationRecord(store, customerPhone, meta, {
       summary,
       lastMessageTimestamp: replyTimestamp,
+      lastMessageRole: 'assistant',
       updatedAt: replyTimestamp,
     });
 
@@ -379,19 +442,39 @@ export async function sendBaileysMessage(phone, text) {
   if (!sock || connectionStatus !== 'connected') {
     throw new Error('WhatsApp Web is not connected');
   }
-  const clean = phone.replace(/[\s+]/g, '');
-  const jid = clean.includes('@') ? clean : `${clean}@s.whatsapp.net`;
-  const result = await sock.sendMessage(jid, { text });
+
+  const store = await getStore();
+  let targetJid = null;
+
+  // 1. Check if conversation has a stored replyJid (handles LIDs and groups properly)
+  try {
+    const conv = await store.get(`conv:${phone}`);
+    if (conv?.replyJid) {
+      targetJid = conv.replyJid;
+    }
+  } catch (err) {}
+
+  // 2. If no replyJid, format based on JID vs standard phone number
+  if (!targetJid) {
+    if (phone.includes('@')) {
+      targetJid = phone;
+    } else {
+      const clean = phone.replace(/[\s+]/g, '');
+      targetJid = `${clean}@s.whatsapp.net`;
+    }
+  }
+
+  const result = await sock.sendMessage(targetJid, { text });
 
   // Update conversation lastMessageTimestamp in local store
   try {
-    const store = await getStore();
     const now = new Date().toISOString();
     const existing = (await store.get(`conv:${phone}`)) ?? { phone };
     await store.set(`conv:${phone}`, {
       ...existing,
       lastMessage: text,
       lastMessageTimestamp: now,
+      lastMessageRole: 'assistant',
       updatedAt: now,
     });
   } catch (err) {

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Conversation Service
  *
  * Manages:
@@ -176,8 +176,13 @@ export function createConversationService(store) {
         return s;
       }
     }
-    // 3. Fallback: WhatsApp phone number
-    return conv.phone || 'Unknown';
+    // 3. Fallback: Verified WhatsApp phone number, or Unresolved Contact for unverified LIDs
+    if (conv.verifiedPhone) return conv.verifiedPhone;
+    if (conv.isVerifiedPhone && conv.phone) return conv.phone;
+    if (conv.phone && conv.phone.startsWith('+') && !conv.phone.includes('@lid')) {
+      return conv.phone;
+    }
+    return 'Unresolved Contact';
   }
 
   // ── Conversation state management ────────────────────────────────────────
@@ -374,14 +379,16 @@ export function createConversationService(store) {
       const tombstone = await store.get(`tombstone:${conv.phone}`);
       if (tombstone) continue;
 
-      const [lead, history, summary] = await Promise.all([
+      const [lead, history, summary, quiz] = await Promise.all([
         store.get(`lead:${conv.phone}`),
         store.get(`history:${conv.phone}`),
         store.get(`summary:${conv.phone}`),
+        store.get(`quiz:${conv.phone}`),
       ]);
 
       const messages = Array.isArray(history) ? history : [];
       const lastMsgObj = messages.length > 0 ? messages[messages.length - 1] : null;
+      const lastMessageRole = lastMsgObj?.role || conv.lastMessageRole || null;
 
       // Determine actual latest message timestamp safely
       const latestTimestamp =
@@ -394,9 +401,29 @@ export function createConversationService(store) {
 
       const resolvedName = resolveContactName(conv, lead);
 
+      // Determine live enquiry status: Closed | In Progress | Waiting for Customer | New
+      let status = 'New';
+      if (conv.isClosed || lead?.state === 'COMPLETE' || quiz?.status === 'COMPLETED') {
+        status = 'Closed';
+      } else if (
+        conv.state === CONV_STATE.HUMAN_TAKEOVER ||
+        (quiz?.status === 'IN_PROGRESS' && quiz?.quizState !== 'AWAITING_Q1')
+      ) {
+        status = 'In Progress';
+      } else if (lastMessageRole === 'assistant') {
+        status = 'Waiting for Customer';
+      } else {
+        status = 'New';
+      }
+
+      const isVerifiedPhone =
+        conv.isVerifiedPhone ??
+        (conv.phone && conv.phone.startsWith('+') && !conv.phone.includes('@lid'));
+
       results.push({
         phone: conv.phone,
         state: conv.state ?? CONV_STATE.AI_ACTIVE,
+        status,
         notificationSent: conv.notificationSent ?? false,
         notifiedAt: conv.notifiedAt ?? null,
         claimedBy: conv.claimedBy ?? null,
@@ -404,13 +431,22 @@ export function createConversationService(store) {
         resumedAt: conv.resumedAt ?? null,
         customerName: resolvedName,
         pushName: conv.pushName ?? null,
+        savedName: conv.savedName ?? null,
+        verifiedPhone: conv.verifiedPhone ?? (isVerifiedPhone ? conv.phone : null),
+        isVerifiedPhone: !!isVerifiedPhone,
+        lid: conv.lid ?? null,
+        jid: conv.jid ?? null,
+        replyJid: conv.replyJid ?? null,
         isGroup: conv.isGroup ?? false,
         groupName: conv.groupName ?? null,
         interest: lead?.data?.interest ?? null,
-        leadComplete: lead?.state === 'COMPLETE',
+        leadComplete: lead?.state === 'COMPLETE' || quiz?.status === 'COMPLETED',
+        quizState: quiz?.quizState ?? null,
+        quizStatus: quiz?.status ?? null,
         messageCount: messages.length,
         lastMessage: lastMsgObj?.content || conv.lastMessage || conv.summary || null,
         lastMessageAt: latestTimestamp,
+        lastMessageRole,
         summary: summary ?? conv.summary ?? null,
         updatedAt: conv.updatedAt ?? latestTimestamp,
       });
@@ -523,6 +559,11 @@ export function resolveContactName(conv = {}, lead = null) {
       return s;
     }
   }
-  return conv.phone || 'Unknown';
+  if (conv.verifiedPhone) return conv.verifiedPhone;
+  if (conv.isVerifiedPhone && conv.phone) return conv.phone;
+  if (conv.phone && conv.phone.startsWith('+') && !conv.phone.includes('@lid')) {
+    return conv.phone;
+  }
+  return 'Unresolved Contact';
 }
 

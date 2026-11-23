@@ -67,12 +67,22 @@ router.get('/stats', async (req, res, next) => {
     const convService = createConversationService(store);
     const convs = await convService.listConversations();
 
+    const newEnquiries = convs.filter((c) => c.status === 'New').length;
+    const inProgress = convs.filter((c) => c.status === 'In Progress').length;
+    const waitingForCustomer = convs.filter((c) => c.status === 'Waiting for Customer').length;
+    const closed = convs.filter((c) => c.status === 'Closed').length;
+
     const stats = {
       total: convs.length,
+      newEnquiries,
+      inProgress,
+      waitingForCustomer,
+      closed,
+      // Backward compatibility mappings
       aiActive: convs.filter((c) => c.state === CONV_STATE.AI_ACTIVE || !c.state).length,
-      humanTakeover: convs.filter((c) => c.state === CONV_STATE.HUMAN_TAKEOVER).length,
-      aiResumed: convs.filter((c) => c.state === CONV_STATE.AI_RESUMED).length,
-      pendingNotification: convs.filter((c) => c.notificationSent).length,
+      humanTakeover: inProgress,
+      aiResumed: waitingForCustomer,
+      pendingNotification: newEnquiries,
     };
 
     return res.json(stats);

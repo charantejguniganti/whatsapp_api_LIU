@@ -1557,30 +1557,45 @@
     let allConversations = [];
 
 // ─── PHONE FORMATTING ─────────────────────────────────
-    function formatPhone(raw) {
-      if (!raw) return raw;
-      // Strip any @lid or @s.whatsapp.net suffix
-      var num = raw.split('@')[0];
-      if (!num.startsWith('+')) num = '+' + num;
+    function formatPhone(raw, isVerified = true) {
+      if (!raw) return '—';
+      // If it's explicitly unverified or an LID, NEVER display arbitrary digits as a phone number
+      if (isVerified === false || String(raw).includes('@lid')) {
+        var lidPart = String(raw).split('@')[0];
+        return 'LID: ' + lidPart + ' (Unverified)';
+      }
+
+      var num = String(raw).split('@')[0].split(':')[0].trim();
+      // Indian 10 digits
+      if (/^\d{10}$/.test(num)) {
+        num = '+91' + num;
+      } else if (!num.startsWith('+')) {
+        num = '+' + num;
+      }
+
       // Indian numbers: +91 followed by exactly 10 digits
       var indiaMatch = num.match(/^\+91(\d{5})(\d{5})$/);
       if (indiaMatch) return '+91 ' + indiaMatch[1] + ' ' + indiaMatch[2];
-      // Generic: extract country code (1-3 digits) and format local in groups of 5
-      var countryMatch = num.match(/^\+(\d{1,3})(\d+)$/);
+
+      // Generic international numbers (10-15 digits)
+      var countryMatch = num.match(/^\+(\d{1,3})(\d{7,12})$/);
       if (countryMatch) {
         var cc = countryMatch[1];
-        var local = countryMatch[2].replace(/(\d{5})(?=\d)/g, '$1 ');
+        var local = countryMatch[2].replace(/(\d{4,5})(?=\d)/g, '$1 ');
         return '+' + cc + ' ' + local;
       }
+
+      // If number is excessively long or unrecognized, don't fabricate fake phone formatting
+      if (num.length > 16) {
+        return 'Unverified Contact';
+      }
+
       return num;
     }
 
-    // ─── INITIALIZATION ───────────────────────────────────
-    async function initDashboard() {
-      if (!token) {
-        promptLoginOrSwitch();
-        return;
-      }
+    // ─── INITIALIZATION & LIVE DATA AUTO-SYNC ────────────
+    async function loadLiveData(isInitial = false) {
+      if (!token) return;
 
       try {
         // Fetch Live Stats
@@ -1595,14 +1610,15 @@
         }
         if (statsRes.ok) {
           const stats = await statsRes.json();
-          document.getElementById('stat-new').innerText = stats.pendingNotification ?? 0;
-          document.getElementById('stat-progress').innerText = stats.humanTakeover ?? 0;
-          document.getElementById('stat-waiting').innerText = stats.aiResumed ?? 0;
-          document.getElementById('stat-closed').innerText = stats.total ?? 0;
+          // Accurately map each metric card to its real meaning
+          document.getElementById('stat-new').innerText = stats.newEnquiries ?? stats.pendingNotification ?? 0;
+          document.getElementById('stat-progress').innerText = stats.inProgress ?? stats.humanTakeover ?? 0;
+          document.getElementById('stat-waiting').innerText = stats.waitingForCustomer ?? stats.aiResumed ?? 0;
+          document.getElementById('stat-closed').innerText = stats.closed ?? 0;
 
           document.getElementById('count-all').innerText = stats.total ?? 0;
-          document.getElementById('count-new').innerText = stats.pendingNotification ?? 0;
-          document.getElementById('count-prog').innerText = stats.humanTakeover ?? 0;
+          document.getElementById('count-new').innerText = stats.newEnquiries ?? stats.pendingNotification ?? 0;
+          document.getElementById('count-prog').innerText = stats.inProgress ?? stats.humanTakeover ?? 0;
         }
 
         // Fetch Live Leads from Neon PostgreSQL
@@ -1615,21 +1631,45 @@
 
           allConversations = leads.map(l => {
             const isHuman = l.state === 'HUMAN_TAKEOVER';
-            const status = isHuman ? 'In Progress' : (l.notificationSent ? 'New' : 'Active');
-            const statusClass = isHuman ? 'tag-blue' : (l.notificationSent ? 'tag-green' : 'tag-amber');
+            const status = l.status || (isHuman ? 'In Progress' : (l.leadComplete ? 'Closed' : 'New'));
+            const statusClass =
+              status === 'Closed' ? 'tag-green' :
+              status === 'In Progress' ? 'tag-blue' :
+              status === 'Waiting for Customer' ? 'tag-amber' : 'tag-green';
+
+            const isVerified = l.isVerifiedPhone ?? (l.verifiedPhone ? true : (l.phone && l.phone.startsWith('+') && !l.phone.includes('@lid')));
             
-            // Prioritize: WhatsApp pushName / groupName -> saved lead name -> formatPhone
-            let name = (l.customerName && l.customerName !== 'null' && l.customerName !== 'undefined') ? l.customerName : null;
-            if (!name && l.pushName && l.pushName !== 'null' && l.pushName !== 'undefined') {
-              name = l.pushName;
+            // Prioritize: WhatsApp pushName / groupName -> saved lead name -> verifiedPhone
+            let name = null;
+            if (l.isGroup && l.groupName && l.groupName.trim()) {
+              name = l.groupName.trim();
             }
-            if (!name || name.trim() === '' || name.toLowerCase() === 'customer') {
-              name = formatPhone(l.phone);
+            if (!name && l.pushName && l.pushName !== 'null' && l.pushName !== 'undefined' && l.pushName.trim()) {
+              name = l.pushName.trim();
             }
+            if (!name && l.customerName && l.customerName !== 'null' && l.customerName !== 'undefined' && l.customerName.toLowerCase() !== 'customer' && l.customerName.toLowerCase() !== 'unresolved contact') {
+              name = l.customerName.trim();
+            }
+            if (!name) {
+              if (l.verifiedPhone || (isVerified && l.phone && l.phone.startsWith('+'))) {
+                name = formatPhone(l.verifiedPhone || l.phone, true);
+              } else {
+                name = l.pushName || 'Unresolved Contact';
+              }
+            }
+
             const avatar = (l.isGroup ? '👥' : name.charAt(0).toUpperCase());
+
+            const phoneDisplay = (l.verifiedPhone || (isVerified && l.phone && l.phone.startsWith('+')))
+              ? formatPhone(l.verifiedPhone || l.phone, true)
+              : (l.lid ? `LID: ${l.lid.split('@')[0]} (Unverified)` : 'Unverified Phone');
 
             return {
               phone: l.phone,
+              verifiedPhone: l.verifiedPhone,
+              isVerifiedPhone: isVerified,
+              lid: l.lid,
+              phoneDisplay: phoneDisplay,
               name: name,
               avatar: avatar,
               isGroup: l.isGroup || false,
@@ -1653,16 +1693,29 @@
 
           renderConversationsList();
 
-          if (allConversations.length > 0) {
+          if (isInitial) {
+            if (allConversations.length > 0) {
+              selectConversation(allConversations[0].phone);
+            } else {
+              renderEmptyWorkspace();
+            }
+          } else if (!selectedPhone && allConversations.length > 0) {
             selectConversation(allConversations[0].phone);
-          } else {
+          } else if (allConversations.length === 0) {
             renderEmptyWorkspace();
           }
         }
       } catch (e) {
         console.error('Failed to load live data:', e);
-        showToast('Error connecting to backend API');
       }
+    }
+
+    async function initDashboard() {
+      if (!token) {
+        promptLoginOrSwitch();
+        return;
+      }
+      await loadLiveData(true);
     }
 
     function renderEmptyWorkspace() {
@@ -1708,6 +1761,7 @@
         const matchesSearch = 
           c.phone.toLowerCase().includes(q) ||
           c.name.toLowerCase().includes(q) ||
+          (c.phoneDisplay && c.phoneDisplay.toLowerCase().includes(q)) ||
           c.lastMsg.toLowerCase().includes(q);
 
         return matchesFilter && matchesSearch;
@@ -1731,7 +1785,7 @@
               <span class="conv-time" style="font-size:11px; color:var(--text-muted); flex-shrink:0;">${c.time}</span>
             </div>
             <div class="conv-phone-sub" style="font-size:11px; color:var(--text-muted); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-              ${formatPhone(c.phone)}
+              ${c.phoneDisplay || formatPhone(c.phone, c.isVerifiedPhone)}
             </div>
             <div class="conv-preview" style="font-size:11.5px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:170px;">${c.lastMsg}</div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
@@ -1756,7 +1810,7 @@
       // Update Center Chat Column
       const activeNameEl = document.getElementById('active-chat-name');
       if (activeNameEl) activeNameEl.innerText = conv.name;
-      document.getElementById('active-chat-phone').innerText = formatPhone(conv.phone);
+      document.getElementById('active-chat-phone').innerText = conv.phoneDisplay || formatPhone(conv.phone, conv.isVerifiedPhone);
       document.getElementById('active-chat-avatar').innerText = conv.avatar;
       document.getElementById('active-chat-status').innerText = conv.status;
       document.getElementById('active-chat-status').className = `tag-pill ${conv.statusClass}`;
@@ -1812,7 +1866,7 @@
       chatContainer.scrollTop = chatContainer.scrollHeight;
 
       // Update Right Details Column
-      document.getElementById('detail-phone').innerText = formatPhone(conv.phone);
+      document.getElementById('detail-phone').innerText = conv.phoneDisplay || formatPhone(conv.phone, conv.isVerifiedPhone);
       document.getElementById('detail-first-contact').innerText = conv.firstContact;
       document.getElementById('detail-last-msg').innerText = conv.lastContact;
       document.getElementById('detail-status-pill').innerText = `● ${conv.status}`;
