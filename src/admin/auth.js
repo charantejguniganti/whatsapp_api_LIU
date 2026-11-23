@@ -25,10 +25,10 @@ import logger from '../logger.js';
 export async function login(username, password) {
   let authorized = false;
   const inputUser = (username || '').trim().toLowerCase();
-  const configuredUser = (config.ADMIN_USERNAME || 'charantej').trim().toLowerCase();
+  const configuredUser = (config.ADMIN_USERNAME || 'tonishapawar').trim().toLowerCase();
 
-  // Allow either the configured username or 'mam' / 'admin' as convenience aliases
-  const usernameMatch = inputUser === configuredUser || inputUser === 'mam' || inputUser === 'admin';
+  // Allow the configured username (tonishapawar) or convenience aliases ('mam', 'admin')
+  const usernameMatch = inputUser === configuredUser || inputUser === 'tonishapawar' || inputUser === 'mam' || inputUser === 'admin';
 
   if (config.ADMIN_PASSWORD_HASH) {
     try {

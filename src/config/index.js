@@ -41,7 +41,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().optional().default(''),
 
   // Admin dashboard auth
-  ADMIN_USERNAME: z.string().optional().default('admin'),
+  ADMIN_USERNAME: z.string().optional().default('tonishapawar'),
   ADMIN_PASSWORD_HASH: z.string().optional().default(''), // bcrypt hash
   JWT_SECRET: z.string().optional().default('liu_dev_jwt_secret_change_in_production'),
   JWT_EXPIRY: z.string().optional().default('8h'),
