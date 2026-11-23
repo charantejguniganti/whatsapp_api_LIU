@@ -47,8 +47,26 @@ export function createApp() {
   app.use('/admin', adminRouter);
   app.use('/api/chats', chatsRouter);
 
-  // Serve Dashboard UI
+  // Serve PWA Manifest & Service Worker with root scope permissions
+  app.get(['/manifest.json', '/manifest.webmanifest'], (_req, res) => {
+    res.setHeader('Content-Type', 'application/manifest+json');
+    res.sendFile(path.join(__dirname, 'dashboard', 'manifest.json'));
+  });
+
+  app.get('/sw.js', (_req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.setHeader('Service-Worker-Allowed', '/');
+    res.sendFile(path.join(__dirname, 'dashboard', 'sw.js'));
+  });
+
+  // Serve PWA Icons & Static Dashboard Assets
+  app.use('/icons', express.static(path.join(__dirname, 'dashboard', 'icons')));
   app.use('/dashboard', express.static(path.join(__dirname, 'dashboard')));
+
+  // Root URL launches the Dashboard app shell
+  app.get('/', (_req, res) => {
+    res.sendFile(path.join(__dirname, 'dashboard', 'index.html'));
+  });
 
 
   // 404 handler

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="terragrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7B5441" />
+      <stop offset="100%" stop-color="#5E3F2F" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#terragrad)" />
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#E5A869" stroke-width="8" opacity="0.85" />
+  
+  <!-- LIU Text -->
+  <g fill="#FFFFFF" font-family="'Cormorant Garamond', 'Playfair Display', serif" font-weight="700">
+    <!-- L -->
+    <path d="M 140 180 L 175 180 L 175 305 L 225 305 L 225 332 L 140 332 Z" />
+    <!-- I -->
+    <path d="M 235 180 L 277 180 L 277 202 L 266 202 L 266 310 L 277 310 L 277 332 L 235 332 L 235 310 L 246 310 L 246 202 L 235 202 Z" />
+    <!-- U -->
+    <path d="M 295 180 L 330 180 L 330 280 C 330 305 342 315 356 315 C 370 315 382 305 382 280 L 382 180 L 417 180 L 417 280 C 417 325 390 336 356 336 C 322 336 295 325 295 280 Z" />
+  </g>
+
+  <!-- Gold Accent Leaf / Dot -->
+  <circle cx="256" cy="148" r="10" fill="#E5A869" />
+
+  <!-- Live It Up Subtitle -->
+  <text x="256" y="375" text-anchor="middle" fill="#E5A869" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="600" letter-spacing="7">LIVE IT UP</text>
+  
+  <!-- WhatsApp Active Indicator Badge -->
+  <circle cx="395" cy="395" r="42" fill="#FFFFFF" />
+  <circle cx="395" cy="395" r="36" fill="#2E7D32" />
+  <path d="M 382 390 C 382 383 388 377 395 377 C 402 377 408 383 408 390 C 408 397 401 405 395 407 C 392 408 387 409 385 411 L 386 405 C 383 401 382 395 382 390 Z" fill="#FFFFFF" />
+</svg>

@@ -4,6 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>LIU — Live It Up | Mam's Concierge Dashboard</title>
+
+  <!-- Progressive Web App (PWA) Meta & Icons -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#6B4938" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="LIU Concierge" />
+  <meta name="application-name" content="LIU Concierge" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="/icons/favicon.png" />
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
@@ -1298,9 +1315,245 @@
         padding: 20px 16px;
       }
     }
+
+    /* ─── PWA & NATIVE MOBILE APP STYLES ──────────────────── */
+    .btn-install-pwa {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #6B4938 0%, #54392B 100%);
+      color: #FFFFFF;
+      border: 1px solid #483023;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(107, 73, 56, 0.25);
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .btn-install-pwa:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(107, 73, 56, 0.35);
+    }
+    .btn-install-pwa.installed {
+      background: #E8F5E9 !important;
+      color: #2E7D32 !important;
+      border-color: #C8E6C9 !important;
+      box-shadow: none !important;
+      cursor: default !important;
+    }
+
+    /* PWA Sidebar Install Banner */
+    .sidebar-install-card {
+      margin: 14px 6px 6px 6px;
+      padding: 12px 14px;
+      background: #FAF6F0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      text-align: left;
+    }
+    .sidebar-install-card h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary-terra);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sidebar-install-card p {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.35;
+      margin-bottom: 8px;
+    }
+    .sidebar-install-card button {
+      width: 100%;
+      padding: 7px 10px;
+      font-size: 11.5px;
+      justify-content: center;
+    }
+
+    /* Floating Offline Alert Banner */
+    .offline-banner {
+      position: fixed;
+      top: max(8px, env(safe-area-inset-top));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2000;
+      background: #3E2723;
+      color: #FFF3E0;
+      border: 1px solid #795548;
+      padding: 8px 16px;
+      border-radius: 24px;
+      font-size: 12px;
+      font-weight: 500;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: slideDown 0.3s ease-out;
+    }
+    .offline-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #FF5252;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+    @keyframes slideDown {
+      from { transform: translate(-50%, -100%); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+
+    /* iOS Install Instruction Modal */
+    .ios-modal-box {
+      background: #FFFFFF;
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 380px;
+      width: 90vw;
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+    }
+    .ios-step-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      margin-bottom: 12px;
+      background: #FDFBF8;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .ios-step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--primary-terra);
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .ios-step-text {
+      font-size: 12.5px;
+      color: var(--text-main);
+      line-height: 1.35;
+    }
+
+    /* Native App Splash Screen */
+    .pwa-splash-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: linear-gradient(145deg, #7B5441 0%, #54392B 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s ease, visibility 0.4s;
+    }
+    .pwa-splash-screen.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .splash-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .splash-logo-wrap {
+      width: 88px;
+      height: 88px;
+      border-radius: 22px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+      margin-bottom: 18px;
+      overflow: hidden;
+      background: #6B4938;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #E5A869;
+    }
+    .splash-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .splash-title {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      color: #FFFFFF;
+      letter-spacing: 2px;
+      margin-bottom: 2px;
+    }
+    .splash-sub {
+      font-size: 11px;
+      color: #E5A869;
+      letter-spacing: 6px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    .splash-spinner {
+      width: 22px;
+      height: 22px;
+      border: 2.5px solid rgba(229, 168, 105, 0.25);
+      border-top-color: #E5A869;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* Standalone Mode Safe Area Adjustments */
+    @media all and (display-mode: standalone) {
+      body {
+        user-select: none;
+        -webkit-user-select: none;
+        padding-top: env(safe-area-inset-top, 0);
+        padding-bottom: env(safe-area-inset-bottom, 0);
+      }
+      .top-bar {
+        padding-top: max(4px, env(safe-area-inset-top));
+      }
+      .chat-input-bar {
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+      }
+    }
   </style>
 </head>
 <body>
+
+  <!-- Native App Splash Screen -->
+  <div id="pwa-splash-screen" class="pwa-splash-screen">
+    <div class="splash-content">
+      <div class="splash-logo-wrap">
+        <img src="/icons/icon-192.png" alt="LIU Logo" class="splash-logo-img" />
+      </div>
+      <div class="splash-title">LIU</div>
+      <div class="splash-sub">LIVE IT UP</div>
+      <div class="splash-spinner"></div>
+    </div>
+  </div>
+
+  <!-- Floating Offline Connectivity Banner -->
+  <div id="offline-banner" class="offline-banner" style="display:none;">
+    <span class="offline-dot"></span>
+    <span>Offline: Showing cached app shell. Live WhatsApp messaging will resume when reconnected.</span>
+  </div>
 
   <!-- Mobile Backdrop for Sidebar Drawer -->
   <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeMobileMenu()"></div>
@@ -1396,6 +1649,21 @@
           </li>
         </ul>
       </nav>
+
+      <!-- PWA Install / Download Option in Sidebar Drawer -->
+      <div class="sidebar-install-card" id="sidebar-install-card">
+        <h4>📱 Mobile App</h4>
+        <p>Install LIU Concierge on your home screen for quick, fullscreen mobile access.</p>
+        <button type="button" class="btn-install-pwa" id="btn-install-pwa-side" onclick="triggerPWAInstall()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="5" y="2" width="14" height="20" rx="3" ry="3"></rect>
+            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+            <polyline points="9 11 12 14 15 11"></polyline>
+            <line x1="12" y1="7" x2="12" y2="14"></line>
+          </svg>
+          <span class="install-label-text">Download App</span>
+        </button>
+      </div>
     </div>
 
     <div class="sidebar-footer">
@@ -1430,19 +1698,35 @@
           </div>
         </div>
 
-        <div class="profile-pill mobile-profile-pill" onclick="promptLoginOrSwitch()">
-          <div class="avatar-circle">M</div>
-          <div class="profile-info">
-            <div class="profile-name">Mam</div>
-            <div class="profile-role">Admin</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button type="button" class="btn-install-pwa" id="btn-install-pwa-mobile" onclick="triggerPWAInstall()" style="padding:4px 9px; font-size:11px;" title="Install Mobile App">
+            <span>📱 Install</span>
+          </button>
+          <div class="profile-pill mobile-profile-pill" onclick="promptLoginOrSwitch()">
+            <div class="avatar-circle">M</div>
+            <div class="profile-info">
+              <div class="profile-name">Mam</div>
+              <div class="profile-role">Admin</div>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#847C76" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
           </div>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#847C76" stroke-width="2">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
         </div>
       </div>
 
       <div class="top-actions">
+        <!-- PWA Install / Download App Button for Desktop / Tablet -->
+        <button type="button" class="btn-install-pwa" id="btn-install-pwa-top" onclick="triggerPWAInstall()" title="Download & Install Mobile App">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="5" y="2" width="14" height="20" rx="3" ry="3"></rect>
+            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+            <polyline points="9 11 12 14 15 11"></polyline>
+            <line x1="12" y1="7" x2="12" y2="14"></line>
+          </svg>
+          <span class="install-label-text">Download App</span>
+        </button>
+
         <div class="search-box">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A49D97" stroke-width="2">
             <circle cx="11" cy="11" r="8"></circle>
@@ -1877,6 +2161,38 @@
     </div>
   </div>
 
+  <!-- ─── IOS PWA INSTALL INSTRUCTIONS MODAL ──────────────── -->
+  <div id="ios-install-modal" role="dialog" aria-modal="true" style="display:none; position:fixed; inset:0; background:rgba(39,33,30,0.55); backdrop-filter:blur(4px); z-index:1003; align-items:center; justify-content:center;">
+    <div class="ios-modal-box">
+      <div style="width:64px; height:64px; border-radius:16px; overflow:hidden; margin:0 auto 12px auto; box-shadow:0 6px 18px rgba(0,0,0,0.22); border:2px solid #E5A869;">
+        <img src="/icons/icon-192.png" alt="LIU Logo" style="width:100%; height:100%; object-fit:cover;" />
+      </div>
+      <h2 style="font-family:var(--font-serif); font-size:20px; color:#2D231E; margin-bottom:4px;">Install LIU App on iPhone</h2>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px; line-height:1.4;">
+        Install this application to your iPhone home screen to run in full-screen standalone mode without any Safari browser bars:
+      </p>
+
+      <div class="ios-step-row">
+        <div class="ios-step-num">1</div>
+        <div class="ios-step-text">Tap the <strong>Share</strong> button <span style="font-size:15px;">⎋</span> at the bottom of your Safari screen.</div>
+      </div>
+
+      <div class="ios-step-row">
+        <div class="ios-step-num">2</div>
+        <div class="ios-step-text">Scroll down the menu and tap <strong>Add to Home Screen</strong> <span style="font-size:15px;">➕</span>.</div>
+      </div>
+
+      <div class="ios-step-row">
+        <div class="ios-step-num">3</div>
+        <div class="ios-step-text">Tap <strong>Add</strong> in the top right corner. The LIU icon will appear on your phone home screen!</div>
+      </div>
+
+      <button type="button" onclick="closeIOSInstallModal()" style="margin-top:14px; width:100%; background:var(--primary-terra); color:#fff; border:none; border-radius:10px; padding:11px; font-weight:600; font-size:13px; cursor:pointer;">
+        Got it!
+      </button>
+    </div>
+  </div>
+
   <script>
     // ─── STATE MANAGEMENT ─────────────────────────────────
     let currentFilter = 'all';
@@ -1884,6 +2200,136 @@
     let selectedPhone = null;
     let token = localStorage.getItem('liu_admin_token') || '';
     let allConversations = [];
+
+    // ─── PROGRESSIVE WEB APP (PWA) CONTROLLERS ────────────
+    let deferredPrompt = null;
+    let isAppInstalled = false;
+
+    // Check if running in standalone mode (installed mobile PWA)
+    function checkStandaloneMode() {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                           window.navigator.standalone === true ||
+                           document.referrer.includes('android-app://');
+      if (isStandalone) {
+        isAppInstalled = true;
+        document.body.classList.add('standalone-mode');
+        markAppAsInstalled();
+      }
+      return isStandalone;
+    }
+
+    function markAppAsInstalled() {
+      const topBtn = document.getElementById('btn-install-pwa-top');
+      const sideCard = document.getElementById('sidebar-install-card');
+      const mobileBtn = document.getElementById('btn-install-pwa-mobile');
+
+      if (topBtn) {
+        topBtn.classList.add('installed');
+        topBtn.innerHTML = `<span>✓ Installed</span>`;
+        topBtn.onclick = () => showToast('LIU Concierge is running as an installed app.');
+      }
+      if (mobileBtn) {
+        mobileBtn.style.display = 'none';
+      }
+      if (sideCard) {
+        sideCard.innerHTML = `
+          <h4>✓ App Installed</h4>
+          <p style="margin:0; font-size:11px; color:var(--text-muted);">Access LIU directly from your mobile home screen anytime.</p>
+        `;
+      }
+    }
+
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+          .then((reg) => {
+            console.log('[PWA] ServiceWorker registered with scope:', reg.scope);
+          })
+          .catch((err) => {
+            console.warn('[PWA] ServiceWorker registration failed:', err);
+          });
+      });
+    }
+
+    // Capture Native Browser PWA Install Prompt (Chrome / Android / Edge)
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      console.log('[PWA] beforeinstallprompt captured and ready');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      isAppInstalled = true;
+      markAppAsInstalled();
+      showToast('🎉 LIU Concierge app successfully installed to your home screen!');
+    });
+
+    function isIOSDevice() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+
+    async function triggerPWAInstall() {
+      if (checkStandaloneMode() || isAppInstalled) {
+        showToast('App is already installed on this device!');
+        return;
+      }
+
+      // 1. Android / Chrome with native install prompt
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log('[PWA] User response to install prompt:', outcome);
+        if (outcome === 'accepted') {
+          markAppAsInstalled();
+        }
+        deferredPrompt = null;
+        return;
+      }
+
+      // 2. iOS Safari or other devices
+      openIOSInstallModal();
+    }
+
+    function openIOSInstallModal() {
+      document.getElementById('ios-install-modal').style.display = 'flex';
+    }
+
+    function closeIOSInstallModal() {
+      document.getElementById('ios-install-modal').style.display = 'none';
+    }
+
+    // Offline / Online Connectivity Detection
+    function updateOnlineStatus() {
+      const banner = document.getElementById('offline-banner');
+      if (!banner) return;
+      if (navigator.onLine) {
+        banner.style.display = 'none';
+      } else {
+        banner.style.display = 'flex';
+      }
+    }
+
+    window.addEventListener('online', () => {
+      updateOnlineStatus();
+      showToast('🟢 Back online. WhatsApp connection active.');
+      if (token) loadLiveData();
+    });
+
+    window.addEventListener('offline', () => {
+      updateOnlineStatus();
+      showToast('🔴 Internet disconnected. Live messaging paused.');
+    });
+
+    // Native App Splash Screen dismiss
+    function dismissSplashScreen() {
+      const splash = document.getElementById('pwa-splash-screen');
+      if (splash) {
+        splash.classList.add('fade-out');
+        setTimeout(() => splash.remove(), 450);
+      }
+    }
 
     // ─── RESPONSIVE & MOBILE NAVIGATION ───────────────────
     let currentMobileView = 'list'; // 'list' | 'chat' | 'details'
@@ -2378,6 +2824,10 @@
     }
 
     async function sendReply() {
+      if (!navigator.onLine) {
+        showToast('⚠️ Cannot send message: Internet connection required for WhatsApp.');
+        return;
+      }
       const input = document.getElementById('chat-reply-input');
       const text = input.value.trim();
       if (!text || !selectedPhone) return;
@@ -2807,7 +3257,14 @@
 
     // Run on load
     window.addEventListener('DOMContentLoaded', () => {
-      initDashboard();
+      checkStandaloneMode();
+      updateOnlineStatus();
+      initDashboard().finally(() => {
+        setTimeout(dismissSplashScreen, 400);
+      });
+      // Safety timeout to ensure splash screen dismisses regardless of network speed
+      setTimeout(dismissSplashScreen, 1200);
+
       setInterval(checkWhatsAppStatus, 10000);
       // Auto-refresh live chats every 4 seconds
       setInterval(() => {
