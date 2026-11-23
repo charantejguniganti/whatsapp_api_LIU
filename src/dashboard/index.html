@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>LIU — Live It Up | Mam's Concierge Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1020,22 +1020,306 @@
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
     }
+
+    /* ─── RESPONSIVE & MOBILE UI/UX ────────────────────────── */
+    .hamburger-btn {
+      display: none;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 38px;
+      height: 38px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+    }
+
+    .sidebar-close-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+    }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 998;
+      backdrop-filter: blur(2px);
+    }
+
+    .mobile-nav-btn {
+      display: none;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--text-main);
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+    .mobile-nav-btn:active {
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .mobile-back-btn {
+      margin-right: 6px;
+    }
+
+    .mobile-details-btn {
+      background: #F4EFEA;
+      color: var(--primary-terra);
+      padding: 5px 9px;
+      border-radius: 14px;
+      font-size: 11.5px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .mobile-details-header {
+      display: none;
+    }
+
+    .mobile-profile-pill {
+      display: none !important;
+    }
+
+    .desktop-profile-pill {
+      display: flex !important;
+    }
+
+    .top-bar-mobile-row {
+      display: contents;
+    }
+
+    /* Tablet Breakpoint (769px - 1024px) */
+    @media (max-width: 1024px) {
+      .workspace-grid {
+        grid-template-columns: 280px 1fr 280px;
+        gap: 12px;
+      }
+      .sidebar {
+        width: 170px;
+        padding: 20px 12px;
+      }
+      .search-box {
+        width: 220px;
+      }
+    }
+
+    /* Mobile Phone Breakpoint (<= 768px) */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+      }
+
+      /* Slide-over Drawer Sidebar */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 260px;
+        height: 100vh;
+        height: 100dvh;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+        background: #FDFBF8;
+      }
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      .sidebar-backdrop.mobile-open {
+        display: block;
+      }
+      .sidebar-close-btn {
+        display: flex;
+      }
+
+      .main-wrapper {
+        padding: 10px 12px 10px 12px;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+      }
+
+      /* Top Bar on Mobile */
+      .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .top-bar-mobile-row {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+      }
+      .mobile-profile-pill {
+        display: flex !important;
+      }
+      .desktop-profile-pill {
+        display: none !important;
+      }
+      .hamburger-btn {
+        display: flex;
+      }
+      .welcome-text h1 {
+        font-size: 16px;
+      }
+      .welcome-text p {
+        display: none;
+      }
+      .top-actions {
+        width: 100%;
+        gap: 8px;
+      }
+      .search-box {
+        width: 100%;
+        padding: 7px 12px;
+      }
+      .search-box input {
+        font-size: 14px;
+      }
+      #btn-whatsapp-qr {
+        padding: 4px 8px !important;
+        font-size: 11px !important;
+      }
+      .profile-pill {
+        padding: 2px 8px 2px 3px;
+        gap: 6px;
+      }
+      .profile-info {
+        display: none;
+      }
+
+      /* 2x2 Metric Cards Grid */
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      .metric-card {
+        padding: 8px 10px;
+        gap: 8px;
+        border-radius: var(--radius-sm);
+      }
+      .metric-icon-wrap {
+        width: 32px;
+        height: 32px;
+      }
+      .metric-num {
+        font-size: 17px;
+      }
+      .metric-label {
+        font-size: 10.5px;
+      }
+      .metric-sub {
+        display: none;
+      }
+      .metric-growth {
+        font-size: 9.5px;
+      }
+
+      /* Mobile Workspace -> 1 Column Active View */
+      .workspace-grid {
+        display: flex !important;
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        gap: 0;
+      }
+
+      #col-conversations,
+      #col-chat,
+      #col-details {
+        width: 100%;
+        height: 100%;
+        flex: 1;
+        border-radius: var(--radius-md);
+      }
+
+      .mobile-nav-btn {
+        display: flex;
+      }
+
+      .chat-header {
+        padding: 10px 12px;
+      }
+      .chat-header .chat-title-info h3 {
+        font-size: 13.5px;
+        max-width: 130px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .chat-messages-scroll {
+        padding: 10px 12px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .chat-row {
+        max-width: 88%;
+      }
+      .chat-input-bar {
+        padding: 8px 10px;
+        gap: 6px;
+      }
+      .chat-input-bar input {
+        font-size: 15px; /* prevents iOS auto-zoom on input focus */
+        padding: 6px 8px;
+      }
+      .chat-send-btn {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+      }
+
+      .modal-box {
+        max-width: 92vw;
+        padding: 20px 16px;
+      }
+    }
   </style>
 </head>
 <body>
 
+  <!-- Mobile Backdrop for Sidebar Drawer -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeMobileMenu()"></div>
+
   <!-- ─── SIDEBAR ─────────────────────────────────────────── -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar-drawer">
     <div>
-      <div class="brand-container">
-        <div class="brand-title">LIU</div>
-        <div class="brand-subtitle">LIVE IT UP</div>
+      <div class="brand-container" style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div class="brand-title">LIU</div>
+          <div class="brand-subtitle">LIVE IT UP</div>
+        </div>
+        <button type="button" class="sidebar-close-btn" onclick="closeMobileMenu()" aria-label="Close Menu">✕</button>
       </div>
 
       <nav>
         <ul class="nav-list">
           <li>
-            <a class="nav-item active" href="#dashboard">
+            <a class="nav-item active" href="#dashboard" onclick="setMobileView('list'); closeMobileMenu();">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -1044,7 +1328,7 @@
             </a>
           </li>
           <li>
-            <a class="nav-item" href="#conversations" onclick="setActiveNav(this)">
+            <a class="nav-item" href="#conversations" onclick="setActiveNav(this); setMobileView('list'); closeMobileMenu();">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
               </svg>
@@ -1131,9 +1415,31 @@
   <main class="main-wrapper">
     <!-- Top Bar -->
     <header class="top-bar">
-      <div class="welcome-text">
-        <h1>Good Morning, Mam! ☀️</h1>
-        <p>Here's what's happening with your enquiries today.</p>
+      <div class="top-bar-mobile-row">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button type="button" class="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Open menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="welcome-text">
+            <h1>Good Morning, Mam! ☀️</h1>
+            <p>Here's what's happening with your enquiries today.</p>
+          </div>
+        </div>
+
+        <div class="profile-pill mobile-profile-pill" onclick="promptLoginOrSwitch()">
+          <div class="avatar-circle">M</div>
+          <div class="profile-info">
+            <div class="profile-name">Mam</div>
+            <div class="profile-role">Admin</div>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#847C76" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
       </div>
 
       <div class="top-actions">
@@ -1160,7 +1466,7 @@
           <span class="badge-dot"></span>
         </button>
 
-        <div class="profile-pill" onclick="promptLoginOrSwitch()">
+        <div class="profile-pill desktop-profile-pill" onclick="promptLoginOrSwitch()">
           <div class="avatar-circle">M</div>
           <div class="profile-info">
             <div class="profile-name">Mam</div>
@@ -1246,7 +1552,7 @@
     <!-- 3-Column Workspace -->
     <div class="workspace-grid">
       <!-- Col 1: Conversations List -->
-      <div class="panel-card">
+      <div class="panel-card" id="col-conversations">
         <div class="conversations-header">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <h2 style="margin:0;">Conversations</h2>
@@ -1271,9 +1577,15 @@
       </div>
 
       <!-- Col 2: Active Chat Area -->
-      <div class="panel-card">
+      <div class="panel-card" id="col-chat">
         <div class="chat-header">
           <div class="chat-user-wrap">
+            <button type="button" class="mobile-nav-btn mobile-back-btn" onclick="setMobileView('list')" aria-label="Back to conversations">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+            </button>
             <div class="avatar-sm" id="active-chat-avatar">P</div>
             <div class="chat-title-info">
               <h3 id="active-chat-name" style="font-size:15px; font-weight:700; margin:0 0 2px 0; color:#2D231E;">No conversation selected</h3>
@@ -1282,6 +1594,14 @@
             </div>
           </div>
           <div class="chat-header-actions" style="display:flex; align-items:center; gap:8px;">
+            <button type="button" class="mobile-nav-btn mobile-details-btn" onclick="setMobileView('details')" aria-label="Customer Details">
+              <span>Info</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </button>
             <span class="tag-pill tag-green" id="active-chat-status">Idle</span>
             <button class="filter-icon-btn" id="btn-delete-active-chat" onclick="openDeleteChatModal(selectedPhone, event)" title="Delete this conversation from local database" style="color:#C62828;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1318,7 +1638,16 @@
       </div>
 
       <!-- Col 3: Details & Concierge Controls -->
-      <div class="panel-card">
+      <div class="panel-card" id="col-details">
+        <div class="mobile-details-header" id="mobile-details-header">
+          <button type="button" class="mobile-nav-btn" onclick="setMobileView('chat')" aria-label="Back to chat" style="display:inline-flex; align-items:center; gap:6px; font-weight:600; font-size:13px; color:var(--primary-terra);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back to Chat</span>
+          </button>
+        </div>
         <div class="details-tabs">
           <div class="details-tab active" onclick="switchDetailTab('details', this)">Details</div>
           <div class="details-tab" onclick="switchDetailTab('summary', this)">Summary</div>
@@ -1556,6 +1885,76 @@
     let token = localStorage.getItem('liu_admin_token') || '';
     let allConversations = [];
 
+    // ─── RESPONSIVE & MOBILE NAVIGATION ───────────────────
+    let currentMobileView = 'list'; // 'list' | 'chat' | 'details'
+
+    function setMobileView(view) {
+      currentMobileView = view;
+      const c1 = document.getElementById('col-conversations');
+      const c2 = document.getElementById('col-chat');
+      const c3 = document.getElementById('col-details');
+      const dh = document.getElementById('mobile-details-header');
+
+      if (!c1 || !c2 || !c3) return;
+
+      if (window.innerWidth > 768) {
+        c1.style.display = '';
+        c2.style.display = '';
+        c3.style.display = '';
+        if (dh) dh.style.display = 'none';
+        return;
+      }
+
+      if (view === 'list') {
+        c1.style.display = 'flex';
+        c2.style.display = 'none';
+        c3.style.display = 'none';
+        if (dh) dh.style.display = 'none';
+      } else if (view === 'chat') {
+        c1.style.display = 'none';
+        c2.style.display = 'flex';
+        c3.style.display = 'none';
+        if (dh) dh.style.display = 'none';
+        const msgBox = document.getElementById('chat-messages-container');
+        if (msgBox) msgBox.scrollTop = msgBox.scrollHeight;
+      } else if (view === 'details') {
+        c1.style.display = 'none';
+        c2.style.display = 'none';
+        c3.style.display = 'flex';
+        if (dh) dh.style.display = 'flex';
+      }
+    }
+
+    function toggleMobileMenu() {
+      const sb = document.getElementById('sidebar-drawer');
+      const bd = document.getElementById('sidebar-backdrop');
+      if (sb) sb.classList.toggle('mobile-open');
+      if (bd) bd.classList.toggle('mobile-open');
+    }
+
+    function closeMobileMenu() {
+      const sb = document.getElementById('sidebar-drawer');
+      const bd = document.getElementById('sidebar-backdrop');
+      if (sb) sb.classList.remove('mobile-open');
+      if (bd) bd.classList.remove('mobile-open');
+    }
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+        const c1 = document.getElementById('col-conversations');
+        const c2 = document.getElementById('col-chat');
+        const c3 = document.getElementById('col-details');
+        const dh = document.getElementById('mobile-details-header');
+        if (c1) c1.style.display = '';
+        if (c2) c2.style.display = '';
+        if (c3) c3.style.display = '';
+        if (dh) dh.style.display = 'none';
+        closeMobileMenu();
+      } else {
+        setMobileView(currentMobileView);
+      }
+    });
+
 // ─── PHONE FORMATTING ─────────────────────────────────
     function formatPhone(raw, isVerified = true) {
       if (!raw) return '—';
@@ -1695,12 +2094,19 @@
 
           if (isInitial) {
             if (allConversations.length > 0) {
-              selectConversation(allConversations[0].phone);
+              if (window.innerWidth <= 768) {
+                // Mobile: keep list view as the landing screen
+                setMobileView('list');
+              } else {
+                selectConversation(allConversations[0].phone);
+              }
             } else {
               renderEmptyWorkspace();
             }
           } else if (!selectedPhone && allConversations.length > 0) {
-            selectConversation(allConversations[0].phone);
+            if (window.innerWidth > 768) {
+              selectConversation(allConversations[0].phone);
+            }
           } else if (allConversations.length === 0) {
             renderEmptyWorkspace();
           }
@@ -1715,7 +2121,13 @@
         promptLoginOrSwitch();
         return;
       }
+      if (window.innerWidth <= 768) {
+        setMobileView('list');
+      }
       await loadLiveData(true);
+      if (window.innerWidth <= 768) {
+        setMobileView('list');
+      }
     }
 
     function renderEmptyWorkspace() {
@@ -1800,10 +2212,14 @@
     }
 
     // ─── SELECT CONVERSATION ──────────────────────────────
-    async function selectConversation(phone) {
+    async function selectConversation(phone, fromUserClick = true) {
       selectedPhone = phone;
       const conv = allConversations.find(c => c.phone === phone);
       if (!conv) return;
+
+      if (window.innerWidth <= 768 && fromUserClick) {
+        setMobileView('chat');
+      }
 
       renderConversationsList();
 
@@ -2024,6 +2440,7 @@
     function setActiveNav(el) {
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       el.classList.add('active');
+      closeMobileMenu();
     }
 
     function copyPhone() {
@@ -2292,10 +2709,17 @@
 
           if (selectedPhone === targetPhone) {
             if (allConversations.length > 0) {
-              selectConversation(allConversations[0].phone);
+              if (window.innerWidth <= 768) {
+                setMobileView('list');
+              } else {
+                selectConversation(allConversations[0].phone);
+              }
             } else {
               selectedPhone = null;
               renderEmptyWorkspace();
+              if (window.innerWidth <= 768) {
+                setMobileView('list');
+              }
             }
           }
 
@@ -2353,6 +2777,9 @@
           allConversations = [];
           selectedPhone = null;
           renderEmptyWorkspace();
+          if (window.innerWidth <= 768) {
+            setMobileView('list');
+          }
 
           const countAll = document.getElementById('count-all');
           if (countAll) countAll.innerText = 0;
@@ -2394,7 +2821,7 @@
               if (detail && detail.history) {
                 const conv = allConversations.find(c => c.phone === selectedPhone);
                 if (conv && detail.history.length !== conv.messages?.length) {
-                  selectConversation(selectedPhone);
+                  selectConversation(selectedPhone, false);
                 }
               }
             }).catch(() => {});
