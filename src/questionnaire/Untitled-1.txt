@@ -1,0 +1,3 @@
+# 
+
+{"status":"ok","service":"liu-whatsapp-ai-assistant","environment":"development","timestamp":"2026-10-12T18:34:10.075Z","mocks":{"ai":true,"whatsapp":true}}

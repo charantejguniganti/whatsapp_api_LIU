@@ -13,6 +13,7 @@ import { processMessage } from '../ai/agent.js';
 import { createLeadService } from '../leads/service.js';
 import { getStore } from '../store/index.js';
 import { sendTextMessage } from '../whatsapp/client.js';
+import { createQuestionnaireManager } from '../questionnaire/stateManager.js';
 
 import {
   createConversationService,
@@ -77,10 +78,11 @@ router.post('/', async (req, res) => {
   const store = await getStore();
   const leadService = createLeadService(store);
   const convService = createConversationService(store);
+  const quizManager = createQuestionnaireManager(store);
 
   for (const msg of messages) {
     try {
-      await processInboundMessage(msg, store, leadService, convService);
+      await processInboundMessage(msg, store, leadService, convService, quizManager);
     } catch (err) {
       logger.error({ err, messageId: msg.messageId }, 'Failed to process inbound message');
     }
@@ -140,7 +142,7 @@ async function handleAdminCommand(msg, convService) {
 /**
  * Process a single inbound message with deduplication.
  */
-async function processInboundMessage(msg, store, leadService, convService) {
+async function processInboundMessage(msg, store, leadService, convService, quizManager) {
   const dedupKey = `dedup:${msg.messageId}`;
 
   // Deduplication check
@@ -166,6 +168,50 @@ async function processInboundMessage(msg, store, leadService, convService) {
     const historyKey = `history:${msg.from}`;
     const history = (await store.get(historyKey)) ?? [];
     await store.set(historyKey, [...history, { role: 'user', content: msg.text }].slice(-20));
+    return;
+  }
+
+  // ── Questionnaire flow ─────────────────────────────────────────────────
+  const quizResult = await quizManager.processMessage(msg.from, msg.text);
+  if (quizResult !== null) {
+    await sendTextMessage(msg.from, quizResult.reply);
+
+    const histKey = `history:${msg.from}`;
+    const hist = (await store.get(histKey)) ?? [];
+    await store.set(histKey, [
+      ...hist,
+      { role: 'user', content: msg.text },
+      { role: 'assistant', content: quizResult.reply },
+    ].slice(-20));
+
+    const existingConv = (await store.get(`conv:${msg.from}`)) ?? { phone: msg.from };
+    await store.set(`conv:${msg.from}`, {
+      ...existingConv,
+      phone: msg.from,
+      updatedAt: new Date().toISOString(),
+    });
+
+    if ((quizResult.quizDone || quizResult.handover) && config.ADMIN_WHATSAPP_NUMBER) {
+      const alreadyNotified = await convService.hasBeenNotified(msg.from);
+      if (!alreadyNotified) {
+        const customerName = await convService.getCustomerName(msg.from);
+        const summary = buildEnquirySummary({
+          customerPhone: msg.from,
+          customerName,
+          interest: 'Completed LIU Questionnaire',
+          recentMessages: [msg.text],
+          aiRecommendation: quizResult.handover
+            ? 'Customer requested human agent during quiz'
+            : 'Questionnaire complete — personalised recommendation delivered',
+        });
+        await sendTextMessage(config.ADMIN_WHATSAPP_NUMBER, summary);
+        await convService.markNotified(msg.from);
+      }
+    }
+
+    if (quizResult.handover) {
+      await convService.claimConversation(msg.from, 'quiz-human-request');
+    }
     return;
   }
 

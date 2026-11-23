@@ -21,6 +21,7 @@ import {
   buildEnquirySummary,
   MESSAGE_CLASS,
 } from '../conversations/service.js';
+import { createQuestionnaireManager } from '../questionnaire/stateManager.js';
 import logger from '../logger.js';
 import config from '../config/index.js';
 
@@ -157,6 +158,7 @@ export async function initBaileys(forceRestart = false) {
 async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, text, store) {
   const leadService = createLeadService(store);
   const convService = createConversationService(store);
+  const quizManager = createQuestionnaireManager(store);
 
   // Check if human has claimed this conversation
   const isAi = await convService.isAiActive(customerPhone);
@@ -168,6 +170,55 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
     // Save to history so Mam sees customer message in the dashboard transcript
     await store.set(historyKey, [...history, { role: 'user', content: text }].slice(-20));
     return;
+  }
+
+  // ── Questionnaire flow (highest priority after human-takeover check) ────
+  const quizResult = await quizManager.processMessage(customerPhone, text);
+  if (quizResult !== null) {
+    // Send questionnaire reply
+    await socket.sendMessage(remoteJid, { text: quizResult.reply });
+
+    // Record in conversation history
+    const updatedHistory = [
+      ...history,
+      { role: 'user', content: text },
+      { role: 'assistant', content: quizResult.reply },
+    ].slice(-20);
+    await store.set(historyKey, updatedHistory);
+
+    // Update conversation record for dashboard
+    const existingConv = (await store.get(`conv:${customerPhone}`)) ?? { phone: customerPhone };
+    await store.set(`conv:${customerPhone}`, {
+      ...existingConv,
+      phone: customerPhone,
+      updatedAt: new Date().toISOString(),
+    });
+
+    // If quiz just completed or human handover requested, notify admin
+    if ((quizResult.quizDone || quizResult.handover) && config.ADMIN_WHATSAPP_NUMBER) {
+      const alreadyNotified = await convService.hasBeenNotified(customerPhone);
+      if (!alreadyNotified) {
+        const customerName = await convService.getCustomerName(customerPhone);
+        const summary = buildEnquirySummary({
+          customerPhone,
+          customerName,
+          interest: 'Completed LIU Questionnaire',
+          recentMessages: [text],
+          aiRecommendation: quizResult.handover
+            ? 'Customer requested human agent'
+            : 'Questionnaire complete — personalised recommendation sent',
+        });
+        const adminJid = config.ADMIN_WHATSAPP_NUMBER.replace('+', '') + '@s.whatsapp.net';
+        await socket.sendMessage(adminJid, { text: summary });
+        await convService.markNotified(customerPhone);
+      }
+    }
+
+    if (quizResult.handover) {
+      await convService.claimConversation(customerPhone, 'quiz-human-request');
+    }
+
+    return; // questionnaire handled this message
   }
 
   // Classify message
