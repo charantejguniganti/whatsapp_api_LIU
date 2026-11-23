@@ -20,6 +20,7 @@ import {
   classifyMessage,
   buildEnquirySummary,
   MESSAGE_CLASS,
+  isChatTombstoned,
 } from '../conversations/service.js';
 import { createQuestionnaireManager } from '../questionnaire/stateManager.js';
 import logger from '../logger.js';
@@ -111,18 +112,29 @@ export async function initBaileys(forceRestart = false) {
         // Skip messages sent from ourselves unless testing
         if (msg.key.fromMe) continue;
 
-        // Skip status broadcasts and group chats (only 1-on-1 customer chats)
+        // Skip status broadcasts (only customer chats and group chats)
         const remoteJid = msg.key.remoteJid;
-        if (
-          !remoteJid ||
-          remoteJid.endsWith('@g.us') ||
-          remoteJid === 'status@broadcast'
-        ) continue;
+        if (!remoteJid || remoteJid === 'status@broadcast') continue;
 
+        const isGroup = remoteJid.endsWith('@g.us');
         // Extract phone number or identifier (handles both @s.whatsapp.net and @lid)
         let customerPhone = remoteJid.split('@')[0];
         if (!customerPhone.startsWith('+')) {
           customerPhone = '+' + customerPhone;
+        }
+
+        const pushName = msg.pushName || null;
+        const msgTimestamp = msg.messageTimestamp
+          ? (typeof msg.messageTimestamp === 'number'
+              ? (msg.messageTimestamp > 1e11 ? new Date(msg.messageTimestamp).toISOString() : new Date(msg.messageTimestamp * 1000).toISOString())
+              : new Date(msg.messageTimestamp).toISOString())
+          : new Date().toISOString();
+
+        // Check if chat is tombstoned (deleted locally from this application's database)
+        // This prevents WhatsApp synchronization from resurrecting deleted chats
+        if (await isChatTombstoned(store, customerPhone, msgTimestamp)) {
+          logger.info({ customerPhone }, 'Skipping message for locally deleted chat (tombstoned)');
+          continue;
         }
 
         const text =
@@ -132,10 +144,14 @@ export async function initBaileys(forceRestart = false) {
 
         if (!text || text.trim().length === 0) continue;
 
-        logger.info({ from: customerPhone, text }, 'Inbound message received via linked WhatsApp');
+        logger.info({ from: customerPhone, text, pushName }, 'Inbound message received via linked WhatsApp');
 
         try {
-          await handleInboundBaileysMessage(sock, remoteJid, customerPhone, text, store);
+          await handleInboundBaileysMessage(sock, remoteJid, customerPhone, text, store, {
+            pushName,
+            msgTimestamp,
+            isGroup,
+          });
         } catch (err) {
           logger.error({ err, customerPhone }, 'Error processing Baileys inbound message');
         }
@@ -149,7 +165,8 @@ export async function initBaileys(forceRestart = false) {
   }
 }
 
-async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, text, store) {
+async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, text, store, meta = {}) {
+  const { pushName = null, msgTimestamp = new Date().toISOString(), isGroup = false, groupName = null } = meta;
   const leadService = createLeadService(store);
   const convService = createConversationService(store);
   const quizManager = createQuestionnaireManager(store);
@@ -162,7 +179,20 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
   if (!isAi) {
     logger.info({ customerPhone }, 'Human takeover active; AI skipped');
     // Save to history so Mam sees customer message in the dashboard transcript
-    await store.set(historyKey, [...history, { role: 'user', content: text }].slice(-20));
+    const updatedHistory = [...history, { role: 'user', content: text, timestamp: msgTimestamp }].slice(-20);
+    await store.set(historyKey, updatedHistory);
+
+    const existingConv = (await store.get(`conv:${customerPhone}`)) ?? { phone: customerPhone };
+    await store.set(`conv:${customerPhone}`, {
+      ...existingConv,
+      phone: customerPhone,
+      pushName: pushName || existingConv.pushName || null,
+      isGroup: isGroup || existingConv.isGroup || false,
+      groupName: groupName || existingConv.groupName || null,
+      lastMessage: text,
+      lastMessageTimestamp: msgTimestamp,
+      updatedAt: msgTimestamp,
+    });
     return;
   }
 
@@ -181,27 +211,33 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
       await socket.sendMessage(remoteJid, { text: outgoingMessages[i] });
     }
 
-    // Record in conversation history
+    const replyTimestamp = new Date().toISOString();
+    // Record in conversation history with explicit timestamps
     const updatedHistory = [
       ...history,
-      { role: 'user', content: text },
-      { role: 'assistant', content: quizResult.reply },
+      { role: 'user', content: text, timestamp: msgTimestamp },
+      { role: 'assistant', content: quizResult.reply, timestamp: replyTimestamp },
     ].slice(-20);
     await store.set(historyKey, updatedHistory);
 
-    // Update conversation record for dashboard
+    // Update conversation record for dashboard (sorted by lastMessageTimestamp)
     const existingConv = (await store.get(`conv:${customerPhone}`)) ?? { phone: customerPhone };
     await store.set(`conv:${customerPhone}`, {
       ...existingConv,
       phone: customerPhone,
-      updatedAt: new Date().toISOString(),
+      pushName: pushName || existingConv.pushName || null,
+      isGroup: isGroup || existingConv.isGroup || false,
+      groupName: groupName || existingConv.groupName || null,
+      lastMessage: text,
+      lastMessageTimestamp: replyTimestamp,
+      updatedAt: replyTimestamp,
     });
 
     // If quiz just completed or human handover requested, notify admin
     if ((quizResult.quizDone || quizResult.handover) && config.ADMIN_WHATSAPP_NUMBER) {
       const alreadyNotified = await convService.hasBeenNotified(customerPhone);
       if (!alreadyNotified) {
-        const customerName = await convService.getCustomerName(customerPhone);
+        const customerName = pushName || (await convService.getCustomerName(customerPhone));
         const summary = buildEnquirySummary({
           customerPhone,
           customerName,
@@ -232,12 +268,32 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
     const { reply, complete, lead } = await leadService.processLeadMessage(customerPhone, text);
     if (reply) {
       await socket.sendMessage(remoteJid, { text: reply });
+      const replyTime = new Date().toISOString();
+      const updatedHistory = [
+        ...history,
+        { role: 'user', content: text, timestamp: msgTimestamp },
+        { role: 'assistant', content: reply, timestamp: replyTime },
+      ].slice(-20);
+      await store.set(historyKey, updatedHistory);
+
+      const existingConv = (await store.get(`conv:${customerPhone}`)) ?? { phone: customerPhone };
+      await store.set(`conv:${customerPhone}`, {
+        ...existingConv,
+        phone: customerPhone,
+        pushName: pushName || existingConv.pushName || null,
+        isGroup: isGroup || existingConv.isGroup || false,
+        groupName: groupName || existingConv.groupName || null,
+        lastMessage: text,
+        lastMessageTimestamp: replyTime,
+        updatedAt: replyTime,
+      });
+
       if (complete && lead && config.ADMIN_WHATSAPP_NUMBER) {
         const alreadyNotified = await convService.hasBeenNotified(customerPhone);
         if (!alreadyNotified) {
           const summary = buildEnquirySummary({
             customerPhone,
-            customerName: lead.name,
+            customerName: pushName || lead.name,
             interest: lead.interest || 'Not specified',
             recentMessages: [text],
             aiRecommendation: 'Lead details captured via flow',
@@ -258,23 +314,29 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
     history,
   });
 
-  // Save history
+  const replyTimestamp = new Date().toISOString();
+  // Save history with timestamps
   const updatedHistory = [
     ...history,
-    { role: 'user', content: text },
-    { role: 'assistant', content: result.reply },
+    { role: 'user', content: text, timestamp: msgTimestamp },
+    { role: 'assistant', content: result.reply, timestamp: replyTimestamp },
   ].slice(-20);
   await store.set(historyKey, updatedHistory);
 
   // Send reply directly back to WhatsApp customer
   await socket.sendMessage(remoteJid, { text: result.reply });
 
-  // Update conversation record for dashboard
+  // Update conversation record for dashboard (latest message timestamp first)
   const existingConv = (await store.get(`conv:${customerPhone}`)) ?? { phone: customerPhone };
   await store.set(`conv:${customerPhone}`, {
     ...existingConv,
     phone: customerPhone,
-    updatedAt: new Date().toISOString(),
+    pushName: pushName || existingConv.pushName || null,
+    isGroup: isGroup || existingConv.isGroup || false,
+    groupName: groupName || existingConv.groupName || null,
+    lastMessage: text,
+    lastMessageTimestamp: replyTimestamp,
+    updatedAt: replyTimestamp,
   });
 
   // If customer asked for human or enquiry is qualified, notify admin
@@ -283,7 +345,7 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
     config.ADMIN_WHATSAPP_NUMBER
   ) {
     const alreadyNotified = await convService.hasBeenNotified(customerPhone);
-    const customerName = await convService.getCustomerName(customerPhone);
+    const customerName = pushName || (await convService.getCustomerName(customerPhone));
     const summary = buildEnquirySummary({
       customerPhone,
       customerName,
@@ -300,7 +362,8 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
     await store.set(`conv:${customerPhone}`, {
       ...updated,
       summary,
-      updatedAt: new Date().toISOString(),
+      lastMessageTimestamp: replyTimestamp,
+      updatedAt: replyTimestamp,
     });
 
     if (!alreadyNotified) {
@@ -318,5 +381,22 @@ export async function sendBaileysMessage(phone, text) {
   }
   const clean = phone.replace(/[\s+]/g, '');
   const jid = clean.includes('@') ? clean : `${clean}@s.whatsapp.net`;
-  return await sock.sendMessage(jid, { text });
+  const result = await sock.sendMessage(jid, { text });
+
+  // Update conversation lastMessageTimestamp in local store
+  try {
+    const store = await getStore();
+    const now = new Date().toISOString();
+    const existing = (await store.get(`conv:${phone}`)) ?? { phone };
+    await store.set(`conv:${phone}`, {
+      ...existing,
+      lastMessage: text,
+      lastMessageTimestamp: now,
+      updatedAt: now,
+    });
+  } catch (err) {
+    // Non-fatal
+  }
+
+  return result;
 }

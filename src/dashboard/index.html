@@ -1248,20 +1248,20 @@
       <!-- Col 1: Conversations List -->
       <div class="panel-card">
         <div class="conversations-header">
-          <h2>Conversations</h2>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <h2 style="margin:0;">Conversations</h2>
+            <button type="button" class="btn-delete-all" onclick="openDeleteAllModal()" title="Delete all chats from local database" style="background:#FFF0F0; border:1px solid #FFCDD2; color:#C62828; padding:4px 9px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px; transition:all 0.2s;">
+              <span style="font-size:12px;">🗑</span> Delete All
+            </button>
+          </div>
           <div class="conv-search">
             <span class="conv-search-icon">🔍</span>
-            <input type="text" id="conv-search-input" placeholder="Search phone number or keyword..." oninput="handleSearch(this.value)" />
+            <input type="text" id="conv-search-input" placeholder="Search name, phone or keyword..." oninput="handleSearch(this.value)" />
           </div>
           <div class="filter-pills">
-            <button class="filter-pill active" onclick="setFilter('all', this)">All (<span id="count-all">84</span>)</button>
-            <button class="filter-pill" onclick="setFilter('new', this)">New (<span id="count-new">12</span>)</button>
-            <button class="filter-pill" onclick="setFilter('progress', this)">In Progress (<span id="count-prog">28</span>)</button>
-            <button class="filter-icon-btn" title="More filters">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#847C76" stroke-width="2">
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-              </svg>
-            </button>
+            <button class="filter-pill active" onclick="setFilter('all', this)">All (<span id="count-all">0</span>)</button>
+            <button class="filter-pill" onclick="setFilter('new', this)">New (<span id="count-new">0</span>)</button>
+            <button class="filter-pill" onclick="setFilter('progress', this)">In Progress (<span id="count-prog">0</span>)</button>
           </div>
         </div>
 
@@ -1276,17 +1276,17 @@
           <div class="chat-user-wrap">
             <div class="avatar-sm" id="active-chat-avatar">P</div>
             <div class="chat-title-info">
-              <h3 id="active-chat-phone">+91 98765 43210</h3>
-              <p id="active-chat-lastseen">Last seen today at 10:24 AM</p>
+              <h3 id="active-chat-name" style="font-size:15px; font-weight:700; margin:0 0 2px 0; color:#2D231E;">No conversation selected</h3>
+              <p id="active-chat-phone" style="font-size:11.5px; color:var(--text-muted); margin:0 0 2px 0;">—</p>
+              <p id="active-chat-lastseen" style="font-size:10.5px; color:var(--text-light); margin:0;">—</p>
             </div>
           </div>
-          <div class="chat-header-actions">
-            <span class="tag-pill tag-green" id="active-chat-status">New</span>
-            <button class="filter-icon-btn" title="Options">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#847C76" stroke-width="2">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
+          <div class="chat-header-actions" style="display:flex; align-items:center; gap:8px;">
+            <span class="tag-pill tag-green" id="active-chat-status">Idle</span>
+            <button class="filter-icon-btn" id="btn-delete-active-chat" onclick="openDeleteChatModal(selectedPhone, event)" title="Delete this conversation from local database" style="color:#C62828;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
               </svg>
             </button>
           </div>
@@ -1498,6 +1498,56 @@
     </div>
   </div>
 
+  <!-- ─── DELETE SINGLE CHAT MODAL ───────────────────────── -->
+  <div id="delete-chat-modal" role="dialog" aria-modal="true" style="display:none; position:fixed; inset:0; background:rgba(39,33,30,0.55); backdrop-filter:blur(4px); z-index:1002; align-items:center; justify-content:center;">
+    <div class="modal-box" style="width:420px; text-align:left; background:#FFFFFF; border-radius:14px; padding:24px; box-shadow:0 12px 32px rgba(0,0,0,0.2);">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+        <div style="background:#FFEBEE; color:#C62828; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px;">🗑</div>
+        <h2 style="font-family:var(--font-serif); font-size:19px; margin:0; color:#2D231E;">Delete Conversation</h2>
+      </div>
+      <p style="font-size:13px; color:#5D4037; line-height:1.5; margin-bottom:14px;">
+        Are you sure you want to delete the conversation with <strong id="delete-chat-target-name">—</strong> (<span id="delete-chat-target-phone">—</span>)?
+      </p>
+      <div style="background:#FFF8E1; border:1px solid #FFE082; border-radius:8px; padding:10px 12px; margin-bottom:20px; font-size:12px; color:#795548; line-height:1.4;">
+        ℹ️ <strong>Database-only deletion:</strong> All locally stored messages and records for this chat will be permanently deleted from this application's database. Your original WhatsApp messages and chat history on your phone will <strong>remain completely untouched</strong>.
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button type="button" onclick="closeDeleteChatModal()" style="background:#EFE7DE; color:#6B4938; border:1px solid #D8C7B5; border-radius:8px; padding:9px 16px; font-weight:600; font-size:13px; cursor:pointer;">
+          Cancel
+        </button>
+        <button type="button" id="btn-confirm-delete-chat" onclick="confirmDeleteSingleChat()" style="background:#C62828; color:#FFFFFF; border:none; border-radius:8px; padding:9px 18px; font-weight:600; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+          <span id="delete-chat-spinner" class="btn-spinner" style="display:none; width:14px; height:14px; border-top-color:#fff;"></span>
+          <span id="delete-chat-btn-text">Delete Chat</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── DELETE ALL CHATS MODAL ─────────────────────────── -->
+  <div id="delete-all-modal" role="dialog" aria-modal="true" style="display:none; position:fixed; inset:0; background:rgba(39,33,30,0.55); backdrop-filter:blur(4px); z-index:1002; align-items:center; justify-content:center;">
+    <div class="modal-box" style="width:440px; text-align:left; background:#FFFFFF; border-radius:14px; padding:24px; box-shadow:0 12px 32px rgba(0,0,0,0.2);">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+        <div style="background:#FFEBEE; color:#C62828; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px;">⚠️</div>
+        <h2 style="font-family:var(--font-serif); font-size:19px; margin:0; color:#C62828;">Delete All Conversations</h2>
+      </div>
+      <p style="font-size:13px; color:#5D4037; line-height:1.5; margin-bottom:14px;">
+        This will permanently delete <strong>all locally stored conversations, messages, and chat transcripts</strong> from this application's database.
+      </p>
+      <div style="background:#FFEBEE; border:1px solid #FFCDD2; border-radius:8px; padding:10px 12px; margin-bottom:20px; font-size:12px; color:#B71C1C; line-height:1.4;">
+        🔒 <strong>WhatsApp is Safe:</strong> This only clears this dashboard's local PostgreSQL database. It <strong>never</strong> deletes messages from WhatsApp, does not modify your original WhatsApp history, and does not disconnect your session.
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button type="button" onclick="closeDeleteAllModal()" style="background:#EFE7DE; color:#6B4938; border:1px solid #D8C7B5; border-radius:8px; padding:9px 16px; font-weight:600; font-size:13px; cursor:pointer;">
+          Cancel
+        </button>
+        <button type="button" id="btn-confirm-delete-all" onclick="confirmDeleteAllChats()" style="background:#C62828; color:#FFFFFF; border:none; border-radius:8px; padding:9px 18px; font-weight:600; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+          <span id="delete-all-spinner" class="btn-spinner" style="display:none; width:14px; height:14px; border-top-color:#fff;"></span>
+          <span id="delete-all-btn-text">Yes, Delete All Chats</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ─── STATE MANAGEMENT ─────────────────────────────────
     let currentFilter = 'all';
@@ -1567,15 +1617,25 @@
             const isHuman = l.state === 'HUMAN_TAKEOVER';
             const status = isHuman ? 'In Progress' : (l.notificationSent ? 'New' : 'Active');
             const statusClass = isHuman ? 'tag-blue' : (l.notificationSent ? 'tag-green' : 'tag-amber');
-            const name = l.customerName || 'Customer';
-            const avatar = name.charAt(0).toUpperCase();
+            
+            // Prioritize: WhatsApp pushName / groupName -> saved lead name -> formatPhone
+            let name = (l.customerName && l.customerName !== 'null' && l.customerName !== 'undefined') ? l.customerName : null;
+            if (!name && l.pushName && l.pushName !== 'null' && l.pushName !== 'undefined') {
+              name = l.pushName;
+            }
+            if (!name || name.trim() === '' || name.toLowerCase() === 'customer') {
+              name = formatPhone(l.phone);
+            }
+            const avatar = (l.isGroup ? '👥' : name.charAt(0).toUpperCase());
 
             return {
               phone: l.phone,
               name: name,
               avatar: avatar,
+              isGroup: l.isGroup || false,
               status: status,
               statusClass: statusClass,
+              lastMessageAt: l.lastMessageAt || l.updatedAt || null,
               time: l.lastMessageAt ? new Date(l.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent',
               lastMsg: l.lastMessage || l.interest || 'No messages yet',
               firstContact: l.notifiedAt ? new Date(l.notifiedAt).toLocaleString() : 'Recent',
@@ -1587,6 +1647,9 @@
               messages: []
             };
           });
+
+          // Sort chats with latest message first (descending timestamp)
+          allConversations.sort((a, b) => new Date(b.lastMessageAt || 0) - new Date(a.lastMessageAt || 0));
 
           renderConversationsList();
 
@@ -1660,15 +1723,23 @@
       }
 
       container.innerHTML = filtered.map(c => `
-        <div class="conv-item ${c.phone === selectedPhone ? 'selected' : ''}" onclick="selectConversation('${c.phone}')">
+        <div class="conv-item ${c.phone === selectedPhone ? 'selected' : ''}" onclick="selectConversation('${c.phone}')" style="position:relative;">
           <div class="avatar-sm">${c.avatar}</div>
-          <div class="conv-info">
-            <div class="conv-top-row">
-              <span class="conv-phone">${formatPhone(c.phone)}</span>
-              <span class="conv-time">${c.time}</span>
+          <div class="conv-info" style="flex:1; min-width:0;">
+            <div class="conv-top-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+              <span class="conv-name" style="font-weight:600; font-size:13.5px; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px;" title="${c.name}">${c.name}</span>
+              <span class="conv-time" style="font-size:11px; color:var(--text-muted); flex-shrink:0;">${c.time}</span>
             </div>
-            <div class="conv-preview">${c.lastMsg}</div>
-            <span class="tag-pill ${c.statusClass}">${c.status}</span>
+            <div class="conv-phone-sub" style="font-size:11px; color:var(--text-muted); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              ${formatPhone(c.phone)}
+            </div>
+            <div class="conv-preview" style="font-size:11.5px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:170px;">${c.lastMsg}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+              <span class="tag-pill ${c.statusClass}">${c.status}</span>
+              <button type="button" class="chat-del-btn" onclick="openDeleteChatModal('${c.phone}', event)" title="Delete conversation from local database" style="background:transparent; border:none; color:#C62828; opacity:0.6; cursor:pointer; font-size:13px; padding:2px 5px; border-radius:4px; transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">
+                🗑
+              </button>
+            </div>
           </div>
         </div>
       `).join('');
@@ -1683,11 +1754,13 @@
       renderConversationsList();
 
       // Update Center Chat Column
+      const activeNameEl = document.getElementById('active-chat-name');
+      if (activeNameEl) activeNameEl.innerText = conv.name;
       document.getElementById('active-chat-phone').innerText = formatPhone(conv.phone);
       document.getElementById('active-chat-avatar').innerText = conv.avatar;
       document.getElementById('active-chat-status').innerText = conv.status;
       document.getElementById('active-chat-status').className = `tag-pill ${conv.statusClass}`;
-      document.getElementById('active-chat-lastseen').innerText = `Last seen ${conv.time}`;
+      document.getElementById('active-chat-lastseen').innerText = `Last message at ${conv.time}`;
 
       // Fetch Live Conversation Transcript from Backend
       const chatContainer = document.getElementById('chat-messages-container');
@@ -1853,13 +1926,20 @@
         });
 
         if (res.ok) {
+          const nowIso = new Date().toISOString();
           conv.messages.push({
             role: 'assistant',
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             text: text
           });
           conv.lastMsg = text;
+          conv.lastMessageAt = nowIso;
+          conv.time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           input.value = '';
+
+          // Re-sort chats so active conversation jumps to top immediately!
+          allConversations.sort((a, b) => new Date(b.lastMessageAt || 0) - new Date(a.lastMessageAt || 0));
+          renderConversationsList();
           selectConversation(conv.phone);
           showToast('Message sent to customer');
         } else {
@@ -2103,6 +2183,144 @@
         setTimeout(checkWhatsAppStatus, 1500);
       } catch (e) {
         showToast('Error refreshing QR code');
+      }
+    }
+
+    // ─── CHAT DELETION CONTROLLERS (LOCAL DATABASE ONLY) ──
+    let phoneToDelete = null;
+
+    function openDeleteChatModal(phone, event) {
+      if (event) event.stopPropagation();
+      phoneToDelete = phone;
+      const conv = allConversations.find(c => c.phone === phone);
+      const nameEl = document.getElementById('delete-chat-target-name');
+      const phoneEl = document.getElementById('delete-chat-target-phone');
+      if (nameEl) nameEl.innerText = conv ? conv.name : phone;
+      if (phoneEl) phoneEl.innerText = formatPhone(phone);
+      document.getElementById('delete-chat-modal').style.display = 'flex';
+    }
+
+    function closeDeleteChatModal() {
+      phoneToDelete = null;
+      document.getElementById('delete-chat-modal').style.display = 'none';
+      const spinner = document.getElementById('delete-chat-spinner');
+      if (spinner) spinner.style.display = 'none';
+      const text = document.getElementById('delete-chat-btn-text');
+      if (text) text.innerText = 'Delete Chat';
+      const btn = document.getElementById('btn-confirm-delete-chat');
+      if (btn) btn.disabled = false;
+    }
+
+    async function confirmDeleteSingleChat() {
+      if (!phoneToDelete) return;
+      const targetPhone = phoneToDelete;
+      const btn = document.getElementById('btn-confirm-delete-chat');
+      const spinner = document.getElementById('delete-chat-spinner');
+      const text = document.getElementById('delete-chat-btn-text');
+
+      if (btn) btn.disabled = true;
+      if (spinner) spinner.style.display = 'inline-block';
+      if (text) text.innerText = 'Deleting...';
+
+      try {
+        const res = await fetch(`/api/chats/${encodeURIComponent(targetPhone)}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          // Remove conversation immediately from frontend
+          allConversations = allConversations.filter(c => c.phone !== targetPhone);
+          renderConversationsList();
+
+          const countAll = document.getElementById('count-all');
+          if (countAll) countAll.innerText = allConversations.length;
+
+          if (selectedPhone === targetPhone) {
+            if (allConversations.length > 0) {
+              selectConversation(allConversations[0].phone);
+            } else {
+              selectedPhone = null;
+              renderEmptyWorkspace();
+            }
+          }
+
+          closeDeleteChatModal();
+          showToast('Chat deleted from local database. Original WhatsApp messages untouched.');
+        } else {
+          showToast('Failed to delete chat');
+          if (btn) btn.disabled = false;
+          if (spinner) spinner.style.display = 'none';
+          if (text) text.innerText = 'Delete Chat';
+        }
+      } catch (err) {
+        console.error('Delete chat error:', err);
+        showToast('Error deleting chat');
+        if (btn) btn.disabled = false;
+        if (spinner) spinner.style.display = 'none';
+        if (text) text.innerText = 'Delete Chat';
+      }
+    }
+
+    function openDeleteAllModal() {
+      if (allConversations.length === 0) {
+        showToast('No conversations to delete.');
+        return;
+      }
+      document.getElementById('delete-all-modal').style.display = 'flex';
+    }
+
+    function closeDeleteAllModal() {
+      document.getElementById('delete-all-modal').style.display = 'none';
+      const spinner = document.getElementById('delete-all-spinner');
+      if (spinner) spinner.style.display = 'none';
+      const text = document.getElementById('delete-all-btn-text');
+      if (text) text.innerText = 'Yes, Delete All Chats';
+      const btn = document.getElementById('btn-confirm-delete-all');
+      if (btn) btn.disabled = false;
+    }
+
+    async function confirmDeleteAllChats() {
+      const btn = document.getElementById('btn-confirm-delete-all');
+      const spinner = document.getElementById('delete-all-spinner');
+      const text = document.getElementById('delete-all-btn-text');
+
+      if (btn) btn.disabled = true;
+      if (spinner) spinner.style.display = 'inline-block';
+      if (text) text.innerText = 'Deleting all...';
+
+      try {
+        const res = await fetch('/api/chats', {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          allConversations = [];
+          selectedPhone = null;
+          renderEmptyWorkspace();
+
+          const countAll = document.getElementById('count-all');
+          if (countAll) countAll.innerText = 0;
+          const countNew = document.getElementById('count-new');
+          if (countNew) countNew.innerText = 0;
+          const countProg = document.getElementById('count-prog');
+          if (countProg) countProg.innerText = 0;
+
+          closeDeleteAllModal();
+          showToast('All chats deleted from local database. WhatsApp messages are untouched.');
+        } else {
+          showToast('Failed to delete all chats');
+          if (btn) btn.disabled = false;
+          if (spinner) spinner.style.display = 'none';
+          if (text) text.innerText = 'Yes, Delete All Chats';
+        }
+      } catch (err) {
+        console.error('Delete all chats error:', err);
+        showToast('Error executing bulk deletion');
+        if (btn) btn.disabled = false;
+        if (spinner) spinner.style.display = 'none';
+        if (text) text.innerText = 'Yes, Delete All Chats';
       }
     }
 

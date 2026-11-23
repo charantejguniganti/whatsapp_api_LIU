@@ -149,6 +149,37 @@ export function createConversationService(store) {
     await store.set(`conv:${phone}`, record);
   }
 
+  // ── Contact Name Resolution ──────────────────────────────────────────────
+
+  /**
+   * Resolves contact name with strict priority:
+   * 1. WhatsApp push name / profile name
+   * 2. Saved contact name (from lead record or metadata)
+   * 3. WhatsApp phone number as fallback
+   */
+  function resolveContactName(conv = {}, lead = null) {
+    if (conv.isGroup && conv.groupName && conv.groupName.trim()) {
+      return conv.groupName.trim();
+    }
+    // 1. WhatsApp push name / profile name
+    if (conv.pushName && typeof conv.pushName === 'string' && conv.pushName.trim()) {
+      const p = conv.pushName.trim();
+      if (p !== 'null' && p !== 'undefined' && p.toLowerCase() !== 'customer') {
+        return p;
+      }
+    }
+    // 2. Saved contact name (from lead record or metadata)
+    const saved = lead?.data?.name || conv.savedName || conv.customerName;
+    if (saved && typeof saved === 'string' && saved.trim()) {
+      const s = saved.trim();
+      if (s !== 'null' && s !== 'undefined' && s.toLowerCase() !== 'customer') {
+        return s;
+      }
+    }
+    // 3. Fallback: WhatsApp phone number
+    return conv.phone || 'Unknown';
+  }
+
   // ── Conversation state management ────────────────────────────────────────
 
   /**
@@ -257,22 +288,140 @@ export function createConversationService(store) {
     return lead?.data?.name ?? null;
   }
 
-  // ── Lead listing for dashboard ───────────────────────────────────────────
+  // ── Conversation Deletion & Tombstone Management (Local DB Only) ───────
 
   /**
-   * Return a summary list of all known conversations (for admin dashboard).
+   * Delete a single conversation and all its messages from local database.
+   * Sets a tombstone to prevent old messages from being re-imported on sync.
+   * NEVER calls WhatsApp deletion APIs.
+   * @param {string} phone
+   */
+  async function deleteConversation(phone) {
+    const cleanPhone = phone.replace(/[^\d+]/g, '');
+    const now = new Date().toISOString();
+
+    // 1. Permanently remove all local data for this chat
+    await Promise.all([
+      store.delete(`conv:${cleanPhone}`),
+      store.delete(`history:${cleanPhone}`),
+      store.delete(`lead:${cleanPhone}`),
+      store.delete(`quiz:${cleanPhone}`),
+      store.delete(`summary:${cleanPhone}`),
+      store.delete(`notified:${cleanPhone}`),
+      store.delete(`notification:${cleanPhone}`),
+    ]);
+
+    // 2. Set tombstone record using the chat ID/phone to protect against sync re-import
+    await store.set(`tombstone:${cleanPhone}`, {
+      deletedAt: now,
+      phone: cleanPhone,
+    });
+
+    logger.info({ phone: cleanPhone }, 'Locally deleted conversation and all associated messages');
+    return { ok: true, phone: cleanPhone };
+  }
+
+  /**
+   * Delete ALL conversations and messages from local database.
+   * Sets tombstones so WhatsApp synchronization does not resurrect them.
+   * NEVER calls WhatsApp deletion APIs.
+   */
+  async function deleteAllConversations() {
+    const convKeys = await store.keys('conv:');
+    const now = new Date().toISOString();
+
+    for (const k of convKeys) {
+      const phone = k.replace('conv:', '');
+      await Promise.all([
+        store.delete(`conv:${phone}`),
+        store.delete(`history:${phone}`),
+        store.delete(`lead:${phone}`),
+        store.delete(`quiz:${phone}`),
+        store.delete(`summary:${phone}`),
+        store.delete(`notified:${phone}`),
+        store.delete(`notification:${phone}`),
+      ]);
+      await store.set(`tombstone:${phone}`, {
+        deletedAt: now,
+        phone,
+      });
+    }
+
+    // Set global tombstone marker
+    await store.set('tombstone:global', {
+      deletedAllAt: now,
+    });
+
+    logger.info({ count: convKeys.length }, 'Locally deleted all conversations and set sync tombstones');
+    return { ok: true, count: convKeys.length };
+  }
+
+  // ── Lead listing for dashboard & APIs (Latest Message First) ─────────────
+
+  /**
+   * Return a summary list of all known conversations, sorted by latest message timestamp.
    * @returns {Promise<Array>}
    */
   async function listConversations() {
     const keys = await store.keys('conv:');
     const results = [];
+
     for (const key of keys) {
       const conv = await store.get(key);
-      if (conv) results.push(conv);
+      if (!conv || !conv.phone) continue;
+
+      // Skip tombstoned conversations
+      const tombstone = await store.get(`tombstone:${conv.phone}`);
+      if (tombstone) continue;
+
+      const [lead, history, summary] = await Promise.all([
+        store.get(`lead:${conv.phone}`),
+        store.get(`history:${conv.phone}`),
+        store.get(`summary:${conv.phone}`),
+      ]);
+
+      const messages = Array.isArray(history) ? history : [];
+      const lastMsgObj = messages.length > 0 ? messages[messages.length - 1] : null;
+
+      // Determine actual latest message timestamp safely
+      const latestTimestamp =
+        lastMsgObj?.timestamp ||
+        conv.lastMessageTimestamp ||
+        conv.updatedAt ||
+        conv.notifiedAt ||
+        conv.claimedAt ||
+        new Date(0).toISOString();
+
+      const resolvedName = resolveContactName(conv, lead);
+
+      results.push({
+        phone: conv.phone,
+        state: conv.state ?? CONV_STATE.AI_ACTIVE,
+        notificationSent: conv.notificationSent ?? false,
+        notifiedAt: conv.notifiedAt ?? null,
+        claimedBy: conv.claimedBy ?? null,
+        claimedAt: conv.claimedAt ?? null,
+        resumedAt: conv.resumedAt ?? null,
+        customerName: resolvedName,
+        pushName: conv.pushName ?? null,
+        isGroup: conv.isGroup ?? false,
+        groupName: conv.groupName ?? null,
+        interest: lead?.data?.interest ?? null,
+        leadComplete: lead?.state === 'COMPLETE',
+        messageCount: messages.length,
+        lastMessage: lastMsgObj?.content || conv.lastMessage || conv.summary || null,
+        lastMessageAt: latestTimestamp,
+        summary: summary ?? conv.summary ?? null,
+        updatedAt: conv.updatedAt ?? latestTimestamp,
+      });
     }
-    return results.sort((a, b) =>
-      (b.notifiedAt ?? b.claimedAt ?? '').localeCompare(a.notifiedAt ?? a.claimedAt ?? '')
-    );
+
+    // Always sorted by latest message timestamp in descending order (latest first)
+    return results.sort((a, b) => {
+      const timeA = new Date(a.lastMessageAt || 0).getTime();
+      const timeB = new Date(b.lastMessageAt || 0).getTime();
+      return timeB - timeA;
+    });
   }
 
   return {
@@ -284,6 +433,96 @@ export function createConversationService(store) {
     markNotified,
     resetNotification,
     getCustomerName,
+    resolveContactName,
+    deleteConversation,
+    deleteAllConversations,
     listConversations,
   };
 }
+
+/**
+ * Check if a chat ID / phone has been locally deleted (tombstoned).
+ * Used during sync to prevent deleted conversations from being resurrected.
+ * @param {import('../store/interface.js').IStore} store
+ * @param {string} phone
+ * @param {number|string} [messageTimestamp]
+ * @returns {Promise<boolean>}
+ */
+export async function isChatTombstoned(store, phone, messageTimestamp) {
+  if (!phone) return false;
+  const cleanPhone = phone.replace(/[^\d+]/g, '');
+
+  // 1. Direct conversation tombstone
+  const tombstone = await store.get(`tombstone:${cleanPhone}`);
+  if (tombstone) {
+    if (tombstone.deletedAt) {
+      const deletedAtMs = new Date(tombstone.deletedAt).getTime();
+      if (messageTimestamp) {
+        const msgTimeMs = typeof messageTimestamp === 'number'
+          ? (messageTimestamp > 1e11 ? messageTimestamp : messageTimestamp * 1000)
+          : new Date(messageTimestamp).getTime();
+        // If message is older than deletion time, it is historic sync -> skip
+        if (msgTimeMs <= deletedAtMs) {
+          return true;
+        }
+      } else {
+        // If no timestamp provided, treat as tombstoned within 5 minutes
+        if (Date.now() - deletedAtMs < 300000) {
+          return true;
+        }
+      }
+    } else {
+      return true;
+    }
+  }
+
+  // 2. Global tombstone (from Delete All Chats)
+  const globalTombstone = await store.get('tombstone:global');
+  if (globalTombstone?.deletedAllAt) {
+    const allDeletedAtMs = new Date(globalTombstone.deletedAllAt).getTime();
+    if (messageTimestamp) {
+      const msgTimeMs = typeof messageTimestamp === 'number'
+        ? (messageTimestamp > 1e11 ? messageTimestamp : messageTimestamp * 1000)
+        : new Date(messageTimestamp).getTime();
+      if (msgTimeMs <= allDeletedAtMs) {
+        return true;
+      }
+    } else {
+      if (Date.now() - allDeletedAtMs < 300000) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Resolves contact name with priority:
+ * 1. WhatsApp push name / profile name
+ * 2. Saved contact name (lead record or metadata)
+ * 3. WhatsApp phone number as fallback
+ * @param {object} conv
+ * @param {object} [lead]
+ * @returns {string}
+ */
+export function resolveContactName(conv = {}, lead = null) {
+  if (conv.isGroup && conv.groupName && conv.groupName.trim()) {
+    return conv.groupName.trim();
+  }
+  if (conv.pushName && typeof conv.pushName === 'string' && conv.pushName.trim()) {
+    const p = conv.pushName.trim();
+    if (p !== 'null' && p !== 'undefined' && p.toLowerCase() !== 'customer') {
+      return p;
+    }
+  }
+  const saved = lead?.data?.name || conv.savedName || conv.customerName;
+  if (saved && typeof saved === 'string' && saved.trim()) {
+    const s = saved.trim();
+    if (s !== 'null' && s !== 'undefined' && s.toLowerCase() !== 'customer') {
+      return s;
+    }
+  }
+  return conv.phone || 'Unknown';
+}
+

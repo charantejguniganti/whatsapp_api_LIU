@@ -38,6 +38,7 @@ export function parseWebhookMessages(body) {
       const value = change?.value;
       const phoneNumberId = value?.metadata?.phone_number_id ?? '';
       const incomingMessages = value?.messages ?? [];
+      const contacts = value?.contacts ?? [];
 
       for (const msg of incomingMessages) {
         if (msg?.type !== 'text') {
@@ -45,12 +46,16 @@ export function parseWebhookMessages(body) {
           continue;
         }
 
+        const contact = contacts.find((c) => c.wa_id === msg.from);
+        const pushName = contact?.profile?.name ?? null;
+
         messages.push({
           from: msg.from,
           messageId: msg.id,
           text: msg?.text?.body ?? '',
           type: msg.type,
           timestamp: parseInt(msg.timestamp, 10),
+          pushName,
           phoneNumberId,
         });
       }

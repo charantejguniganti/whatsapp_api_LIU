@@ -12,6 +12,7 @@ import healthRouter from './routes/health.js';
 import simulateRouter from './routes/simulate.js';
 import webhookRouter from './webhooks/router.js';
 import adminRouter from './admin/router.js';
+import chatsRouter from './routes/chats.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +45,7 @@ export function createApp() {
   app.use('/simulate', simulateRouter);
   app.use('/webhook', webhookRouter);
   app.use('/admin', adminRouter);
+  app.use('/api/chats', chatsRouter);
 
   // Serve Dashboard UI
   app.use('/dashboard', express.static(path.join(__dirname, 'dashboard')));

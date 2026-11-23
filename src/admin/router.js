@@ -82,40 +82,15 @@ router.get('/stats', async (req, res, next) => {
 });
 
 // ---------------------------------------------------------------------------
-// GET /admin/leads
+// GET /admin/leads — Returns conversations sorted by latest message timestamp
 // ---------------------------------------------------------------------------
 router.get('/leads', async (req, res, next) => {
   try {
     const store = await getStore();
     const convService = createConversationService(store);
 
-    // Get all conversation records
-    const convs = await convService.listConversations();
-
-    // Enrich with lead data
-    const enriched = await Promise.all(
-      convs.map(async (conv) => {
-        const leadState = await store.get(`lead:${conv.phone}`);
-        const history = await store.get(`history:${conv.phone}`);
-        const summary = await store.get(`summary:${conv.phone}`);
-        return {
-          phone: conv.phone,
-          state: conv.state ?? CONV_STATE.AI_ACTIVE,
-          notificationSent: conv.notificationSent ?? false,
-          notifiedAt: conv.notifiedAt ?? null,
-          claimedBy: conv.claimedBy ?? null,
-          claimedAt: conv.claimedAt ?? null,
-          resumedAt: conv.resumedAt ?? null,
-          customerName: leadState?.data?.name ?? null,
-          interest: leadState?.data?.interest ?? null,
-          leadComplete: leadState?.state === 'COMPLETE',
-          messageCount: history?.length ?? 0,
-          lastMessage: history && history.length > 0 ? history[history.length - 1].content : null,
-          lastMessageAt: conv.updatedAt ?? conv.notifiedAt ?? conv.claimedAt ?? null,
-          summary: summary ?? conv.summary ?? null,
-        };
-      })
-    );
+    // Get all conversation records, sorted by latest message timestamp
+    const enriched = await convService.listConversations();
 
     return res.json({ leads: enriched, total: enriched.length });
   } catch (err) {
@@ -229,20 +204,67 @@ router.post('/leads/:phone/reply', async (req, res, next) => {
     // Send reply via active channel (Baileys or Meta Cloud API)
     await sendTextMessage(phone, message.trim());
 
-    // Update conversation history
+    // Update conversation history with timestamp
+    const now = new Date().toISOString();
     const historyKey = `history:${phone}`;
     const history = (await store.get(historyKey)) ?? [];
-    const updated = [...history, { role: 'assistant', content: message.trim() }].slice(-20);
+    const updated = [
+      ...history,
+      { role: 'assistant', content: message.trim(), timestamp: now },
+    ].slice(-20);
     await store.set(historyKey, updated);
 
-    // Update conversation timestamp
+    // Update conversation timestamp & latest message
     const existingConv = (await store.get(`conv:${phone}`)) ?? { phone };
     await store.set(`conv:${phone}`, {
       ...existingConv,
-      updatedAt: new Date().toISOString(),
+      lastMessage: message.trim(),
+      lastMessageTimestamp: now,
+      updatedAt: now,
     });
 
     return res.json({ ok: true, phone, message: message.trim() });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// DELETE /admin/leads/:phone — Delete single conversation (Local DB only)
+// ---------------------------------------------------------------------------
+router.delete('/leads/:phone', async (req, res, next) => {
+  try {
+    const phone = decodeURIComponent(req.params.phone);
+    const store = await getStore();
+    const convService = createConversationService(store);
+
+    await convService.deleteConversation(phone);
+    logger.info({ phone, by: req.admin?.sub }, 'Chat deleted via admin API');
+    return res.json({
+      ok: true,
+      message: `Conversation ${phone} successfully deleted from local database. WhatsApp history remains untouched.`,
+      phone,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// DELETE /admin/leads — Delete all conversations (Local DB only)
+// ---------------------------------------------------------------------------
+router.delete('/leads', async (req, res, next) => {
+  try {
+    const store = await getStore();
+    const convService = createConversationService(store);
+
+    const result = await convService.deleteAllConversations();
+    logger.info({ count: result.count, by: req.admin?.sub }, 'All chats deleted via admin API');
+    return res.json({
+      ok: true,
+      message: 'All conversations successfully deleted from local database. WhatsApp history remains untouched.',
+      deletedCount: result.count,
+    });
   } catch (err) {
     next(err);
   }

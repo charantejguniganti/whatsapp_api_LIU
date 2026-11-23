@@ -21,6 +21,7 @@ import {
   buildEnquirySummary,
   MESSAGE_CLASS,
   CONV_STATE,
+  isChatTombstoned,
 } from '../conversations/service.js';
 
 const router = Router();
@@ -153,6 +154,12 @@ async function processInboundMessage(msg, store, leadService, convService, quizM
   }
   await store.set(dedupKey, true, DEDUP_TTL_MS);
 
+  // Check if chat has been locally deleted (tombstoned)
+  if (await isChatTombstoned(store, msg.from, msg.timestamp)) {
+    logger.info({ from: msg.from }, 'Skipping message for locally deleted chat (tombstoned)');
+    return;
+  }
+
   // Check if message is an admin command from Mam's WhatsApp number
   if (await handleAdminCommand(msg, convService)) {
     return;
@@ -162,12 +169,26 @@ async function processInboundMessage(msg, store, leadService, convService, quizM
 
   // Check if human has taken over this conversation
   const isAi = await convService.isAiActive(msg.from);
+  const msgTime = msg.timestamp
+    ? new Date(msg.timestamp > 1e11 ? msg.timestamp : msg.timestamp * 1000).toISOString()
+    : new Date().toISOString();
+
   if (!isAi) {
     logger.info({ from: msg.from }, 'Human takeover active; AI skipped');
     // Store message in history so Mam has full context
     const historyKey = `history:${msg.from}`;
     const history = (await store.get(historyKey)) ?? [];
-    await store.set(historyKey, [...history, { role: 'user', content: msg.text }].slice(-20));
+    await store.set(historyKey, [...history, { role: 'user', content: msg.text, timestamp: msgTime }].slice(-20));
+
+    const existingConv = (await store.get(`conv:${msg.from}`)) ?? { phone: msg.from };
+    await store.set(`conv:${msg.from}`, {
+      ...existingConv,
+      phone: msg.from,
+      pushName: msg.pushName || existingConv.pushName || null,
+      lastMessage: msg.text,
+      lastMessageTimestamp: msgTime,
+      updatedAt: msgTime,
+    });
     return;
   }
 
@@ -186,19 +207,23 @@ async function processInboundMessage(msg, store, leadService, convService, quizM
       await sendTextMessage(msg.from, outgoingMessages[i]);
     }
 
+    const replyTime = new Date().toISOString();
     const histKey = `history:${msg.from}`;
     const hist = (await store.get(histKey)) ?? [];
     await store.set(histKey, [
       ...hist,
-      { role: 'user', content: msg.text },
-      { role: 'assistant', content: quizResult.reply },
+      { role: 'user', content: msg.text, timestamp: msgTime },
+      { role: 'assistant', content: quizResult.reply, timestamp: replyTime },
     ].slice(-20));
 
     const existingConv = (await store.get(`conv:${msg.from}`)) ?? { phone: msg.from };
     await store.set(`conv:${msg.from}`, {
       ...existingConv,
       phone: msg.from,
-      updatedAt: new Date().toISOString(),
+      pushName: msg.pushName || existingConv.pushName || null,
+      lastMessage: msg.text,
+      lastMessageTimestamp: replyTime,
+      updatedAt: replyTime,
     });
 
     if ((quizResult.quizDone || quizResult.handover) && config.ADMIN_WHATSAPP_NUMBER) {
@@ -264,11 +289,12 @@ async function processInboundMessage(msg, store, leadService, convService, quizM
     history,
   });
 
-  // Persist updated history (last 10 exchanges)
+  const replyTime = new Date().toISOString();
+  // Persist updated history (last 10 exchanges) with timestamps
   const updatedHistory = [
     ...history,
-    { role: 'user', content: msg.text },
-    { role: 'assistant', content: result.reply },
+    { role: 'user', content: msg.text, timestamp: msgTime },
+    { role: 'assistant', content: result.reply, timestamp: replyTime },
   ].slice(-20); // Keep last 20 messages (10 exchanges)
   await store.set(historyKey, updatedHistory);
 
@@ -280,7 +306,10 @@ async function processInboundMessage(msg, store, leadService, convService, quizM
   await store.set(`conv:${msg.from}`, {
     ...existingConv,
     phone: msg.from,
-    updatedAt: new Date().toISOString(),
+    pushName: msg.pushName || existingConv.pushName || null,
+    lastMessage: msg.text,
+    lastMessageTimestamp: replyTime,
+    updatedAt: replyTime,
   });
 
   // Check if customer asked for human handover or message was qualified
