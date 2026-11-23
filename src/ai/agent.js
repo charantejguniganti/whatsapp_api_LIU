@@ -35,9 +35,7 @@ export async function processMessage({ from, message, history = [], leadState = 
   if (wantsHumanHandover(message)) {
     logger.info({ from }, 'Human handover triggered');
     return {
-      reply:
-        '🙌 No problem! I\'m flagging your conversation for one of our team members right now. ' +
-        'Someone will reach out to you shortly. In the meantime, feel free to email us at hello@liveitup.in.',
+      reply: 'Thanks for reaching out to Live It Up! 🌟 Our team will contact you soon.',
       handover: true,
       leadCollected: false,
     };

@@ -18,7 +18,7 @@ const MOCK_RESPONSES = [
   {
     keywords: ['human', 'agent', 'person', 'someone', 'team', 'representative', 'speak to', 'talk to', 'call me', 'manager', 'escalate'],
     reply:
-      "I'd be happy to connect you with a member of the LIU team! 🙌 You can reach out directly at hello@liveitup.in, or share your contact details and someone will reach out shortly.",
+      "Thanks for reaching out to Live It Up! 🌟 Our team will contact you soon.",
   },
   {
     keywords: ['price', 'cost', 'fee', 'fees', 'charges', 'how much', 'pricing', 'quote', 'budget', 'rate', 'rates', 'schedule', 'timing', 'slot', 'slots', 'availability'],
@@ -73,8 +73,7 @@ function mockReply(message) {
     }
   }
   return (
-    "Thanks for reaching out to Live It Up! ✨ I don't have specific details on that right now, " +
-    "but our team would be happy to help. Would you like me to connect you with someone from the LIU team?"
+    "Thanks for reaching out to Live It Up! 🌟 Our team will contact you soon."
   );
 }
 

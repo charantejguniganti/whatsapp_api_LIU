@@ -230,6 +230,23 @@ describe('Test 6 – Q8 skipped when brand conscious = No', () => {
     expect(session.answers.brandPreference).toBeNull();
     expect(session.answers.additionalQuestions).toBe("No, I'm all set");
   });
+
+  it('handles customer replying "Yes" after quiz completion to connect with team', async () => {
+    const store = createMemoryStore();
+    const manager = createQuestionnaireManager(store);
+    const phone = '+919000000006c';
+
+    await manager.processMessage(phone, 'Hi');
+    for (const ans of ['A', 'B', 'A', 'A', 'D', 'B', 'B', 'B']) {
+      await manager.processMessage(phone, ans);
+    }
+
+    // Customer says "Yes" after receiving recommendations
+    const postQuizReply = await manager.processMessage(phone, 'Yes');
+    expect(postQuizReply).not.toBeNull();
+    expect(postQuizReply.reply).toBe('Thanks for reaching out to Live It Up! 🌟 Our team will contact you soon.');
+    expect(postQuizReply.handover).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------

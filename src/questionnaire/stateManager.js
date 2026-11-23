@@ -193,6 +193,21 @@ export function createQuestionnaireManager(store) {
 
     // ── No active session ───────────────────────────────────────────────────
     if (!session || session.status !== 'IN_PROGRESS') {
+      // Customer confirmed after questionnaire completion (e.g. replied "Yes" to connect with team)
+      if (session && session.status === 'COMPLETED') {
+        const lower = trimmed.toLowerCase();
+        if (
+          /^(yes|yeah|yep|sure|ok|okay|y|please|connect|contact|call|interested|yes please)\b/i.test(lower) ||
+          /connect with (the|our) team|speak with (the|our) consultant|speak to (someone|a consultant)/i.test(lower)
+        ) {
+          return {
+            reply: 'Thanks for reaching out to Live It Up! 🌟 Our team will contact you soon.',
+            handover: true,
+            quizDone: true,
+          };
+        }
+      }
+
       // Start questionnaire on greeting
       if (isGreeting(trimmed)) {
         const newSession = await repo.createSession(phone);
@@ -266,7 +281,7 @@ export function createQuestionnaireManager(store) {
       return { reply, handover: false, quizDone: session.status === 'COMPLETED' };
     }
 
-    // ANALYSING or COMPLETED — should not normally receive messages here
+    // ANALYSING or COMPLETED
     if (quizState === 'ANALYSING') {
       return {
         reply: `⏳ Just a moment, I'm preparing your personalised recommendation...`,

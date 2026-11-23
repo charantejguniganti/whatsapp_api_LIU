@@ -308,3 +308,4 @@ export async function resolveSenderIdentity(socket, msg, store) {
     savedName,
   };
 }
+
