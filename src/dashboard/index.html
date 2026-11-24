@@ -175,9 +175,11 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
       padding: 24px 28px 24px 28px;
       background: var(--bg);
+      -webkit-overflow-scrolling: touch;
     }
 
     /* Top Bar */
@@ -186,6 +188,7 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 22px;
+      flex-shrink: 0;
     }
 
     .welcome-text h1 {
@@ -2111,26 +2114,6 @@
             </a>
           </li>
           <li>
-            <a class="nav-item" id="nav-services" href="#services" onclick="switchView('services', this); return false;">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-              </svg>
-              Services
-            </a>
-          </li>
-          <li>
-            <a class="nav-item" id="nav-team" href="#team" onclick="switchView('team', this); return false;">
-              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-              </svg>
-              Team
-            </a>
-          </li>
-          <li>
             <a class="nav-item" id="nav-settings" href="#settings" onclick="openSettingsModal(); return false;">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="3"></circle>
@@ -2764,31 +2747,7 @@
     </div>
   </div>
 
-  <!-- ─── VIEW 6: SERVICES CATALOGUE & PERFORMANCE ────────── -->
-  <div id="view-services" class="crm-view">
-    <div class="crm-section-card">
-      <div class="crm-section-header">
-        <div>
-          <div class="crm-section-title">✨ LIU Services Catalogue & Performance</div>
-          <div class="crm-section-desc">Approved services, verified pricing, duration, and conversion statistics</div>
-        </div>
-      </div>
-
-      <div class="services-cards-grid" id="services-cards-container">
-        <!-- Rendered via renderServicesView() -->
-      </div>
-    </div>
   </div>
-
-  <!-- ─── VIEW 7: TEAM & CONSULTANTS ──────────────────────── -->
-  <div id="view-team" class="crm-view">
-    <div class="crm-section-card">
-      <div class="crm-section-header">
-        <div>
-          <div class="crm-section-title">👥 Team Members & Consultants</div>
-          <div class="crm-section-desc">Consultant allocations, active customer workloads, and performance metrics</div>
-        </div>
-      </div>
 
       <div class="team-cards-grid" id="team-cards-container">
         <!-- Rendered via renderTeamView() -->
@@ -5246,7 +5205,7 @@
       // Listen for browser back/forward and hash changes
       window.addEventListener('hashchange', () => {
         const hash = window.location.hash ? window.location.hash.replace('#', '') : 'dashboard';
-        const validViews = ['dashboard', 'conversations', 'enquiries', 'calendar', 'reports', 'services', 'team'];
+        const validViews = ['dashboard', 'conversations', 'enquiries', 'calendar', 'reports'];
         if (validViews.includes(hash)) {
           switchView(hash);
         }
@@ -5257,7 +5216,7 @@
 
         // Routing based on hash
         const hashView = window.location.hash ? window.location.hash.replace('#', '') : 'dashboard';
-        if (['dashboard', 'conversations', 'enquiries', 'calendar', 'reports', 'services', 'team'].includes(hashView)) {
+        if (['dashboard', 'conversations', 'enquiries', 'calendar', 'reports'].includes(hashView)) {
           switchView(hashView);
         } else {
           switchView('dashboard');

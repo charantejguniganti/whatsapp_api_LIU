@@ -274,21 +274,21 @@ describe('LIU CRM & Business Analytics Upgrade', () => {
   });
 
   describe('4. Dashboard Navigation & UI Requirements Verification', () => {
-    it('verifies exact 8 navbar items in index.html with NO FAQ or Questionnaire tabs', async () => {
+    it('verifies navbar items in index.html with NO FAQ or Questionnaire tabs and no Services or Team tabs', async () => {
       const res = await request(app).get('/');
       expect(res.status).toBe(200);
 
-      // Verify exact 8 nav items
+      // Verify active nav items
       expect(res.text).toContain('href="#dashboard"');
       expect(res.text).toContain('href="#conversations"');
       expect(res.text).toContain('href="#enquiries"');
       expect(res.text).toContain('href="#calendar"');
       expect(res.text).toContain('href="#reports"');
-      expect(res.text).toContain('href="#services"');
-      expect(res.text).toContain('href="#team"');
       expect(res.text).toContain('href="#settings"');
 
-      // STRICT REQUIREMENT: No FAQ Management or Questionnaire in navbar
+      // STRICT REQUIREMENT: No Services, Team, FAQ Management or Questionnaire in navbar
+      expect(res.text).not.toContain('href="#services"');
+      expect(res.text).not.toContain('href="#team"');
       expect(res.text).not.toContain('FAQ Management');
       expect(res.text).not.toContain('href="#faq"');
       expect(res.text).not.toContain('href="#questionnaire"');
@@ -299,8 +299,8 @@ describe('LIU CRM & Business Analytics Upgrade', () => {
       expect(res.text).toContain('id="view-enquiries"');
       expect(res.text).toContain('id="view-calendar"');
       expect(res.text).toContain('id="view-reports"');
-      expect(res.text).toContain('id="view-services"');
-      expect(res.text).toContain('id="view-team"');
+      expect(res.text).not.toContain('id="view-services"');
+      expect(res.text).not.toContain('id="view-team"');
 
       // Verify modals
       expect(res.text).toContain('id="stage-customers-modal"');
