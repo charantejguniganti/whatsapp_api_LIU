@@ -401,9 +401,11 @@ export function createConversationService(store) {
 
       const resolvedName = resolveContactName(conv, lead);
 
-      // Determine live enquiry status: Closed | In Progress | Waiting for Customer | New
+      // Determine live enquiry status: Closed | Consultant Requested | In Progress | Waiting for Customer | New
       let status = 'New';
-      if (conv.isClosed || lead?.state === 'COMPLETE' || quiz?.status === 'COMPLETED') {
+      if (quiz?.consultantRequested || conv.status === 'Consultant Requested') {
+        status = 'Consultant Requested';
+      } else if (conv.isClosed || conv.isResolved || (quiz?.status === 'COMPLETED' && !quiz?.consultantRequested) || lead?.state === 'COMPLETE') {
         status = 'Closed';
       } else if (
         conv.state === CONV_STATE.HUMAN_TAKEOVER ||

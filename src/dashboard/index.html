@@ -1614,6 +1614,417 @@
         padding-bottom: max(8px, env(safe-area-inset-bottom));
       }
     }
+
+    /* ─── CRM & BUSINESS ANALYTICS SYSTEM STYLES ────────────── */
+    .crm-view {
+      display: none;
+      width: 100%;
+      animation: fadeIn 0.25s ease-out;
+    }
+    .crm-view.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* CRM Date Filter Bar */
+    .crm-date-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      background: #FFFFFF;
+      padding: 12px 18px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .crm-date-pills {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .crm-date-pill {
+      background: #FDFBF8;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .crm-date-pill:hover {
+      border-color: var(--primary-terra);
+      color: var(--primary-terra);
+    }
+    .crm-date-pill.active {
+      background: var(--primary-terra);
+      color: #FFFFFF;
+      border-color: var(--primary-terra);
+    }
+    .crm-custom-dates {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .crm-custom-dates input[type="date"] {
+      border: 1px solid var(--border);
+      background: #FDFBF8;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    /* CRM KPI 8-Card Grid */
+    .crm-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 1200px) {
+      .crm-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .crm-kpi-grid { grid-template-columns: 1fr; }
+    }
+
+    .crm-kpi-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .crm-kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+      border-color: var(--accent-gold);
+    }
+    .crm-kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .crm-kpi-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .crm-kpi-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .crm-kpi-badge.up {
+      background: #E8F5E9;
+      color: #2E7D32;
+    }
+    .crm-kpi-badge.down {
+      background: #FFEBEE;
+      color: #C62828;
+    }
+    .crm-kpi-badge.neutral {
+      background: #F5F5F5;
+      color: #757575;
+    }
+    .crm-kpi-val {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      line-height: 1.1;
+    }
+    .crm-kpi-footer {
+      font-size: 11px;
+      color: var(--text-light);
+    }
+
+    /* Analytics Section Card Layout */
+    .crm-section-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    }
+    .crm-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .crm-section-title {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .crm-section-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Visual Funnel Chart */
+    .funnel-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .funnel-stage-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 10px;
+      transition: background 0.15s;
+    }
+    .funnel-stage-row:hover {
+      background: #FAF7F2;
+    }
+    .funnel-stage-label {
+      width: 190px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      flex-shrink: 0;
+    }
+    .funnel-bar-track {
+      flex: 1;
+      height: 26px;
+      background: #F4EFEA;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .funnel-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-terra), #A87B65);
+      border-radius: 8px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    .funnel-bar-text {
+      position: absolute;
+      left: 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #FFFFFF;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      pointer-events: none;
+    }
+    .funnel-metrics-pill {
+      width: 220px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .funnel-metrics-pill strong {
+      color: var(--text-main);
+    }
+
+    /* Customer Waiting List Table */
+    .crm-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    .crm-table th {
+      text-align: left;
+      padding: 10px 14px;
+      background: #FAF8F5;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+    .crm-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+    .crm-table tr:hover td {
+      background: #FDFBF8;
+    }
+    .wait-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .wait-badge.urgent {
+      background: #FFEBEE;
+      color: #C62828;
+      border: 1px solid #FFCDD2;
+    }
+    .wait-badge.medium {
+      background: #FFF8E1;
+      color: #F57F17;
+      border: 1px solid #FFE082;
+    }
+    .wait-badge.low {
+      background: #E8F5E9;
+      color: #2E7D32;
+      border: 1px solid #C8E6C9;
+    }
+
+    /* Pending Actions List */
+    .pending-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .pending-action-item {
+      background: #FDFBF8;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary-terra);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .pending-action-item.urgent {
+      border-left-color: #D32F2F;
+    }
+    .pending-action-item.medium {
+      border-left-color: #F57C00;
+    }
+
+    /* Calendar Grid */
+    .calendar-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .cal-day-header {
+      text-align: center;
+      padding: 8px 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .cal-day-cell {
+      min-height: 80px;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px;
+      position: relative;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .cal-day-cell:hover {
+      border-color: var(--primary-terra);
+    }
+    .cal-day-cell.today {
+      background: #FDFBF8;
+      border-color: var(--primary-terra);
+    }
+    .cal-day-cell.inactive {
+      background: #FAFAFA;
+      opacity: 0.45;
+    }
+    .cal-day-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+    .cal-apt-pill {
+      background: #F5EDE7;
+      color: var(--primary-terra);
+      border: 1px solid #E5D5CB;
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+    }
+    .cal-apt-pill.completed {
+      background: #E8F5E9;
+      color: #2E7D32;
+      border-color: #C8E6C9;
+    }
+    .cal-apt-pill.cancelled {
+      background: #FFEBEE;
+      color: #C62828;
+      border-color: #FFCDD2;
+    }
+
+    /* Services & Team Grid */
+    .services-cards-grid, .team-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin-top: 14px;
+    }
+    .srv-card, .team-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .srv-card:hover, .team-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+    }
   </style>
 </head>
 <body>
@@ -1653,7 +2064,7 @@
       <nav>
         <ul class="nav-list">
           <li>
-            <a class="nav-item active" href="#dashboard" onclick="setMobileView('list'); closeMobileMenu();">
+            <a class="nav-item active" id="nav-dashboard" href="#dashboard" onclick="switchView('dashboard', this); return false;">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -1662,7 +2073,7 @@
             </a>
           </li>
           <li>
-            <a class="nav-item" href="#conversations" onclick="setActiveNav(this); setMobileView('list'); closeMobileMenu();">
+            <a class="nav-item" id="nav-conversations" href="#conversations" onclick="switchView('conversations', this); return false;">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
               </svg>
@@ -1670,7 +2081,7 @@
             </a>
           </li>
           <li>
-            <a class="nav-item" href="#enquiries" onclick="setActiveNav(this)">
+            <a class="nav-item" id="nav-enquiries" href="#enquiries" onclick="switchView('enquiries', this); return false;">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
                 <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
@@ -1679,7 +2090,7 @@
             </a>
           </li>
           <li>
-            <a class="nav-item" href="#calendar" onclick="setActiveNav(this)">
+            <a class="nav-item" id="nav-calendar" href="#calendar" onclick="switchView('calendar', this); return false;">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -1690,7 +2101,7 @@
             </a>
           </li>
           <li>
-            <a class="nav-item" href="#reports" onclick="setActiveNav(this)">
+            <a class="nav-item" id="nav-reports" href="#reports" onclick="switchView('reports', this); return false;">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="20" x2="18" y2="10"></line>
                 <line x1="12" y1="20" x2="12" y2="4"></line>
@@ -1700,7 +2111,7 @@
             </a>
           </li>
           <li>
-            <a class="nav-item" href="#services" onclick="setActiveNav(this)">
+            <a class="nav-item" id="nav-services" href="#services" onclick="switchView('services', this); return false;">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="3"></circle>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -1709,7 +2120,7 @@
             </a>
           </li>
           <li>
-            <a class="nav-item" href="#team" onclick="setActiveNav(this)">
+            <a class="nav-item" id="nav-team" href="#team" onclick="switchView('team', this); return false;">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
@@ -1720,7 +2131,7 @@
             </a>
           </li>
           <li>
-            <a class="nav-item" href="#settings" onclick="openSettingsModal(); return false;">
+            <a class="nav-item" id="nav-settings" href="#settings" onclick="openSettingsModal(); return false;">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="3"></circle>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -1844,78 +2255,183 @@
       </div>
     </header>
 
-    <!-- Top Metric Cards -->
-    <section class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-icon-wrap pink">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-          </svg>
+    <!-- ─── VIEW 1: DASHBOARD (BUSINESS OVERVIEW & ANALYTICS) ─── -->
+    <div id="view-dashboard" class="crm-view active">
+      <!-- CRM Date Range Filter Bar -->
+      <div class="crm-date-bar">
+        <div class="crm-date-pills">
+          <span style="font-size:12px; font-weight:700; color:var(--text-main); margin-right:4px;">Period:</span>
+          <button type="button" class="crm-date-pill" onclick="setCrmTimeRange('today', this)">Today</button>
+          <button type="button" class="crm-date-pill active" onclick="setCrmTimeRange('7d', this)">Last 7 Days</button>
+          <button type="button" class="crm-date-pill" onclick="setCrmTimeRange('30d', this)">Last 30 Days</button>
+          <button type="button" class="crm-date-pill" onclick="setCrmTimeRange('90d', this)">Last 90 Days</button>
+          <button type="button" class="crm-date-pill" onclick="toggleCustomDatePicker()">Custom Range</button>
         </div>
-        <div class="metric-content">
-          <div class="metric-row">
-            <div class="metric-num" id="stat-new">12</div>
-            <div class="metric-growth">↑ 25%</div>
-          </div>
-          <div class="metric-label">New Enquiries</div>
-          <div class="metric-sub">vs last week</div>
-        </div>
-      </div>
-
-      <div class="metric-card">
-        <div class="metric-icon-wrap orange">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-        </div>
-        <div class="metric-content">
-          <div class="metric-row">
-            <div class="metric-num" id="stat-progress">28</div>
-            <div class="metric-growth">↑ 10%</div>
-          </div>
-          <div class="metric-label">In Progress</div>
-          <div class="metric-sub">vs last week</div>
+        <div class="crm-custom-dates" id="custom-date-inputs" style="display:none;">
+          <input type="date" id="crm-custom-from" />
+          <span style="font-size:11px; color:var(--text-muted);">to</span>
+          <input type="date" id="crm-custom-to" />
+          <button type="button" onclick="applyCustomDateRange()" style="background:var(--primary-terra); color:#fff; border:none; border-radius:6px; padding:5px 12px; font-size:11.5px; font-weight:600; cursor:pointer;">Apply</button>
         </div>
       </div>
 
-      <div class="metric-card">
-        <div class="metric-icon-wrap blue">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-          </svg>
-        </div>
-        <div class="metric-content">
-          <div class="metric-row">
-            <div class="metric-num" id="stat-waiting">8</div>
-            <div class="metric-growth">↑ 14%</div>
-          </div>
-          <div class="metric-label">Waiting for Customer</div>
-          <div class="metric-sub">vs last week</div>
-        </div>
-      </div>
+      <!-- Top 8 KPI Cards -->
+      <section class="crm-kpi-grid" id="crm-kpi-cards-container">
+        <!-- Rendered dynamically -->
+      </section>
 
-      <div class="metric-card">
-        <div class="metric-icon-wrap green">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
-        </div>
-        <div class="metric-content">
-          <div class="metric-row">
-            <div class="metric-num" id="stat-closed">36</div>
-            <div class="metric-growth">↑ 18%</div>
+      <!-- Follow-Up & Pending Actions Widget -->
+      <section class="crm-section-card" id="crm-pending-actions-section">
+        <div class="crm-section-header">
+          <div>
+            <div class="crm-section-title">⚡ Pending Actions & Follow-ups</div>
+            <div class="crm-section-desc">Immediate tasks sorted by urgency and waiting time</div>
           </div>
-          <div class="metric-label">Closed</div>
-          <div class="metric-sub">vs last week</div>
+          <span class="wait-badge urgent" id="pending-actions-badge">Checking...</span>
         </div>
-      </div>
-    </section>
+        <div class="pending-actions-grid" id="pending-actions-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
 
-    <!-- 3-Column Workspace -->
-    <div class="workspace-grid">
+      <!-- Enquiry Progress and Funnel -->
+      <section class="crm-section-card" id="crm-funnel-section">
+        <div class="crm-section-header">
+          <div>
+            <div class="crm-section-title">📊 Enquiry Progress & Conversion Funnel</div>
+            <div class="crm-section-desc">Real pipeline progression from first contact to converted customer (click any stage to view leads)</div>
+          </div>
+          <div style="font-size:12px; color:var(--text-muted);">
+            Total Active Enquiries: <strong id="funnel-total-count" style="color:var(--text-main);">0</strong>
+          </div>
+        </div>
+        <div class="funnel-container" id="funnel-stages-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- Customer Response Tracking Section -->
+      <section class="crm-section-card" id="crm-response-tracking-section">
+        <div class="crm-section-header">
+          <div>
+            <div class="crm-section-title">⏱ Customer Response Tracking & Waiting Lists</div>
+            <div class="crm-section-desc">Real-time SLA monitoring based on verified WhatsApp message timestamps</div>
+          </div>
+          <div class="crm-date-pills" id="response-filter-pills">
+            <button type="button" class="crm-date-pill active" onclick="setResponseFilter('all', this)">All</button>
+            <button type="button" class="crm-date-pill" onclick="setResponseFilter('waiting_team', this)">Waiting for Team</button>
+            <button type="button" class="crm-date-pill" onclick="setResponseFilter('waiting_customer', this)">Waiting for Customer</button>
+            <button type="button" class="crm-date-pill" onclick="setResponseFilter('no_response_24h', this)">&gt; 24h</button>
+            <button type="button" class="crm-date-pill" onclick="setResponseFilter('no_response_48h', this)">&gt; 48h</button>
+            <button type="button" class="crm-date-pill" onclick="setResponseFilter('no_response_7d', this)">&gt; 7 Days</button>
+            <button type="button" class="crm-date-pill" onclick="setResponseFilter('consultant_pending', this)">Consultant Pending</button>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="crm-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Verified WhatsApp</th>
+                <th>Last Message</th>
+                <th>Waiting Duration</th>
+                <th>Interested Service</th>
+                <th>Status</th>
+                <th>Assigned</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="response-tracking-tbody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Questionnaire Completion Analysis -->
+      <section class="crm-section-card" id="crm-questionnaire-section">
+        <div class="crm-section-header">
+          <div>
+            <div class="crm-section-title">📝 Questionnaire Completion & Drop-Off Analytics</div>
+            <div class="crm-section-desc">Real performance data from Live It Up's WhatsApp diagnostic flow</div>
+          </div>
+          <div style="display:flex; gap:16px; font-size:12px; flex-wrap:wrap;">
+            <span>Completion Rate: <strong id="quiz-stat-rate" style="color:#2E7D32;">0%</strong></span>
+            <span>Avg Time: <strong id="quiz-stat-time">0m</strong></span>
+            <span>Most Common Drop-off: <strong id="quiz-stat-dropoff" style="color:#C62828;">-</strong></span>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px; margin-bottom:20px;">
+          <!-- Starts vs Completions -->
+          <div style="background:#FAF8F5; border:1px solid var(--border); border-radius:12px; padding:14px;">
+            <div style="font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:10px;">Questionnaire Activity Timeline</div>
+            <div id="quiz-chart-container" style="min-height:160px; display:flex; align-items:center; justify-content:center;">
+              <!-- Chart injected -->
+            </div>
+          </div>
+
+          <!-- Question Drop-Off Distribution -->
+          <div style="background:#FAF8F5; border:1px solid var(--border); border-radius:12px; padding:14px;">
+            <div style="font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:10px;">Drop-off by Question (Q1 to Q9)</div>
+            <div id="quiz-dropoff-bars" style="min-height:160px; display:flex; flex-direction:column; justify-content:space-around;">
+              <!-- Injected bars -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Incomplete Questionnaires Table -->
+        <div style="font-size:13px; font-weight:700; color:var(--text-main); margin-bottom:8px;">Incomplete Questionnaires (Opportunities for Re-engagement)</div>
+        <div style="overflow-x:auto;">
+          <table class="crm-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Service Interest</th>
+                <th>Last Answered</th>
+                <th>Started</th>
+                <th>Last Active</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="incomplete-quiz-tbody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Enquiry Analytics & Trends -->
+      <section class="crm-section-card" id="crm-enquiry-trends-section">
+        <div class="crm-section-header">
+          <div>
+            <div class="crm-section-title">📈 Enquiry Analytics & Conversion Performance</div>
+            <div class="crm-section-desc">Historical volume, service preferences, and conversion rates</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
+          <!-- Enquiries Over Time Chart -->
+          <div style="background:#FAF8F5; border:1px solid var(--border); border-radius:12px; padding:14px;">
+            <div style="font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:10px;">Enquiries Over Time</div>
+            <div id="enquiries-time-chart" style="min-height:160px;"></div>
+          </div>
+
+          <!-- Service Distribution -->
+          <div style="background:#FAF8F5; border:1px solid var(--border); border-radius:12px; padding:14px;">
+            <div style="font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:10px;">Enquiries by Service</div>
+            <div id="enquiries-service-bars" style="min-height:160px; display:flex; flex-direction:column; justify-content:space-around;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ─── VIEW 2: CONVERSATIONS (LIVE WHATSAPP CHAT AREA) ─── -->
+    <div id="view-conversations" class="crm-view">
+      <!-- 3-Column Workspace -->
+      <div class="workspace-grid">
       <!-- Col 1: Conversations List -->
       <div class="panel-card" id="col-conversations">
         <div class="conversations-header">
@@ -2101,6 +2617,184 @@
         </div>
       </div>
     </div>
+  </div><!-- /view-conversations -->
+
+  <!-- ─── VIEW 3: ENQUIRIES MANAGEMENT ────────────────────── -->
+  <div id="view-enquiries" class="crm-view">
+    <div class="crm-section-card">
+      <div class="crm-section-header">
+        <div>
+          <div class="crm-section-title">📋 Enquiries Management</div>
+          <div class="crm-section-desc">Manage, filter, and assign incoming customer consultation enquiries</div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input type="text" id="enquiry-filter-search" placeholder="Search customer, phone or service..." oninput="filterEnquiriesTable(this.value)" style="border:1px solid var(--border); padding:6px 12px; border-radius:8px; font-size:12px; width:220px;" />
+        </div>
+      </div>
+
+      <!-- Stage Filters -->
+      <div class="crm-date-pills" id="enquiries-stage-pills" style="margin-bottom:16px;">
+        <button type="button" class="crm-date-pill active" onclick="setEnquiriesStageFilter('all', this)">All (<span id="eq-count-all">0</span>)</button>
+        <button type="button" class="crm-date-pill" onclick="setEnquiriesStageFilter('new', this)">New (<span id="eq-count-new">0</span>)</button>
+        <button type="button" class="crm-date-pill" onclick="setEnquiriesStageFilter('in_progress', this)">In Progress (<span id="eq-count-prog">0</span>)</button>
+        <button type="button" class="crm-date-pill" onclick="setEnquiriesStageFilter('consultant_requested', this)">Consultant Requested (<span id="eq-count-cons">0</span>)</button>
+        <button type="button" class="crm-date-pill" onclick="setEnquiriesStageFilter('waiting_customer', this)">Waiting for Customer (<span id="eq-count-wait">0</span>)</button>
+        <button type="button" class="crm-date-pill" onclick="setEnquiriesStageFilter('closed', this)">Closed / Converted (<span id="eq-count-closed">0</span>)</button>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="crm-table">
+          <thead>
+            <tr>
+              <th>Customer Name</th>
+              <th>WhatsApp Phone</th>
+              <th>Interested Service</th>
+              <th>Stage / Status</th>
+              <th>Last Message</th>
+              <th>Assigned Consultant</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="enquiries-table-tbody">
+            <!-- Populated dynamically via renderEnquiriesView() -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── VIEW 4: APPOINTMENT CALENDAR ────────────────────── -->
+  <div id="view-calendar" class="crm-view">
+    <div class="crm-section-card">
+      <div class="calendar-controls">
+        <div>
+          <div class="crm-section-title">📅 Consultation Appointment Calendar</div>
+          <div class="crm-section-desc">Schedule, track, and manage one-on-one appointments across all LIU consultants</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <select id="cal-consultant-select" onchange="loadCalendarView()" style="border:1px solid var(--border); padding:6px 12px; border-radius:8px; font-size:12px; background:#fff;">
+            <option value="">All Consultants</option>
+            <option value="mam">Mam (Lead Consultant)</option>
+            <option value="priya">Priya Sharma</option>
+            <option value="ananya">Ananya Roy</option>
+            <option value="rahul">Rahul Verma</option>
+          </select>
+          <div class="crm-date-pills">
+            <button type="button" class="crm-date-pill active" onclick="setCalendarMode('month', this)">Month</button>
+            <button type="button" class="crm-date-pill" onclick="setCalendarMode('week', this)">Week</button>
+            <button type="button" class="crm-date-pill" onclick="setCalendarMode('day', this)">Day</button>
+          </div>
+          <button type="button" onclick="openAppointmentModal()" style="background:var(--primary-terra); color:#fff; border:none; padding:7px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">+ Book Appointment</button>
+        </div>
+      </div>
+
+      <!-- Calendar Month Grid -->
+      <div id="calendar-grid-view">
+        <div class="calendar-grid" id="calendar-cells-container">
+          <!-- Calendar cells rendered via renderCalendarGrid() -->
+        </div>
+      </div>
+
+      <!-- Upcoming Appointments Table -->
+      <div style="font-size:13.5px; font-weight:700; color:var(--text-main); margin:18px 0 10px 0;">Upcoming Scheduled Consultations</div>
+      <div style="overflow-x:auto;">
+        <table class="crm-table">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Customer</th>
+              <th>Service</th>
+              <th>Consultant</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="calendar-appointments-tbody">
+            <!-- Injected dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── VIEW 5: BUSINESS REPORTS & PERFORMANCE ──────────── -->
+  <div id="view-reports" class="crm-view">
+    <div class="crm-section-card">
+      <div class="crm-section-header">
+        <div>
+          <div class="crm-section-title">📊 Executive Business Performance Reports</div>
+          <div class="crm-section-desc">Comprehensive analysis across conversations, questionnaires, appointments and conversions</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button type="button" onclick="downloadCrmReportCSV()" style="background:#FFFFFF; border:1px solid var(--border); color:var(--primary-terra); font-weight:600; padding:6px 14px; border-radius:8px; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <span>📥</span> Download CSV Report
+          </button>
+        </div>
+      </div>
+
+      <!-- Reports Sub-sections -->
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px; margin-bottom:24px;">
+        <!-- 1. Conversation Reports -->
+        <div style="background:#FAF8F5; border:1px solid var(--border); border-radius:12px; padding:16px;">
+          <div style="font-size:13px; font-weight:700; color:var(--text-main); margin-bottom:12px;">💬 Conversation Performance</div>
+          <div class="meta-key-val"><span class="key">Total Conversations:</span><strong id="rep-total-convs">0</strong></div>
+          <div class="meta-key-val"><span class="key">New Conversations:</span><strong id="rep-new-convs">0</strong></div>
+          <div class="meta-key-val"><span class="key">Incoming Messages:</span><strong id="rep-in-msgs">0</strong></div>
+          <div class="meta-key-val"><span class="key">Outgoing Messages:</span><strong id="rep-out-msgs">0</strong></div>
+        </div>
+
+        <!-- 2. Enquiry Reports -->
+        <div style="background:#FAF8F5; border:1px solid var(--border); border-radius:12px; padding:16px;">
+          <div style="font-size:13px; font-weight:700; color:var(--text-main); margin-bottom:12px;">📋 Enquiry & Lead Reports</div>
+          <div class="meta-key-val"><span class="key">Total Enquiries:</span><strong id="rep-total-eq">0</strong></div>
+          <div class="meta-key-val"><span class="key">Qualified Leads:</span><strong id="rep-qual-eq">0</strong></div>
+          <div class="meta-key-val"><span class="key">Consultant Requests:</span><strong id="rep-cons-eq">0</strong></div>
+          <div class="meta-key-val"><span class="key">Converted Customers:</span><strong id="rep-conv-eq" style="color:#2E7D32;">0</strong></div>
+        </div>
+
+        <!-- 3. Appointment Reports -->
+        <div style="background:#FAF8F5; border:1px solid var(--border); border-radius:12px; padding:16px;">
+          <div style="font-size:13px; font-weight:700; color:var(--text-main); margin-bottom:12px;">📅 Appointments & Consultations</div>
+          <div class="meta-key-val"><span class="key">Appointments Booked:</span><strong id="rep-apt-booked">0</strong></div>
+          <div class="meta-key-val"><span class="key">Appointments Completed:</span><strong id="rep-apt-done" style="color:#2E7D32;">0</strong></div>
+          <div class="meta-key-val"><span class="key">Appointments Cancelled:</span><strong id="rep-apt-cancelled" style="color:#C62828;">0</strong></div>
+          <div class="meta-key-val"><span class="key">Overall Conversion Rate:</span><strong id="rep-conv-rate" style="color:var(--primary-terra);">0%</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── VIEW 6: SERVICES CATALOGUE & PERFORMANCE ────────── -->
+  <div id="view-services" class="crm-view">
+    <div class="crm-section-card">
+      <div class="crm-section-header">
+        <div>
+          <div class="crm-section-title">✨ LIU Services Catalogue & Performance</div>
+          <div class="crm-section-desc">Approved services, verified pricing, duration, and conversion statistics</div>
+        </div>
+      </div>
+
+      <div class="services-cards-grid" id="services-cards-container">
+        <!-- Rendered via renderServicesView() -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── VIEW 7: TEAM & CONSULTANTS ──────────────────────── -->
+  <div id="view-team" class="crm-view">
+    <div class="crm-section-card">
+      <div class="crm-section-header">
+        <div>
+          <div class="crm-section-title">👥 Team Members & Consultants</div>
+          <div class="crm-section-desc">Consultant allocations, active customer workloads, and performance metrics</div>
+        </div>
+      </div>
+
+      <div class="team-cards-grid" id="team-cards-container">
+        <!-- Rendered via renderTeamView() -->
+      </div>
+    </div>
+  </div>
   </main>
 
   <div id="toast">Takeover confirmed!</div>
@@ -2346,6 +3040,115 @@
     </div>
   </div>
 
+  <!-- ─── FUNNEL STAGE CUSTOMERS MODAL ────────────────────── -->
+  <div id="stage-customers-modal" role="dialog" aria-modal="true" style="display:none; position:fixed; inset:0; background:rgba(39,33,30,0.55); backdrop-filter:blur(4px); z-index:1003; align-items:center; justify-content:center;">
+    <div class="settings-modal-box" style="max-width:550px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div>
+          <h2 id="stage-modal-title" style="font-family:var(--font-serif); font-size:18px; color:var(--text-main); margin:0;">Stage Customers</h2>
+          <p id="stage-modal-sub" style="font-size:11.5px; color:var(--text-muted); margin:2px 0 0 0;">Leads in this funnel stage</p>
+        </div>
+        <button type="button" onclick="closeStageCustomersModal()" style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted); line-height:1;">&times;</button>
+      </div>
+      <div style="max-height:360px; overflow-y:auto;">
+        <table class="crm-table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Service</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="stage-customers-tbody">
+            <!-- Injected dynamically -->
+          </tbody>
+        </table>
+      </div>
+      <button type="button" onclick="closeStageCustomersModal()" style="margin-top:14px; width:100%; background:var(--primary-terra); color:#fff; border:none; border-radius:8px; padding:9px; font-weight:600; font-size:12px; cursor:pointer;">Close</button>
+    </div>
+  </div>
+
+  <!-- ─── APPOINTMENT BOOKING MODAL ───────────────────────── -->
+  <div id="appointment-modal" role="dialog" aria-modal="true" style="display:none; position:fixed; inset:0; background:rgba(39,33,30,0.55); backdrop-filter:blur(4px); z-index:1004; align-items:center; justify-content:center;">
+    <div class="settings-modal-box" style="max-width:480px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div>
+          <h2 id="apt-modal-title" style="font-family:var(--font-serif); font-size:18px; color:var(--text-main); margin:0;">Schedule Consultation</h2>
+          <p style="font-size:11.5px; color:var(--text-muted); margin:2px 0 0 0;">Book a one-on-one session for a customer</p>
+        </div>
+        <button type="button" onclick="closeAppointmentModal()" style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted); line-height:1;">&times;</button>
+      </div>
+      <form id="appointment-form" onsubmit="event.preventDefault(); submitAppointment();">
+        <input type="hidden" id="apt-edit-id" />
+        <div style="margin-bottom:10px;">
+          <label style="font-size:11.5px; font-weight:600; color:var(--text-main); display:block; margin-bottom:4px;">Customer WhatsApp Phone</label>
+          <input type="text" id="apt-customer-phone" required placeholder="+91..." style="width:100%; border:1px solid var(--border); padding:8px; border-radius:8px; font-size:12.5px;" />
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="font-size:11.5px; font-weight:600; color:var(--text-main); display:block; margin-bottom:4px;">Customer Name</label>
+          <input type="text" id="apt-customer-name" placeholder="Full Name" style="width:100%; border:1px solid var(--border); padding:8px; border-radius:8px; font-size:12.5px;" />
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="font-size:11.5px; font-weight:600; color:var(--text-main); display:block; margin-bottom:4px;">Service</label>
+          <select id="apt-service-name" style="width:100%; border:1px solid var(--border); padding:8px; border-radius:8px; font-size:12.5px; background:#fff;">
+            <option value="Personal Shopping">Personal Shopping (Rs 15,000 / 3 hrs)</option>
+            <option value="Image Consulting">Image Consulting (Rs 5,000 / 60 mins)</option>
+            <option value="Communication Skills">Communication Skills (Rs 3,000 / 60 mins)</option>
+            <option value="Etiquette / Soft Skills">Etiquette / Soft Skills (Rs 3,000 / 60 mins)</option>
+            <option value="Posture & Body Language">Posture & Body Language (Rs 3,000 / 60 mins)</option>
+            <option value="Wardrobe Audit">Wardrobe Audit (Rs 15,000 / 3 hrs)</option>
+            <option value="Pilates & Movement">Pilates & Movement (Rs 3,000 / session)</option>
+          </select>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div>
+            <label style="font-size:11.5px; font-weight:600; color:var(--text-main); display:block; margin-bottom:4px;">Date</label>
+            <input type="date" id="apt-date" required style="width:100%; border:1px solid var(--border); padding:8px; border-radius:8px; font-size:12.5px;" />
+          </div>
+          <div>
+            <label style="font-size:11.5px; font-weight:600; color:var(--text-main); display:block; margin-bottom:4px;">Time</label>
+            <input type="time" id="apt-time" required value="10:00" style="width:100%; border:1px solid var(--border); padding:8px; border-radius:8px; font-size:12.5px;" />
+          </div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="font-size:11.5px; font-weight:600; color:var(--text-main); display:block; margin-bottom:4px;">Consultant</label>
+          <select id="apt-consultant" style="width:100%; border:1px solid var(--border); padding:8px; border-radius:8px; font-size:12.5px; background:#fff;">
+            <option value="mam|Mam">Mam (Director & Lead Consultant)</option>
+            <option value="priya|Priya Sharma">Priya Sharma (Senior Styling & Image)</option>
+            <option value="ananya|Ananya Roy">Ananya Roy (Grooming & Etiquette)</option>
+            <option value="rahul|Rahul Verma">Rahul Verma (Executive Communication)</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button type="button" onclick="closeAppointmentModal()" style="flex:1; background:#F5EDE7; color:var(--primary-terra); border:none; border-radius:8px; padding:10px; font-weight:600; font-size:12.5px; cursor:pointer;">Cancel</button>
+          <button type="submit" id="btn-save-apt" style="flex:1; background:var(--primary-terra); color:#fff; border:none; border-radius:8px; padding:10px; font-weight:600; font-size:12.5px; cursor:pointer;">Save Appointment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── REASSIGN CONSULTANT MODAL ───────────────────────── -->
+  <div id="reassign-modal" role="dialog" aria-modal="true" style="display:none; position:fixed; inset:0; background:rgba(39,33,30,0.55); backdrop-filter:blur(4px); z-index:1004; align-items:center; justify-content:center;">
+    <div class="settings-modal-box" style="max-width:380px;">
+      <h2 style="font-family:var(--font-serif); font-size:18px; color:var(--text-main); margin:0 0 6px 0;">Assign Consultant</h2>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">Select the staff member or specialist who will manage this customer</p>
+      <input type="hidden" id="reassign-phone" />
+      <div style="margin-bottom:16px;">
+        <select id="reassign-consultant-select" style="width:100%; border:1px solid var(--border); padding:9px; border-radius:8px; font-size:13px; background:#fff;">
+          <option value="Mam">Mam (Director & Lead Consultant)</option>
+          <option value="Priya Sharma">Priya Sharma (Senior Styling & Image)</option>
+          <option value="Ananya Roy">Ananya Roy (Grooming & Etiquette)</option>
+          <option value="Rahul Verma">Rahul Verma (Executive Communication)</option>
+        </select>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button type="button" onclick="closeReassignModal()" style="flex:1; background:#F5EDE7; color:var(--primary-terra); border:none; border-radius:8px; padding:9px; font-weight:600; font-size:12px; cursor:pointer;">Cancel</button>
+        <button type="button" onclick="confirmReassignConsultant()" style="flex:1; background:var(--primary-terra); color:#fff; border:none; border-radius:8px; padding:9px; font-weight:600; font-size:12px; cursor:pointer;">Confirm Assignment</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ─── STATE MANAGEMENT ─────────────────────────────────
     let currentFilter = 'all';
@@ -2353,6 +3156,19 @@
     let selectedPhone = null;
     let token = localStorage.getItem('liu_admin_token') || '';
     let allConversations = [];
+
+    // CRM State
+    let currentActiveView = 'dashboard';
+    let currentCrmTimeRange = '7d';
+    let customCrmFrom = null;
+    let customCrmTo = null;
+    let currentResponseFilter = 'all';
+    let currentEnquiriesStage = 'all';
+    let calendarMode = 'month';
+    let funnelDataCache = null;
+    let crmAppointmentsCache = [];
+    let responseTrackingCache = [];
+    let allEnquiriesCache = [];
 
     // ─── PROGRESSIVE WEB APP (PWA) CONTROLLERS ────────────
     let deferredPrompt = null;
@@ -2723,7 +3539,781 @@
       }
     }
 
-    // ─── RESPONSIVE & MOBILE NAVIGATION ───────────────────
+    // ─── CRM VIEW SWITCHING & ROUTING ─────────────────────
+    function switchView(viewName, navEl) {
+      currentActiveView = viewName;
+      document.querySelectorAll('.crm-view').forEach(v => v.classList.remove('active'));
+      const targetView = document.getElementById(`view-${viewName}`);
+      if (targetView) targetView.classList.add('active');
+
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const activeNav = navEl || document.getElementById(`nav-${viewName}`);
+      if (activeNav) activeNav.classList.add('active');
+
+      window.location.hash = viewName;
+      closeMobileMenu();
+
+      if (viewName === 'dashboard') {
+        loadDashboardData();
+      } else if (viewName === 'conversations') {
+        loadLiveData();
+        if (window.innerWidth <= 768) {
+          setMobileView('list');
+        }
+      } else if (viewName === 'enquiries') {
+        loadEnquiriesView();
+      } else if (viewName === 'calendar') {
+        loadCalendarView();
+      } else if (viewName === 'reports') {
+        loadReportsView();
+      } else if (viewName === 'services') {
+        loadServicesView();
+      } else if (viewName === 'team') {
+        loadTeamView();
+      }
+    }
+
+    function jumpToConversation(phone) {
+      switchView('conversations');
+      selectConversation(phone, true);
+    }
+
+    // ─── CRM DASHBOARD CONTROLLERS ─────────────────────────
+    function setCrmTimeRange(range, btn) {
+      currentCrmTimeRange = range;
+      document.querySelectorAll('.crm-date-pill').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      document.getElementById('custom-date-inputs').style.display = 'none';
+      loadDashboardData();
+    }
+
+    function toggleCustomDatePicker() {
+      const box = document.getElementById('custom-date-inputs');
+      box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function applyCustomDateRange() {
+      const fromVal = document.getElementById('crm-custom-from').value;
+      const toVal = document.getElementById('crm-custom-to').value;
+      if (!fromVal || !toVal) {
+        showToast('Please select both start and end dates');
+        return;
+      }
+      currentCrmTimeRange = 'custom';
+      customCrmFrom = fromVal;
+      customCrmTo = toVal;
+      loadDashboardData();
+    }
+
+    async function loadDashboardData() {
+      let q = `timeRange=${currentCrmTimeRange}`;
+      if (currentCrmTimeRange === 'custom' && customCrmFrom && customCrmTo) {
+        q += `&from=${encodeURIComponent(customCrmFrom)}&to=${encodeURIComponent(customCrmTo)}`;
+      }
+
+      // Parallel fetch of real data
+      Promise.all([
+        fetch(`/api/crm/kpis?${q}`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => null),
+        fetch(`/api/crm/pending-actions`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => null),
+        fetch(`/api/crm/funnel?${q}`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => null),
+        fetch(`/api/crm/response-tracking?filter=${currentResponseFilter}`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => null),
+        fetch(`/api/crm/questionnaire-analytics?${q}`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => null),
+        fetch(`/api/crm/enquiry-analytics?${q}`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => null)
+      ]).then(([kpis, actions, funnel, responseTracking, quizData, eqData]) => {
+        if (kpis && kpis.cards) renderDashboardKPIs(kpis.cards);
+        if (actions && actions.actions) renderPendingActions(actions.actions);
+        if (funnel && funnel.funnel) {
+          funnelDataCache = funnel;
+          renderFunnel(funnel);
+        }
+        if (responseTracking) {
+          responseTrackingCache = responseTracking;
+          renderResponseTracking(responseTracking);
+        }
+        if (quizData) renderQuestionnaireAnalytics(quizData);
+        if (eqData) renderEnquiryAnalytics(eqData);
+      });
+    }
+
+    function renderDashboardKPIs(cards) {
+      const container = document.getElementById('crm-kpi-cards-container');
+      if (!container) return;
+      container.innerHTML = cards.map(c => `
+        <div class="crm-kpi-card" onclick="handleKpiCardClick('${c.filter}')">
+          <div class="crm-kpi-header">
+            <div class="crm-kpi-title">${c.title}</div>
+            <span class="crm-kpi-badge ${c.direction}">${c.direction === 'up' ? '↑' : c.direction === 'down' ? '↓' : '•'} ${c.change}</span>
+          </div>
+          <div class="crm-kpi-val">${c.current.toLocaleString()}</div>
+          <div class="crm-kpi-footer">vs previous period: <strong>${c.previous.toLocaleString()}</strong></div>
+        </div>
+      `).join('');
+    }
+
+    function handleKpiCardClick(filter) {
+      if (filter === 'all' || filter === 'new' || filter === 'progress') {
+        switchView('conversations');
+        const btn = document.querySelector(`.filter-pill[onclick*="${filter}"]`);
+        if (btn) setFilter(filter, btn);
+      } else if (filter === 'appointment') {
+        switchView('calendar');
+      } else if (filter === 'consultant') {
+        switchView('enquiries');
+        setEnquiriesStageFilter('consultant_requested');
+      } else if (filter === 'waiting_team') {
+        setResponseFilter('waiting_team');
+        const section = document.getElementById('crm-response-tracking-section');
+        if (section) section.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        switchView('enquiries');
+      }
+    }
+
+    function renderPendingActions(actions) {
+      const badge = document.getElementById('pending-actions-badge');
+      const container = document.getElementById('pending-actions-container');
+      if (!container) return;
+
+      const urgentCount = actions.filter(a => a.urgency === 'HIGH').length;
+      if (badge) {
+        badge.innerText = `${urgentCount} urgent / ${actions.length} total`;
+        badge.className = `wait-badge ${urgentCount > 0 ? 'urgent' : 'low'}`;
+      }
+
+      if (actions.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">
+            🎉 All pending responses and consultant follow-ups are up to date!
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = actions.slice(0, 6).map(a => `
+        <div class="pending-action-item ${a.urgency.toLowerCase()}">
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span style="font-size:11px; font-weight:700; color:${a.urgency === 'HIGH' ? '#C62828' : '#F57C00'};">${a.urgency} PRIORITY</span>
+              <span style="font-size:10.5px; color:var(--text-light);">${new Date(a.dueTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+            </div>
+            <div style="font-size:13px; font-weight:700; color:var(--text-main); margin-bottom:3px;">${a.title}</div>
+            <div style="font-size:11.5px; color:var(--text-muted); line-height:1.3; margin-bottom:12px;">${a.subtitle}</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button type="button" onclick="jumpToConversation('${a.customerPhone}')" style="flex:1; background:var(--primary-terra); color:#fff; border:none; border-radius:6px; padding:6px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">
+              Open Chat
+            </button>
+            <button type="button" onclick="openReassignModal('${a.customerPhone}')" style="background:#FFFFFF; border:1px solid var(--border); color:var(--text-main); border-radius:6px; padding:6px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">
+              Assign
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderFunnel(funnelData) {
+      const totalEl = document.getElementById('funnel-total-count');
+      const container = document.getElementById('funnel-stages-container');
+      if (totalEl) totalEl.innerText = funnelData.totalEnquiries.toLocaleString();
+      if (!container) return;
+
+      container.innerHTML = funnelData.funnel.map(stage => `
+        <div class="funnel-stage-row" onclick="openStageModal('${stage.id}')" title="Click to view customers in ${stage.label}">
+          <div class="funnel-stage-label">${stage.label}</div>
+          <div class="funnel-bar-track">
+            <div class="funnel-bar-fill" style="width: ${Math.max(stage.percentage, 4)}%;"></div>
+            <span class="funnel-bar-text">${stage.count} (${stage.percentage}%)</span>
+          </div>
+          <div class="funnel-metrics-pill">
+            <span>Conv: <strong>${stage.conversionFromPrev}%</strong></span>
+            <span>Drop: <strong style="color:${stage.dropOffPercentage > 40 ? '#C62828' : 'inherit'};">${stage.dropOffPercentage}%</strong></span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openStageModal(stageId) {
+      if (!funnelDataCache) return;
+      const stage = funnelDataCache.funnel.find(s => s.id === stageId);
+      if (!stage) return;
+
+      document.getElementById('stage-modal-title').innerText = `${stage.label} (${stage.count})`;
+      document.getElementById('stage-modal-sub').innerText = `${stage.percentage}% of total enquiries • ${stage.conversionFromPrev}% conversion from previous stage`;
+
+      const tbody = document.getElementById('stage-customers-tbody');
+      if (!tbody) return;
+
+      if (!stage.customers || stage.customers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:18px;">No customers currently at this stage.</td></tr>`;
+      } else {
+        tbody.innerHTML = stage.customers.map(c => `
+          <tr>
+            <td>
+              <div style="font-weight:600;">${c.name}</div>
+              <div style="font-size:11px; color:var(--text-muted);">${c.phone}</div>
+            </td>
+            <td>${c.interest}</td>
+            <td><span class="tag-pill tag-green">${c.status}</span></td>
+            <td>
+              <button type="button" onclick="closeStageCustomersModal(); jumpToConversation('${c.phone}');" style="background:var(--primary-terra); color:#fff; border:none; border-radius:6px; padding:4px 9px; font-size:11px; font-weight:600; cursor:pointer;">Chat</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      document.getElementById('stage-customers-modal').style.display = 'flex';
+    }
+
+    function closeStageCustomersModal() {
+      document.getElementById('stage-customers-modal').style.display = 'none';
+    }
+
+    function setResponseFilter(filter, btn) {
+      currentResponseFilter = filter;
+      document.querySelectorAll('#response-filter-pills .crm-date-pill').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      fetch(`/api/crm/response-tracking?filter=${filter}`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(data => {
+          responseTrackingCache = data;
+          renderResponseTracking(data);
+        })
+        .catch(() => {});
+    }
+
+    function renderResponseTracking(data) {
+      const tbody = document.getElementById('response-tracking-tbody');
+      if (!tbody) return;
+
+      if (!data.items || data.items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:20px;">No customers matching this filter.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.items.slice(0, 15).map(item => {
+        let badgeClass = 'low';
+        if (item.waitingHours >= 24) badgeClass = 'urgent';
+        else if (item.waitingHours >= 4) badgeClass = 'medium';
+
+        return `
+          <tr>
+            <td><strong>${item.name}</strong></td>
+            <td><span style="font-family:monospace; font-size:12px;">${item.verifiedPhone}</span></td>
+            <td><div style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.lastMessage}">${item.lastMessage}</div></td>
+            <td><span class="wait-badge ${badgeClass}">${item.waitingDisplay}</span></td>
+            <td>${item.interestedService}</td>
+            <td><span class="tag-pill ${item.status === 'Closed' ? 'tag-green' : 'tag-orange'}">${item.status}</span></td>
+            <td>${item.assignedConsultant}</td>
+            <td>
+              <button type="button" onclick="jumpToConversation('${item.phone}')" style="background:var(--primary-terra); color:#fff; border:none; border-radius:6px; padding:4px 9px; font-size:11px; font-weight:600; cursor:pointer;">
+                Reply
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderQuestionnaireAnalytics(data) {
+      const rateEl = document.getElementById('quiz-stat-rate');
+      const timeEl = document.getElementById('quiz-stat-time');
+      const dropEl = document.getElementById('quiz-stat-dropoff');
+      if (rateEl) rateEl.innerText = `${data.completionRate}%`;
+      if (timeEl) timeEl.innerText = `${data.avgCompletionMinutes} mins`;
+      if (dropEl) dropEl.innerText = `${data.mostCommonDropOff} (${data.dropOffRate}% drop-off)`;
+
+      // Render Drop-off bars by Question
+      const dropBars = document.getElementById('quiz-dropoff-bars');
+      if (dropBars && data.dropOffCounts) {
+        const entries = Object.entries(data.dropOffCounts);
+        const maxVal = Math.max(...Object.values(data.dropOffCounts), 1);
+        dropBars.innerHTML = entries.map(([q, count]) => {
+          const pct = Math.round((count / maxVal) * 100);
+          return `
+            <div style="display:flex; align-items:center; gap:8px; font-size:11px;">
+              <span style="width:25px; font-weight:700;">${q}</span>
+              <div style="flex:1; height:12px; background:#EAE4DC; border-radius:6px; overflow:hidden;">
+                <div style="width:${Math.max(pct, 4)}%; height:100%; background:var(--primary-terra); border-radius:6px;"></div>
+              </div>
+              <span style="width:30px; text-align:right; font-weight:600;">${count}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render Starts vs Completions chart (pure responsive SVG)
+      const chartContainer = document.getElementById('quiz-chart-container');
+      if (chartContainer && data.timeline) {
+        if (data.timeline.length === 0) {
+          chartContainer.innerHTML = `<span style="font-size:12px; color:var(--text-muted);">No timeline data for this period</span>`;
+        } else {
+          const maxVal = Math.max(...data.timeline.map(t => Math.max(t.starts, t.completions)), 4);
+          const w = 360;
+          const h = 130;
+          const step = w / Math.max(data.timeline.length, 1);
+
+          const startsPts = data.timeline.map((t, i) => `${i * step + 20},${h - (t.starts / maxVal) * 100}`).join(' ');
+          const compPts = data.timeline.map((t, i) => `${i * step + 20},${h - (t.completions / maxVal) * 100}`).join(' ');
+
+          chartContainer.innerHTML = `
+            <svg width="100%" height="150" viewBox="0 0 ${w + 30} ${h + 20}">
+              <!-- Grid lines -->
+              <line x1="20" y1="30" x2="${w}" y2="30" stroke="#EAE4DC" stroke-dasharray="3" />
+              <line x1="20" y1="80" x2="${w}" y2="80" stroke="#EAE4DC" stroke-dasharray="3" />
+              <line x1="20" y1="${h}" x2="${w}" y2="${h}" stroke="#D6CEC5" />
+              <!-- Starts Polyline -->
+              <polyline fill="none" stroke="#6B4938" stroke-width="2.5" points="${startsPts}" />
+              <!-- Completions Polyline -->
+              <polyline fill="none" stroke="#2E7D32" stroke-width="2.5" points="${compPts}" />
+              <!-- Legend -->
+              <text x="30" y="15" font-size="10" fill="#6B4938" font-weight="700">● Starts</text>
+              <text x="100" y="15" font-size="10" fill="#2E7D32" font-weight="700">● Completions</text>
+            </svg>
+          `;
+        }
+      }
+
+      // Incomplete questionnaires table
+      const tbody = document.getElementById('incomplete-quiz-tbody');
+      if (tbody) {
+        if (!data.incompleteTable || data.incompleteTable.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:16px;">No incomplete questionnaires in this period.</td></tr>`;
+        } else {
+          tbody.innerHTML = data.incompleteTable.slice(0, 8).map(row => `
+            <tr>
+              <td><strong>${row.name}</strong><br><span style="font-size:11px; color:var(--text-muted);">${row.phone}</span></td>
+              <td>${row.service}</td>
+              <td><span style="font-weight:700; color:#C62828;">${row.lastCompletedQuestion}</span></td>
+              <td>${new Date(row.startedAt).toLocaleDateString()}</td>
+              <td>${new Date(row.lastResponseAt).toLocaleDateString()}</td>
+              <td><span class="tag-pill tag-orange">${row.status}</span></td>
+              <td>
+                <button type="button" onclick="jumpToConversation('${row.phone}')" style="background:var(--primary-terra); color:#fff; border:none; border-radius:6px; padding:4px 9px; font-size:11px; font-weight:600; cursor:pointer;">Follow Up</button>
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+    }
+
+    function renderEnquiryAnalytics(data) {
+      // Over time chart
+      const timeChart = document.getElementById('enquiries-time-chart');
+      if (timeChart && data.enquiriesOverTime) {
+        if (data.enquiriesOverTime.length === 0) {
+          timeChart.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:12px;">No historical enquiries found in this range.</div>`;
+        } else {
+          const maxVal = Math.max(...data.enquiriesOverTime.map(e => e.count), 4);
+          const w = 340;
+          const h = 120;
+          const step = w / Math.max(data.enquiriesOverTime.length, 1);
+          const pts = data.enquiriesOverTime.map((e, i) => `${i * step + 15},${h - (e.count / maxVal) * 90}`).join(' ');
+
+          timeChart.innerHTML = `
+            <svg width="100%" height="140" viewBox="0 0 ${w + 30} ${h + 20}">
+              <polyline fill="none" stroke="var(--primary-terra)" stroke-width="2.5" points="${pts}" />
+              ${data.enquiriesOverTime.map((e, i) => `
+                <circle cx="${i * step + 15}" cy="${h - (e.count / maxVal) * 90}" r="3.5" fill="var(--primary-terra)" />
+                <text x="${i * step + 15}" y="${h + 15}" font-size="9" text-anchor="middle" fill="#847C76">${e.date.slice(5)}</text>
+              `).join('')}
+            </svg>
+          `;
+        }
+      }
+
+      // Services distribution bars
+      const srvBars = document.getElementById('enquiries-service-bars');
+      if (srvBars && data.serviceDistribution) {
+        const total = data.totalEnquiries || 1;
+        srvBars.innerHTML = data.serviceDistribution.slice(0, 5).map(s => {
+          const pct = Math.round((s.count / total) * 100);
+          return `
+            <div style="font-size:11.5px; margin-bottom:6px;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                <span style="font-weight:600; color:var(--text-main);">${s.service}</span>
+                <span style="color:var(--text-muted);">${s.count} (${pct}%)</span>
+              </div>
+              <div style="height:8px; background:#EAE4DC; border-radius:4px; overflow:hidden;">
+                <div style="width:${pct}%; height:100%; background:var(--primary-terra);"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // ─── VIEW 3: ENQUIRIES MANAGEMENT ───────────────────────
+    function loadEnquiriesView() {
+      fetch('/admin/leads', { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(data => {
+          allEnquiriesCache = data.leads || [];
+          updateEnquiriesCounts();
+          renderEnquiriesTable();
+        })
+        .catch(err => console.error('Enquiries load error:', err));
+    }
+
+    function updateEnquiriesCounts() {
+      const all = allEnquiriesCache.length;
+      const nw = allEnquiriesCache.filter(e => e.status === 'New').length;
+      const prog = allEnquiriesCache.filter(e => e.status === 'In Progress').length;
+      const cons = allEnquiriesCache.filter(e => e.quizStatus === 'COMPLETED' || e.status === 'Consultant Requested').length;
+      const wait = allEnquiriesCache.filter(e => e.status === 'Waiting for Customer').length;
+      const closed = allEnquiriesCache.filter(e => e.status === 'Closed').length;
+
+      const setT = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+      setT('eq-count-all', all);
+      setT('eq-count-new', nw);
+      setT('eq-count-prog', prog);
+      setT('eq-count-cons', cons);
+      setT('eq-count-wait', wait);
+      setT('eq-count-closed', closed);
+    }
+
+    function setEnquiriesStageFilter(stage, btn) {
+      currentEnquiriesStage = stage;
+      document.querySelectorAll('#enquiries-stage-pills .crm-date-pill').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderEnquiriesTable();
+    }
+
+    function filterEnquiriesTable(search) {
+      renderEnquiriesTable(search);
+    }
+
+    function renderEnquiriesTable(search = '') {
+      const tbody = document.getElementById('enquiries-table-tbody');
+      if (!tbody) return;
+
+      let list = allEnquiriesCache;
+      if (currentEnquiriesStage === 'new') list = list.filter(e => e.status === 'New');
+      else if (currentEnquiriesStage === 'in_progress') list = list.filter(e => e.status === 'In Progress');
+      else if (currentEnquiriesStage === 'consultant_requested') list = list.filter(e => e.quizStatus === 'COMPLETED' || e.status === 'Consultant Requested');
+      else if (currentEnquiriesStage === 'waiting_customer') list = list.filter(e => e.status === 'Waiting for Customer');
+      else if (currentEnquiriesStage === 'closed') list = list.filter(e => e.status === 'Closed');
+
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        list = list.filter(e => (e.customerName && e.customerName.toLowerCase().includes(q)) || (e.phone && e.phone.includes(q)) || (e.interest && e.interest.toLowerCase().includes(q)));
+      }
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">No enquiries match this filter.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(e => `
+        <tr>
+          <td><strong>${e.customerName}</strong></td>
+          <td><span style="font-family:monospace;">${e.verifiedPhone || e.phone}</span></td>
+          <td>${e.interest || 'General Grooming & Image'}</td>
+          <td><span class="tag-pill ${e.status === 'Closed' ? 'tag-green' : e.status === 'New' ? 'tag-pink' : 'tag-orange'}">${e.status}</span></td>
+          <td><div style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${e.lastMessage || '—'}</div></td>
+          <td>${e.claimedBy || 'Mam (Default)'}</td>
+          <td>
+            <div style="display:flex; gap:6px;">
+              <button type="button" onclick="jumpToConversation('${e.phone}')" style="background:var(--primary-terra); color:#fff; border:none; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; cursor:pointer;">Chat</button>
+              <button type="button" onclick="openAppointmentModal({customerPhone:'${e.phone}', customerName:'${e.customerName}'})" style="background:#FFFFFF; border:1px solid var(--border); color:var(--primary-terra); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; cursor:pointer;">Book</button>
+              <button type="button" onclick="openReassignModal('${e.phone}')" style="background:#F5EDE7; color:var(--primary-terra); border:none; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; cursor:pointer;">Assign</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ─── VIEW 4: APPOINTMENT CALENDAR ───────────────────────
+    function setCalendarMode(mode, btn) {
+      calendarMode = mode;
+      document.querySelectorAll('#view-calendar .crm-date-pill').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderCalendarGrid(crmAppointmentsCache, mode);
+    }
+
+    function loadCalendarView() {
+      const consultantSelect = document.getElementById('cal-consultant-select');
+      const consultantId = consultantSelect ? consultantSelect.value : '';
+      let url = '/api/crm/appointments';
+      if (consultantId) url += `?consultantId=${encodeURIComponent(consultantId)}`;
+
+      fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(data => {
+          crmAppointmentsCache = data.appointments || [];
+          renderCalendarGrid(crmAppointmentsCache, calendarMode);
+          renderUpcomingAppointmentsTable(crmAppointmentsCache);
+        })
+        .catch(err => console.error('Calendar load error:', err));
+    }
+
+    function renderCalendarGrid(appointments, mode) {
+      const container = document.getElementById('calendar-cells-container');
+      if (!container) return;
+
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const firstDay = new Date(year, month, 1).getDay();
+
+      const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      let html = daysOfWeek.map(d => `<div class="cal-day-header">${d}</div>`).join('');
+
+      for (let i = 0; i < firstDay; i++) {
+        html += `<div class="cal-day-cell inactive"></div>`;
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayApts = appointments.filter(a => a.date === dStr);
+        const isToday = day === now.getDate();
+
+        html += `
+          <div class="cal-day-cell ${isToday ? 'today' : ''}" onclick="openAppointmentModal({date:'${dStr}'})">
+            <div class="cal-day-num">${day}</div>
+            ${dayApts.map(a => `
+              <div class="cal-apt-pill ${a.status.toLowerCase()}" title="${a.time} - ${a.customerName} (${a.serviceName})">
+                ${a.time} ${a.customerName}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function renderUpcomingAppointmentsTable(appointments) {
+      const tbody = document.getElementById('calendar-appointments-tbody');
+      if (!tbody) return;
+
+      if (appointments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:20px;">No appointments booked yet. Click "+ Book Appointment" above.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = appointments.slice(0, 10).map(a => `
+        <tr>
+          <td><strong>${a.date}</strong> at ${a.time}</td>
+          <td><strong>${a.customerName}</strong><br><span style="font-size:11px; color:var(--text-muted);">${a.customerPhone}</span></td>
+          <td>${a.serviceName}</td>
+          <td>${a.consultantName}</td>
+          <td><span class="tag-pill ${a.status === 'COMPLETED' ? 'tag-green' : a.status === 'CANCELLED' ? 'tag-pink' : 'tag-orange'}">${a.status}</span></td>
+          <td>
+            <div style="display:flex; gap:6px;">
+              ${a.status === 'SCHEDULED' ? `
+                <button type="button" onclick="updateAppointmentStatus('${a.id}', 'COMPLETED')" style="background:#E8F5E9; color:#2E7D32; border:1px solid #C8E6C9; border-radius:6px; padding:3px 7px; font-size:11px; font-weight:600; cursor:pointer;">Complete</button>
+                <button type="button" onclick="updateAppointmentStatus('${a.id}', 'CANCELLED')" style="background:#FFEBEE; color:#C62828; border:1px solid #FFCDD2; border-radius:6px; padding:3px 7px; font-size:11px; font-weight:600; cursor:pointer;">Cancel</button>
+              ` : `
+                <span style="font-size:11px; color:var(--text-light);">Archived</span>
+              `}
+              <button type="button" onclick="jumpToConversation('${a.customerPhone}')" style="background:var(--primary-terra); color:#fff; border:none; border-radius:6px; padding:3px 7px; font-size:11px; font-weight:600; cursor:pointer;">Chat</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openAppointmentModal(prefill = {}) {
+      document.getElementById('apt-edit-id').value = prefill.id || '';
+      document.getElementById('apt-customer-phone').value = prefill.customerPhone || selectedPhone || '';
+      document.getElementById('apt-customer-name').value = prefill.customerName || '';
+      document.getElementById('apt-date').value = prefill.date || new Date().toISOString().split('T')[0];
+      document.getElementById('apt-time').value = prefill.time || '11:00';
+      document.getElementById('appointment-modal').style.display = 'flex';
+    }
+
+    function closeAppointmentModal() {
+      document.getElementById('appointment-modal').style.display = 'none';
+    }
+
+    async function submitAppointment() {
+      const editId = document.getElementById('apt-edit-id').value;
+      const phone = document.getElementById('apt-customer-phone').value;
+      const name = document.getElementById('apt-customer-name').value;
+      const serviceName = document.getElementById('apt-service-name').value;
+      const date = document.getElementById('apt-date').value;
+      const time = document.getElementById('apt-time').value;
+      const [consultantId, consultantName] = document.getElementById('apt-consultant').value.split('|');
+
+      const body = {
+        customerPhone: phone,
+        customerName: name || phone,
+        serviceName,
+        date,
+        time,
+        consultantId,
+        consultantName,
+      };
+
+      const url = editId ? `/api/crm/appointments/${editId}` : '/api/crm/appointments';
+      const method = editId ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify(body)
+        });
+        if (res.ok) {
+          showToast('Appointment successfully scheduled!');
+          closeAppointmentModal();
+          loadCalendarView();
+          loadDashboardData();
+        } else {
+          showToast('Failed to save appointment');
+        }
+      } catch (err) {
+        showToast('Network error saving appointment');
+      }
+    }
+
+    async function updateAppointmentStatus(id, status) {
+      try {
+        const res = await fetch(`/api/crm/appointments/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ status })
+        });
+        if (res.ok) {
+          showToast(`Appointment marked as ${status}`);
+          loadCalendarView();
+          loadDashboardData();
+        }
+      } catch (e) {
+        showToast('Error updating appointment');
+      }
+    }
+
+    // ─── VIEW 5: REPORTS & CSV EXPORT ───────────────────────
+    function loadReportsView() {
+      fetch('/api/crm/reports', { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(data => {
+          const setT = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+          setT('rep-total-convs', data.conversationReport?.totalConversations || 0);
+          setT('rep-new-convs', data.conversationReport?.newConversations || 0);
+          setT('rep-in-msgs', data.conversationReport?.inboundMessages || 0);
+          setT('rep-out-msgs', data.conversationReport?.outboundMessages || 0);
+
+          setT('rep-total-eq', data.enquiryReport?.totalEnquiries || 0);
+          setT('rep-qual-eq', data.enquiryReport?.qualifiedEnquiries || 0);
+          setT('rep-cons-eq', data.enquiryReport?.consultantRequests || 0);
+          setT('rep-conv-eq', data.enquiryReport?.convertedEnquiries || 0);
+
+          setT('rep-apt-booked', data.appointmentReport?.totalBooked || 0);
+          setT('rep-apt-done', data.appointmentReport?.completed || 0);
+          setT('rep-apt-cancelled', data.appointmentReport?.cancelled || 0);
+
+          const convRate = data.enquiryReport?.totalEnquiries > 0
+            ? Math.round((data.enquiryReport.convertedEnquiries / data.enquiryReport.totalEnquiries) * 100)
+            : 0;
+          setT('rep-conv-rate', `${convRate}%`);
+        })
+        .catch(err => console.error('Reports load error:', err));
+    }
+
+    function downloadCrmReportCSV() {
+      window.location.href = `/api/crm/reports/csv?timeRange=${currentCrmTimeRange}`;
+    }
+
+    // ─── VIEW 6: SERVICES CATALOGUE ─────────────────────────
+    function loadServicesView() {
+      fetch('/api/crm/services', { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(data => {
+          const container = document.getElementById('services-cards-container');
+          if (!container) return;
+
+          container.innerHTML = data.services.map(s => `
+            <div class="srv-card">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                <h3 style="font-family:var(--font-serif); font-size:16px; color:var(--text-main); margin:0;">${s.name}</h3>
+                <span class="tag-pill tag-green">Rs ${s.price.toLocaleString()}</span>
+              </div>
+              <div style="font-size:11.5px; color:var(--text-muted); margin-bottom:14px;">Basis: ${s.basis} • Section ${s.section}</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px; background:#FAF8F5; padding:10px; border-radius:8px; margin-bottom:12px;">
+                <div>Enquiries: <strong>${s.totalEnquiries}</strong></div>
+                <div>Appointments: <strong>${s.totalAppointments}</strong></div>
+                <div>Conversions: <strong style="color:#2E7D32;">${s.totalConversions}</strong></div>
+                <div>Conv Rate: <strong>${s.conversionRate}%</strong></div>
+              </div>
+              <div style="font-size:11px; color:var(--text-light); text-align:right;">
+                Potential Value: <strong>Rs ${(s.potentialRevenue).toLocaleString()}</strong>
+              </div>
+            </div>
+          `).join('');
+        })
+        .catch(err => console.error('Services load error:', err));
+    }
+
+    // ─── VIEW 7: TEAM & CONSULTANTS ─────────────────────────
+    function loadTeamView() {
+      fetch('/api/crm/team', { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(data => {
+          const container = document.getElementById('team-cards-container');
+          if (!container) return;
+
+          container.innerHTML = data.team.map(c => `
+            <div class="team-card">
+              <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                <div class="avatar-sm" style="width:42px; height:42px; font-size:16px; border-radius:50%; background:#F5EDE7; color:var(--primary-terra); display:flex; align-items:center; justify-content:center; font-weight:700;">
+                  ${c.name.charAt(0)}
+                </div>
+                <div>
+                  <h3 style="font-size:15px; font-weight:700; color:var(--text-main); margin:0;">${c.name}</h3>
+                  <div style="font-size:11.5px; color:var(--text-muted);">${c.role}</div>
+                </div>
+              </div>
+              <div style="font-size:11.5px; color:var(--text-light); margin-bottom:12px;">
+                📞 ${c.phone} • ✉️ ${c.email}
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px; background:#FAF8F5; padding:10px; border-radius:8px; margin-bottom:12px;">
+                <div>Assigned: <strong>${c.assignedEnquiries}</strong></div>
+                <div>Follow-ups: <strong style="${c.pendingFollowups > 0 ? 'color:#C62828;' : ''}">${c.pendingFollowups}</strong></div>
+                <div>Appointments: <strong>${c.appointmentsCount}</strong></div>
+                <div>Conversions: <strong style="color:#2E7D32;">${c.convertedCount}</strong></div>
+              </div>
+              <button type="button" onclick="switchView('enquiries')" style="width:100%; background:var(--primary-terra); color:#fff; border:none; border-radius:8px; padding:7px; font-size:11.5px; font-weight:600; cursor:pointer;">
+                View Assigned Work
+              </button>
+            </div>
+          `).join('');
+        })
+        .catch(err => console.error('Team load error:', err));
+    }
+
+    function openReassignModal(phone) {
+      document.getElementById('reassign-phone').value = phone;
+      document.getElementById('reassign-modal').style.display = 'flex';
+    }
+
+    function closeReassignModal() {
+      document.getElementById('reassign-modal').style.display = 'none';
+    }
+
+    async function confirmReassignConsultant() {
+      const phone = document.getElementById('reassign-phone').value;
+      const consultantName = document.getElementById('reassign-consultant-select').value;
+
+      try {
+        const res = await fetch('/api/crm/assign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ phone, consultantId: consultantName.toLowerCase().split(' ')[0], consultantName })
+        });
+        if (res.ok) {
+          showToast(`Assigned ${phone} to ${consultantName}`);
+          closeReassignModal();
+          loadDashboardData();
+          if (currentActiveView === 'enquiries') loadEnquiriesView();
+        }
+      } catch (err) {
+        showToast('Error reassigning consultant');
+      }
+    }
     let currentMobileView = 'list'; // 'list' | 'chat' | 'details'
 
     function setMobileView(view) {
@@ -3656,11 +5246,20 @@
       initDashboard().finally(() => {
         setTimeout(dismissSplashScreen, 400);
 
+        // Routing based on hash
+        const hashView = window.location.hash ? window.location.hash.replace('#', '') : 'dashboard';
+        if (['dashboard', 'conversations', 'enquiries', 'calendar', 'reports', 'services', 'team'].includes(hashView)) {
+          switchView(hashView);
+        } else {
+          switchView('dashboard');
+        }
+
         // If launched or redirected from push notification with ?phone=...
         const urlParams = new URLSearchParams(window.location.search);
         const targetPhone = urlParams.get('phone');
         if (targetPhone) {
           console.log('[Push] Target phone detected from URL:', targetPhone);
+          switchView('conversations');
           setTimeout(() => {
             selectConversation(targetPhone, true);
           }, 500);
