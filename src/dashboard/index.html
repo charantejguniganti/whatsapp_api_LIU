@@ -5220,18 +5220,24 @@
       try {
         const qrLoading = document.getElementById('wa-qr-loading');
         const qrImg = document.getElementById('wa-qr-img');
+        const statusLbl = document.getElementById('wa-status-label');
+        const pairingBox = document.getElementById('wa-pairing-code-box');
+
+        if (pairingBox) pairingBox.style.display = 'none';
         if (qrLoading) {
           qrLoading.style.display = 'block';
-          qrLoading.innerHTML = '<div class="btn-spinner" style="margin:0 auto 10px auto; border-top-color:#6B4938; border-color:rgba(107,73,56,0.2); width:24px; height:24px;"></div>Generating new QR code...';
+          qrLoading.innerHTML = '<div class="btn-spinner" style="margin:0 auto 10px auto; border-top-color:#6B4938; border-color:rgba(107,73,56,0.2); width:24px; height:24px;"></div>Starting fresh WhatsApp connection...';
         }
         if (qrImg) qrImg.style.display = 'none';
+        if (statusLbl) statusLbl.innerHTML = '<span style="color:#B25D25;">Restarting connection session...</span>';
+
         await fetch('/admin/whatsapp/start', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` }
         });
         setTimeout(checkWhatsAppStatus, 1500);
       } catch (e) {
-        showToast('Error refreshing QR code');
+        showToast('Error refreshing connection');
       }
     }
 

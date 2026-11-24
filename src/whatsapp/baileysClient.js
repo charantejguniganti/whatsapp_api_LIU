@@ -9,6 +9,7 @@
 import makeWASocket, {
   DisconnectReason,
   fetchLatestBaileysVersion,
+  Browsers,
 } from '@whiskeysockets/baileys';
 import QRCode from 'qrcode';
 import { getStore } from '../store/index.js';
@@ -128,6 +129,20 @@ export async function initBaileys(forceRestart = false) {
   if (isStarting && !forceRestart) return;
   if (sock && connectionStatus === 'connected' && !forceRestart) return;
 
+  // If force restart requested and socket exists, cleanly close previous socket
+  if (forceRestart && sock) {
+    try {
+      currentQr = null;
+      currentPairingCode = null;
+      pairingCodeExpiresAt = null;
+      pairingPhoneNumber = null;
+      sock.end?.();
+    } catch (e) {
+      // ignore
+    }
+    sock = null;
+  }
+
   isStarting = true;
   connectionStatus = 'connecting';
   currentQr = null;
@@ -145,7 +160,7 @@ export async function initBaileys(forceRestart = false) {
       auth: state,
       printQRInTerminal: true,
       logger: logger.child({ module: 'baileys' }, { level: 'silent' }),
-      browser: ['LIU Concierge Assistant', 'Chrome', '1.0.0'],
+      browser: Browsers.ubuntu('Chrome'),
       syncFullHistory: false,
     });
 
