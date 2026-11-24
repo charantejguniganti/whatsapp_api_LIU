@@ -5243,6 +5243,15 @@
       updateOnlineStatus();
       updatePushPermissionUI();
 
+      // Listen for browser back/forward and hash changes
+      window.addEventListener('hashchange', () => {
+        const hash = window.location.hash ? window.location.hash.replace('#', '') : 'dashboard';
+        const validViews = ['dashboard', 'conversations', 'enquiries', 'calendar', 'reports', 'services', 'team'];
+        if (validViews.includes(hash)) {
+          switchView(hash);
+        }
+      });
+
       initDashboard().finally(() => {
         setTimeout(dismissSplashScreen, 400);
 

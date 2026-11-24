@@ -7,9 +7,10 @@
  * live WhatsApp messages, customer data, and auth tokens remain secure.
  */
 
-const CACHE_NAME = 'liu-pwa-v1.0.3';
+const CACHE_NAME = 'liu-pwa-v2.0.0';
 const STATIC_ASSETS = [
   '/',
+  '/dashboard/',
   '/manifest.json',
   '/manifest.webmanifest',
   '/icons/icon-192.png',
