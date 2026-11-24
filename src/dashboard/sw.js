@@ -7,7 +7,7 @@
  * live WhatsApp messages, customer data, and auth tokens remain secure.
  */
 
-const CACHE_NAME = 'liu-pwa-v1.0.2';
+const CACHE_NAME = 'liu-pwa-v1.0.3';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -44,6 +44,73 @@ self.addEventListener('activate', (event) => {
         })
       );
     }).then(() => self.clients.claim())
+  );
+});
+
+// ─── PUSH NOTIFICATIONS ──────────────────────────────────────────
+self.addEventListener('push', (event) => {
+  let data = {};
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data = {
+        title: '🔔 New LIU Consultant Request',
+        body: event.data.text(),
+      };
+    }
+  }
+
+  const title = data.title || '🔔 New LIU Consultant Request';
+  const options = {
+    body: data.body || 'A customer wants to speak with an LIU consultant.',
+    icon: data.icon || '/icons/icon-192.png',
+    badge: data.badge || '/icons/icon-192.png',
+    tag: data.tag || 'liu-consultant-alert',
+    data: data.data || {},
+    vibrate: [200, 100, 200, 100, 200],
+    requireInteraction: true,
+    actions: data.actions || [
+      { action: 'open', title: 'Open Conversation' },
+      { action: 'dismiss', title: 'Dismiss' },
+    ],
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// ─── NOTIFICATION CLICK HANDLING ─────────────────────────────────
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  if (event.action === 'dismiss') {
+    return;
+  }
+
+  const notifData = event.notification.data || {};
+  const phone = notifData.phone || '';
+  const targetUrl = phone ? `/?phone=${encodeURIComponent(phone)}` : '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // 1. If an existing dashboard tab/window is open, focus it and tell it to select conversation
+      for (const client of clientList) {
+        if ('focus' in client) {
+          client.focus();
+          client.postMessage({
+            type: 'SELECT_CONVERSATION',
+            phone: phone,
+            highlightMessage: true,
+          });
+          return;
+        }
+      }
+
+      // 2. Otherwise open fresh window pointing directly to the conversation
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
   );
 });
 
@@ -123,3 +190,4 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+

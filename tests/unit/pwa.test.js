@@ -71,3 +71,4 @@ describe('PWA & Mobile App Integration', () => {
     expect(res512.body.length).toBeGreaterThan(0);
   });
 });
+

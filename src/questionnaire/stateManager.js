@@ -134,6 +134,33 @@ export function createQuestionnaireManager(store) {
     return null;
   }
 
+  // ── Consultant affirmative detector ──────────────────────────────────────
+  function isConsultantHandoffAffirmative(text) {
+    const lower = text.trim().toLowerCase();
+    // 1. Direct short affirmative responses
+    if (/^(yes|yeah|yep|sure|ok|okay|y|please|connect|contact|call|interested|yes please|absolutely|definitely|i do)[\s!.,]*$/i.test(lower)) {
+      return true;
+    }
+    // 2. Starts with affirmative
+    if (/^(yes|yeah|yep|sure|ok|okay|yes please|absolutely|definitely)\b/i.test(lower)) {
+      return true;
+    }
+    // 3. Explicit consultant or team contact intent
+    if (
+      /connect me with (the|our|a)?\s*(consultant|team)/i.test(lower) ||
+      /speak with (the|our|a)?\s*(consultant|team)/i.test(lower) ||
+      /speak to (someone|a consultant|the team)/i.test(lower) ||
+      /talk to (someone|a consultant|the team)/i.test(lower) ||
+      /i (want|would like) to (speak|talk|connect) (with|to) (a|the|our)?\s*(consultant|team|someone)/i.test(lower) ||
+      /i would like someone to contact me/i.test(lower) ||
+      /someone to contact me/i.test(lower) ||
+      /contact me/i.test(lower)
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   // ── Greeting detector ─────────────────────────────────────────────────────
 
   function isGreeting(text) {
@@ -193,17 +220,20 @@ export function createQuestionnaireManager(store) {
 
     // ── No active session ───────────────────────────────────────────────────
     if (!session || session.status !== 'IN_PROGRESS') {
-      // Customer confirmed after questionnaire completion (e.g. replied "Yes" to connect with team)
+      // Customer confirmed after questionnaire completion (e.g. replied "Yes" to connect with consultant)
       if (session && session.status === 'COMPLETED') {
-        const lower = trimmed.toLowerCase();
-        if (
-          /^(yes|yeah|yep|sure|ok|okay|y|please|connect|contact|call|interested|yes please)\b/i.test(lower) ||
-          /connect with (the|our) team|speak with (the|our) consultant|speak to (someone|a consultant)/i.test(lower)
-        ) {
+        if (isConsultantHandoffAffirmative(trimmed)) {
+          const isFirstTime = !session.consultantRequested;
+          session.consultantRequested = true;
+          session.consultantRequestedAt = session.consultantRequestedAt || new Date().toISOString();
+          await repo.saveSession(phone, session);
+
           return {
             reply: 'Thanks for reaching out to Live It Up! 🌟 Our team will contact you soon.',
             handover: true,
             quizDone: true,
+            isConsultantRequest: isFirstTime,
+            consultantRequested: true,
           };
         }
       }

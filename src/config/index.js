@@ -49,6 +49,17 @@ const envSchema = z.object({
   // Admin WhatsApp number (Mam's business number, for command-based takeover)
   ADMIN_WHATSAPP_NUMBER: z.string().optional().default(''),
 
+  // Web Push & VAPID (Mobile Push Notifications)
+  VAPID_PUBLIC_KEY: z.string().default(
+    process.env.VAPID_PUBLIC_KEY ||
+      'BAhl35CtgfpObVfmQ_z2TtJRHvxeiQrXSFYKMuZyaPlbvDZPOSiGbpVD4xkyWyFHTHM3wLLBSnqiiwb-h9aCrtg'
+  ),
+  VAPID_PRIVATE_KEY: z.string().default(
+    process.env.VAPID_PRIVATE_KEY ||
+      'GAhngo3X5dOcycCq9YaYWrdZ5dWB2lmNpBVImY-urOk'
+  ),
+  VAPID_SUBJECT: z.string().default(process.env.VAPID_SUBJECT || 'mailto:hello@liveitup.in'),
+
   // Feature flags
   USE_MOCK_AI: z
     .enum(['true', 'false', ''])

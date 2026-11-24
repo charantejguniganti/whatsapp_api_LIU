@@ -14,6 +14,7 @@ import { createLeadService } from '../leads/service.js';
 import { getStore } from '../store/index.js';
 import { sendTextMessage } from '../whatsapp/client.js';
 import { createQuestionnaireManager } from '../questionnaire/stateManager.js';
+import * as pushService from '../push/pushService.js';
 
 import {
   createConversationService,
@@ -246,6 +247,20 @@ async function processInboundMessage(msg, store, leadService, convService, quizM
 
     if (quizResult.handover) {
       await convService.claimConversation(msg.from, 'quiz-human-request');
+    }
+
+    if (quizResult.isConsultantRequest) {
+      try {
+        const customerName = (await convService.getCustomerName(msg.from)) || msg.pushName || msg.from;
+        await pushService.notifyConsultantRequest({
+          customerPhone: msg.from,
+          customerName,
+          messageText: msg.text,
+          timestamp: msgTime,
+        });
+      } catch (err) {
+        logger.error({ err, phone: msg.from }, 'Failed to send consultant push notification');
+      }
     }
     return;
   }

@@ -27,6 +27,8 @@ import config from '../config/index.js';
 import logger from '../logger.js';
 import { processMessage } from '../ai/agent.js';
 import { createLeadService } from '../leads/service.js';
+import { createQuestionnaireManager } from '../questionnaire/stateManager.js';
+import * as pushService from '../push/pushService.js';
 import { getStore } from '../store/index.js';
 
 const router = Router();
@@ -66,6 +68,37 @@ router.post('/', async (req, res, next) => {
     if (clearHistory) {
       await store.delete(historyKey);
       await store.delete(`lead:${from}`);
+      await store.delete(`quiz:session:${from}`);
+    }
+
+    // Check if in questionnaire flow
+    const quizManager = createQuestionnaireManager(store);
+    const quizResult = await quizManager.processMessage(from, message);
+    if (quizResult !== null) {
+      let pushResult = null;
+      if (quizResult.isConsultantRequest) {
+        try {
+          pushResult = await pushService.notifyConsultantRequest({
+            customerPhone: from,
+            customerName: from,
+            messageText: message,
+          });
+        } catch (e) {
+          logger.warn({ err: e }, 'Simulate push error');
+        }
+      }
+
+      return res.json({
+        from,
+        reply: quizResult.reply,
+        messages: quizResult.messages || [quizResult.reply],
+        handover: quizResult.handover,
+        quizDone: quizResult.quizDone,
+        isConsultantRequest: quizResult.isConsultantRequest,
+        pushResult,
+        mock: true,
+        flow: 'questionnaire',
+      });
     }
 
     // Check if in lead collection flow

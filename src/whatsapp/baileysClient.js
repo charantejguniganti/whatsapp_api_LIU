@@ -23,6 +23,7 @@ import {
   isChatTombstoned,
 } from '../conversations/service.js';
 import { createQuestionnaireManager } from '../questionnaire/stateManager.js';
+import * as pushService from '../push/pushService.js';
 import {
   resolveSenderIdentity,
   handleContactsSync,
@@ -329,6 +330,20 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
 
     if (quizResult.handover) {
       await convService.claimConversation(customerPhone, 'quiz-human-request');
+    }
+
+    if (quizResult.isConsultantRequest) {
+      try {
+        const customerName = pushName || (await convService.getCustomerName(customerPhone)) || customerPhone;
+        await pushService.notifyConsultantRequest({
+          customerPhone,
+          customerName,
+          messageText: text,
+          timestamp: msgTimestamp,
+        });
+      } catch (err) {
+        logger.error({ err, phone: customerPhone }, 'Failed to send consultant push notification in Baileys');
+      }
     }
 
     return; // questionnaire handled this message
