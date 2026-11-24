@@ -375,9 +375,20 @@ export function createConversationService(store) {
       const conv = await store.get(key);
       if (!conv || !conv.phone) continue;
 
-      // Skip tombstoned conversations
+      // Check tombstone with message timestamp: if customer sent a new message AFTER deletion, show it!
       const tombstone = await store.get(`tombstone:${conv.phone}`);
-      if (tombstone) continue;
+      if (tombstone && tombstone.deletedAt) {
+        const deletedAtMs = new Date(tombstone.deletedAt).getTime();
+        const convLastMs = new Date(conv.lastMessageTimestamp || conv.updatedAt || 0).getTime();
+        if (convLastMs <= deletedAtMs) {
+          continue;
+        } else {
+          // A fresh message arrived after deletion! Clean up the old tombstone
+          await store.delete(`tombstone:${conv.phone}`);
+        }
+      } else if (tombstone) {
+        continue;
+      }
 
       const [lead, history, summary, quiz] = await Promise.all([
         store.get(`lead:${conv.phone}`),
@@ -503,11 +514,6 @@ export async function isChatTombstoned(store, phone, messageTimestamp) {
         if (msgTimeMs <= deletedAtMs) {
           return true;
         }
-      } else {
-        // If no timestamp provided, treat as tombstoned within 5 minutes
-        if (Date.now() - deletedAtMs < 300000) {
-          return true;
-        }
       }
     } else {
       return true;
@@ -523,10 +529,6 @@ export async function isChatTombstoned(store, phone, messageTimestamp) {
         ? (messageTimestamp > 1e11 ? messageTimestamp : messageTimestamp * 1000)
         : new Date(messageTimestamp).getTime();
       if (msgTimeMs <= allDeletedAtMs) {
-        return true;
-      }
-    } else {
-      if (Date.now() - allDeletedAtMs < 300000) {
         return true;
       }
     }
