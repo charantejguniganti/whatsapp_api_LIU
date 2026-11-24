@@ -41,12 +41,87 @@ let connectionStatus = 'disconnected'; // 'disconnected' | 'connecting' | 'conne
 let connectedPhone = null;
 let isStarting = false;
 
+// Pairing code state
+let currentPairingCode = null;
+let pairingCodeExpiresAt = null;
+let pairingPhoneNumber = null;
+
 export function getBaileysStatus() {
+  // If pairing code expired, clear it
+  if (pairingCodeExpiresAt && Date.now() > pairingCodeExpiresAt) {
+    currentPairingCode = null;
+    pairingCodeExpiresAt = null;
+    pairingPhoneNumber = null;
+  }
+
   return {
     status: connectionStatus,
     qr: currentQr,
     phone: connectedPhone,
+    pairingCode: currentPairingCode,
+    pairingCodeExpiresAt: pairingCodeExpiresAt ? new Date(pairingCodeExpiresAt).toISOString() : null,
+    pairingPhoneNumber: pairingPhoneNumber,
   };
+}
+
+/**
+ * Request a Baileys Pairing Code for phone number linking.
+ * Formats phone number and queries active socket for 8-character pairing code.
+ * Reuses existing connection or starts socket if disconnected.
+ *
+ * @param {string} phoneNumber - Full phone number with country code (e.g. "+91 91540 18249")
+ * @returns {Promise<{ pairingCode: string, expiresAt: string, phone: string }>}
+ */
+export async function requestPairingCode(phoneNumber) {
+  if (!phoneNumber) {
+    throw new Error('Phone number is required for pairing code authentication');
+  }
+
+  // Sanitize phone: keep only digits
+  const cleanPhone = String(phoneNumber).replace(/\D/g, '');
+  if (!cleanPhone || cleanPhone.length < 8 || cleanPhone.length > 15) {
+    throw new Error('Please enter a valid phone number with country code (e.g. 919154018249)');
+  }
+
+  // If already connected, do not request pairing code
+  if (sock && connectionStatus === 'connected') {
+    throw new Error(`WhatsApp is already connected to ${connectedPhone || 'another phone'}`);
+  }
+
+  // Ensure socket is running and ready for pairing code
+  if (!sock || connectionStatus === 'disconnected') {
+    await initBaileys(true);
+  }
+
+  // Wait a short moment for socket to initialize event listeners if just starting
+  let attempts = 0;
+  while ((!sock || !sock.requestPairingCode) && attempts < 20) {
+    await new Promise((r) => setTimeout(r, 250));
+    attempts++;
+  }
+
+  if (!sock || typeof sock.requestPairingCode !== 'function') {
+    throw new Error('Baileys socket is not ready to generate a pairing code. Please try again.');
+  }
+
+  try {
+    logger.info({ phone: cleanPhone }, 'Requesting Baileys pairing code...');
+    const code = await sock.requestPairingCode(cleanPhone);
+    currentPairingCode = code;
+    // Pairing codes typically expire in 2-3 minutes
+    pairingCodeExpiresAt = Date.now() + 180 * 1000;
+    pairingPhoneNumber = cleanPhone;
+    logger.info({ code, phone: cleanPhone }, '✅ Baileys pairing code generated successfully');
+
+    return {
+      pairingCode: code,
+      expiresAt: new Date(pairingCodeExpiresAt).toISOString(),
+      phone: cleanPhone,
+    };
+  } catch (err) {
+    logger.error({ err, phone: cleanPhone }, 'Failed to request Baileys pairing code');
+    throw new Error(`Failed to generate pairing code: ${err.message || 'WhatsApp error'}`);
+  }
 }
 
 export async function initBaileys(forceRestart = false) {
@@ -109,6 +184,9 @@ export async function initBaileys(forceRestart = false) {
       } else if (connection === 'open') {
         connectionStatus = 'connected';
         currentQr = null;
+        currentPairingCode = null;
+        pairingCodeExpiresAt = null;
+        pairingPhoneNumber = null;
         connectedPhone = sock.user?.id ? sock.user.id.split(':')[0] : null;
         logger.info({ phone: connectedPhone }, '✅ WhatsApp Web linked successfully!');
       }

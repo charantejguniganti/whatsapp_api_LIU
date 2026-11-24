@@ -198,6 +198,31 @@ router.post('/whatsapp/start', async (req, res, next) => {
 });
 
 // ---------------------------------------------------------------------------
+// POST /admin/whatsapp/pairing-code
+// Generates a Baileys pairing code for phone-number based linking
+// ---------------------------------------------------------------------------
+router.post('/whatsapp/pairing-code', async (req, res, next) => {
+  try {
+    const { phone } = req.body ?? {};
+    if (!phone) {
+      return res.status(400).json({ error: 'Phone number is required (with country code)' });
+    }
+
+    const { requestPairingCode } = await import('../whatsapp/baileysClient.js');
+    const result = await requestPairingCode(phone);
+    return res.json({
+      ok: true,
+      pairingCode: result.pairingCode,
+      expiresAt: result.expiresAt,
+      phone: result.phone,
+    });
+  } catch (err) {
+    logger.warn({ err: err.message }, 'Pairing code generation error');
+    return res.status(400).json({ error: err.message || 'Failed to generate pairing code' });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // POST /admin/leads/:phone/reply (Mam sends message from dashboard)
 // ---------------------------------------------------------------------------
 router.post('/leads/:phone/reply', async (req, res, next) => {
