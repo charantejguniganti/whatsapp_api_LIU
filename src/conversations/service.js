@@ -375,8 +375,10 @@ export function createConversationService(store) {
       const conv = await store.get(key);
       if (!conv || !conv.phone) continue;
 
+      const cleanPhone = conv.phone.replace(/[^\d+]/g, '');
+
       // Check tombstone with message timestamp: if customer sent a new message AFTER deletion, show it!
-      const tombstone = await store.get(`tombstone:${conv.phone}`);
+      const tombstone = (await store.get(`tombstone:${conv.phone}`)) || (await store.get(`tombstone:${cleanPhone}`));
       if (tombstone && tombstone.deletedAt) {
         const deletedAtMs = new Date(tombstone.deletedAt).getTime();
         const convLastMs = new Date(conv.lastMessageTimestamp || conv.updatedAt || 0).getTime();
@@ -385,9 +387,20 @@ export function createConversationService(store) {
         } else {
           // A fresh message arrived after deletion! Clean up the old tombstone
           await store.delete(`tombstone:${conv.phone}`);
+          await store.delete(`tombstone:${cleanPhone}`);
         }
       } else if (tombstone) {
         continue;
+      }
+
+      // Check global tombstone
+      const globalTombstone = await store.get('tombstone:global');
+      if (globalTombstone?.deletedAllAt) {
+        const deletedAllMs = new Date(globalTombstone.deletedAllAt).getTime();
+        const convLastMs = new Date(conv.lastMessageTimestamp || conv.updatedAt || 0).getTime();
+        if (convLastMs <= deletedAllMs) {
+          continue;
+        }
       }
 
       const [lead, history, summary, quiz] = await Promise.all([
