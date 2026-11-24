@@ -2,7 +2,7 @@
  * Web Push Notification Service
  * Sends native mobile push notifications to installed PWAs using Web Push API and VAPID.
  */
-import webpush from 'web-push';
+import * as webpush from 'web-push';
 import config from '../config/index.js';
 import logger from '../logger.js';
 import * as pushStore from './pushStore.js';
