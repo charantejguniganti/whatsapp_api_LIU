@@ -60,15 +60,27 @@ export function createApp() {
   app.get('/sw.js', (_req, res) => {
     res.setHeader('Content-Type', 'application/javascript');
     res.setHeader('Service-Worker-Allowed', '/');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(__dirname, 'dashboard', 'sw.js'));
   });
 
   // Serve PWA Icons & Static Dashboard Assets
   app.use('/icons', express.static(path.join(__dirname, 'dashboard', 'icons')));
-  app.use('/dashboard', express.static(path.join(__dirname, 'dashboard')));
+  app.get(['/dashboard', '/dashboard/index.html'], (_req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(__dirname, 'dashboard', 'index.html'));
+  });
+  app.use('/dashboard', express.static(path.join(__dirname, 'dashboard'), {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    }
+  }));
 
   // Root URL launches the Dashboard app shell
   app.get('/', (_req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(__dirname, 'dashboard', 'index.html'));
   });
 
