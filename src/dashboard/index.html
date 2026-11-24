@@ -1632,6 +1632,86 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Fixed Viewport for Conversations workspace so page never scrolls */
+    body.view-conversations,
+    body.view-conversations .main-wrapper {
+      overflow-y: hidden !important;
+      overflow-x: hidden !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+    }
+
+    #view-conversations.active {
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 !important;
+      min-height: 0 !important;
+      height: 100% !important;
+      overflow: hidden !important;
+    }
+
+    #view-conversations .workspace-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 310px 1fr 330px;
+      gap: 16px;
+      min-height: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #col-conversations,
+    #col-chat,
+    #col-details {
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .conversations-header {
+      flex-shrink: 0;
+    }
+
+    .conversations-list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    .chat-header {
+      flex-shrink: 0;
+    }
+
+    .chat-messages-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+
+    .chat-input-bar {
+      flex-shrink: 0;
+    }
+
+    .details-tabs {
+      flex-shrink: 0;
+    }
+
+    .details-content-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
     /* CRM Date Filter Bar */
     .crm-date-bar {
       display: flex;
@@ -3564,6 +3644,7 @@
     // ─── CRM VIEW SWITCHING & ROUTING ─────────────────────
     function switchView(viewName, navEl) {
       currentActiveView = viewName;
+      document.body.classList.toggle('view-conversations', viewName === 'conversations');
       document.querySelectorAll('.crm-view').forEach(v => v.classList.remove('active'));
       const targetView = document.getElementById(`view-${viewName}`);
       if (targetView) targetView.classList.add('active');
@@ -4516,6 +4597,8 @@
               ? formatPhone(l.verifiedPhone || l.phone, true)
               : (l.lid ? `LID: ${l.lid.split('@')[0]} (Unverified)` : 'Unverified Phone');
 
+            const existing = allConversations.find(c => c.phone === l.phone);
+
             return {
               phone: l.phone,
               verifiedPhone: l.verifiedPhone,
@@ -4536,7 +4619,7 @@
               services: l.interest ? [l.interest] : ['Wellness & Image Consulting'],
               requirements: l.summary ? [l.summary] : ['Customer enquiry on WhatsApp'],
               nextSteps: ['Follow up with customer schedule', 'Offer consultation booking'],
-              messages: []
+              messages: existing?.messages || []
             };
           });
 
@@ -4678,8 +4761,250 @@
       `).join('');
     }
 
+    // ─── TRANSCRIPT PAGINATION & SCROLL MANAGEMENT ────────
+    let transcriptState = {
+      phone: null,
+      offset: 0,
+      limit: 30,
+      hasMore: false,
+      isLoading: false
+    };
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function renderMessageRow(m, avatar) {
+      const isUser = m.role === 'user';
+      const timeStr = m.time || (m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Transcript');
+      return `
+        <div class="chat-row ${isUser ? 'incoming' : 'outgoing'}" data-msg-role="${m.role || ''}">
+          <div class="msg-avatar ${m.role === 'assistant' ? 'ai' : ''}">
+            ${m.role === 'assistant' ? 'LIU' : avatar}
+          </div>
+          <div class="bubble-wrap">
+            <div class="chat-bubble">${escapeHtml(m.text || m.content || '').replace(/\n/g, '<br>')}</div>
+            <div class="bubble-meta">${timeStr}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function updateRightDetails(conv) {
+      if (!conv) return;
+      const setSafe = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+      setSafe('detail-phone', conv.phoneDisplay || formatPhone(conv.phone, conv.isVerifiedPhone));
+      setSafe('detail-first-contact', conv.firstContact);
+      setSafe('detail-last-msg', conv.lastContact);
+      
+      const statusPill = document.getElementById('detail-status-pill');
+      if (statusPill) {
+        statusPill.innerText = `● ${conv.status}`;
+        statusPill.className = `tag-pill ${conv.statusClass}`;
+      }
+
+      const isHuman = conv.state === 'HUMAN_TAKEOVER';
+      setSafe('detail-owner', isHuman ? '👤 Mam (Human)' : '🤖 AI Assistant (Liv)');
+
+      const btnTakeover = document.getElementById('btn-takeover');
+      if (btnTakeover) {
+        if (isHuman) {
+          btnTakeover.style.opacity = '0.5';
+          btnTakeover.innerText = '✓ Claimed by Mam';
+        } else {
+          btnTakeover.style.opacity = '1';
+          btnTakeover.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Take Over (Human)
+          `;
+        }
+      }
+
+      const sTags = document.getElementById('detail-services-tags');
+      if (sTags) {
+        sTags.innerHTML = (conv.services || []).map((s, i) => `
+          <span class="tag-pill-large ${i % 2 === 0 ? 'brown' : 'orange'}">${escapeHtml(s)}</span>
+        `).join('') || '<span style="font-size:12px; color:var(--text-muted);">None</span>';
+      }
+
+      const reqs = document.getElementById('detail-requirements');
+      if (reqs) {
+        reqs.innerHTML = (conv.requirements || []).map(r => `<li>${escapeHtml(r)}</li>`).join('') || '<li>Customer enquiry on WhatsApp</li>';
+      }
+
+      const steps = document.getElementById('detail-next-steps');
+      if (steps) {
+        steps.innerHTML = (conv.nextSteps || []).map(n => `<li>${escapeHtml(n)}</li>`).join('');
+      }
+    }
+
+    function renderTranscriptDOM(conv) {
+      const chatContainer = document.getElementById('chat-messages-container');
+      if (!chatContainer) return;
+
+      const msgs = conv.messages || [];
+      if (msgs.length === 0) {
+        chatContainer.innerHTML = `
+          <div class="chat-date-divider"><span>Active Transcript</span></div>
+          <div style="padding: 32px; text-align: center; color: var(--text-muted); font-size: 13px;">
+            No message history recorded yet for this number.
+          </div>
+        `;
+        return;
+      }
+
+      const rowsHtml = msgs.map(m => renderMessageRow(m, conv.avatar)).join('');
+      const loaderHtml = `
+        <div id="chat-older-loader" style="display:none; text-align:center; padding:8px 0; font-size:11.5px; color:var(--text-muted);">
+          <div class="btn-spinner" style="display:inline-block; vertical-align:middle; width:14px; height:14px; margin-right:6px; border-top-color:#6B4938; border-color:rgba(107,73,56,0.2);"></div>
+          Loading older messages...
+        </div>
+      `;
+
+      chatContainer.innerHTML = `
+        <div class="chat-date-divider"><span>Active Transcript</span></div>
+        ${loaderHtml}
+        <div id="chat-messages-list" style="display:flex; flex-direction:column; gap:16px;">
+          ${rowsHtml}
+        </div>
+      `;
+    }
+
+    function initChatScrollListener() {
+      const chatContainer = document.getElementById('chat-messages-container');
+      if (!chatContainer || chatContainer._hasScrollListener) return;
+      chatContainer._hasScrollListener = true;
+
+      chatContainer.addEventListener('scroll', () => {
+        if (chatContainer.scrollTop < 60 && transcriptState.hasMore && !transcriptState.isLoading) {
+          loadOlderTranscript();
+        }
+      }, { passive: true });
+    }
+
+    async function loadOlderTranscript() {
+      if (!selectedPhone || transcriptState.isLoading || !transcriptState.hasMore) return;
+
+      const chatContainer = document.getElementById('chat-messages-container');
+      const messagesList = document.getElementById('chat-messages-list');
+      const olderLoader = document.getElementById('chat-older-loader');
+      if (!chatContainer || !messagesList) return;
+
+      transcriptState.isLoading = true;
+      if (olderLoader) olderLoader.style.display = 'block';
+
+      // 1. Record scrollHeight and scrollTop before prepending older messages
+      const prevScrollHeight = chatContainer.scrollHeight;
+      const prevScrollTop = chatContainer.scrollTop;
+
+      const nextOffset = transcriptState.offset + transcriptState.limit;
+      const phone = selectedPhone;
+
+      try {
+        const res = await fetch(`/admin/leads/${encodeURIComponent(phone)}?limit=${transcriptState.limit}&offset=${nextOffset}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          const detail = await res.json();
+          if (selectedPhone !== phone) return;
+
+          const olderBatch = (detail.history || []).map(h => ({
+            role: h.role,
+            text: h.content,
+            timestamp: h.timestamp,
+            time: h.timestamp ? new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Transcript'
+          }));
+
+          transcriptState.offset = nextOffset;
+          transcriptState.hasMore = detail.hasMore ?? false;
+
+          const conv = allConversations.find(c => c.phone === phone);
+          if (conv && olderBatch.length > 0) {
+            conv.messages = olderBatch.concat(conv.messages);
+            const olderHtml = olderBatch.map(m => renderMessageRow(m, conv.avatar)).join('');
+            messagesList.insertAdjacentHTML('afterbegin', olderHtml);
+
+            // 2. Restore exact scroll position using height difference
+            const newScrollHeight = chatContainer.scrollHeight;
+            const heightDiff = newScrollHeight - prevScrollHeight;
+            chatContainer.scrollTop = prevScrollTop + heightDiff;
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load older messages:', err);
+      } finally {
+        if (olderLoader) olderLoader.style.display = 'none';
+        transcriptState.isLoading = false;
+      }
+    }
+
+    function syncActiveChatTranscript(detail) {
+      if (!selectedPhone || transcriptState.isLoading) return;
+      const conv = allConversations.find(c => c.phone === selectedPhone);
+      if (!conv) return;
+
+      const chatContainer = document.getElementById('chat-messages-container');
+      const messagesList = document.getElementById('chat-messages-list');
+      if (!chatContainer || !messagesList) return;
+
+      const latestServerMessages = detail.history || [];
+      if (latestServerMessages.length === 0) return;
+
+      const currentMessages = conv.messages || [];
+      const newMessages = [];
+
+      for (let i = latestServerMessages.length - 1; i >= 0; i--) {
+        const sm = latestServerMessages[i];
+        const isAlreadyPresent = currentMessages.some(cm => 
+          (sm.timestamp && cm.timestamp && sm.timestamp === cm.timestamp) ||
+          (sm.content === cm.text && sm.role === cm.role)
+        );
+        if (!isAlreadyPresent) {
+          newMessages.unshift(sm);
+        } else {
+          break;
+        }
+      }
+
+      if (newMessages.length > 0) {
+        const isNearBottom = (chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight) < 120;
+        
+        const mappedNew = newMessages.map(h => ({
+          role: h.role,
+          text: h.content,
+          timestamp: h.timestamp,
+          time: h.timestamp ? new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Transcript'
+        }));
+
+        conv.messages = conv.messages.concat(mappedNew);
+
+        const newHtml = mappedNew.map(m => renderMessageRow(m, conv.avatar)).join('');
+        messagesList.insertAdjacentHTML('beforeend', newHtml);
+
+        if (isNearBottom) {
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+      }
+
+      if (detail.conversation?.state && conv.state !== detail.conversation.state) {
+        conv.state = detail.conversation.state;
+        updateRightDetails(conv);
+      }
+    }
+
     // ─── SELECT CONVERSATION ──────────────────────────────
     async function selectConversation(phone, fromUserClick = true) {
+      const isSwitchingPhone = (selectedPhone !== phone);
       selectedPhone = phone;
       const conv = allConversations.find(c => c.phone === phone);
       if (!conv) return;
@@ -4690,7 +5015,7 @@
 
       renderConversationsList();
 
-      // Update Center Chat Column
+      // Update Center Chat Column Header
       const activeNameEl = document.getElementById('active-chat-name');
       if (activeNameEl) activeNameEl.innerText = conv.name;
       document.getElementById('active-chat-phone').innerText = conv.phoneDisplay || formatPhone(conv.phone, conv.isVerifiedPhone);
@@ -4699,94 +5024,74 @@
       document.getElementById('active-chat-status').className = `tag-pill ${conv.statusClass}`;
       document.getElementById('active-chat-lastseen').innerText = `Last message at ${conv.time}`;
 
-      // Fetch Live Conversation Transcript from Backend
-      const chatContainer = document.getElementById('chat-messages-container');
-      chatContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-muted);">Loading full transcript...</div>';
+      updateRightDetails(conv);
 
+      const chatContainer = document.getElementById('chat-messages-container');
+      if (!chatContainer) return;
+      initChatScrollListener();
+
+      if (isSwitchingPhone) {
+        transcriptState.phone = phone;
+        transcriptState.offset = 0;
+        transcriptState.limit = 30;
+        transcriptState.hasMore = false;
+        transcriptState.isLoading = false;
+
+        // If conversation already has cached messages in memory, display them right away
+        if (conv.messages && conv.messages.length > 0) {
+          renderTranscriptDOM(conv);
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        } else {
+          chatContainer.innerHTML = `
+            <div style="padding: 40px; text-align: center; color: var(--text-muted); font-size: 13px;">
+              <div class="btn-spinner" style="margin:0 auto 10px auto; border-top-color:#6B4938; border-color:rgba(107,73,56,0.2); width:20px; height:20px;"></div>
+              Loading conversation...
+            </div>
+          `;
+        }
+      }
+
+      if (transcriptState.isLoading && transcriptState.phone === phone) {
+        return;
+      }
+
+      transcriptState.isLoading = true;
       try {
-        const res = await fetch(`/admin/leads/${encodeURIComponent(phone)}`, {
+        const res = await fetch(`/admin/leads/${encodeURIComponent(phone)}?limit=30&offset=0`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.ok) {
           const detail = await res.json();
+          if (selectedPhone !== phone) return;
+
           const history = detail.history || [];
+          transcriptState.hasMore = detail.hasMore ?? false;
+
           conv.messages = history.map(h => ({
             role: h.role,
             text: h.content,
-            time: 'Transcript'
+            timestamp: h.timestamp,
+            time: h.timestamp ? new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Transcript'
           }));
 
-          if (detail.conversation?.state) {
-            conv.state = detail.conversation.state;
-          }
-          if (detail.summary) {
-            conv.requirements = [detail.summary];
-          }
-          if (detail.lead?.data?.interest) {
-            conv.services = [detail.lead.data.interest];
+          if (detail.conversation?.state) conv.state = detail.conversation.state;
+          if (detail.summary) conv.requirements = [detail.summary];
+          if (detail.lead?.data?.interest) conv.services = [detail.lead.data.interest];
+
+          updateRightDetails(conv);
+
+          const isAtBottom = (chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight) < 100;
+          renderTranscriptDOM(conv);
+
+          if (isSwitchingPhone || isAtBottom) {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
           }
         }
       } catch (err) {
         console.error('Failed to fetch lead transcript:', err);
+      } finally {
+        transcriptState.isLoading = false;
       }
-
-      const msgsHtml = conv.messages.length > 0 ? conv.messages.map(m => `
-        <div class="chat-row ${m.role === 'user' ? 'incoming' : 'outgoing'}">
-          <div class="msg-avatar ${m.role === 'assistant' ? 'ai' : ''}">
-            ${m.role === 'assistant' ? 'LIU' : conv.avatar}
-          </div>
-          <div class="bubble-wrap">
-            <div class="chat-bubble">${(m.text || '').replace(/\n/g, '<br>')}</div>
-            <div class="bubble-meta">${m.time}</div>
-          </div>
-        </div>
-      `).join('') : '<div style="padding: 32px; text-align: center; color: var(--text-muted); font-size: 13px;">No message history recorded yet for this number.</div>';
-
-      chatContainer.innerHTML = `
-        <div class="chat-date-divider"><span>Active Transcript</span></div>
-        ${msgsHtml}
-      `;
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-
-      // Update Right Details Column
-      document.getElementById('detail-phone').innerText = conv.phoneDisplay || formatPhone(conv.phone, conv.isVerifiedPhone);
-      document.getElementById('detail-first-contact').innerText = conv.firstContact;
-      document.getElementById('detail-last-msg').innerText = conv.lastContact;
-      document.getElementById('detail-status-pill').innerText = `● ${conv.status}`;
-      document.getElementById('detail-status-pill').className = `tag-pill ${conv.statusClass}`;
-
-      const isHuman = conv.state === 'HUMAN_TAKEOVER';
-      document.getElementById('detail-owner').innerText = isHuman ? '👤 Mam (Human)' : '🤖 AI Assistant (Liv)';
-      
-      const btnTakeover = document.getElementById('btn-takeover');
-      if (isHuman) {
-        btnTakeover.style.opacity = '0.5';
-        btnTakeover.innerText = '✓ Claimed by Mam';
-      } else {
-        btnTakeover.style.opacity = '1';
-        btnTakeover.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          Take Over (Human)
-        `;
-      }
-
-      // Services tags
-      document.getElementById('detail-services-tags').innerHTML = (conv.services || []).map((s, i) => `
-        <span class="tag-pill-large ${i % 2 === 0 ? 'brown' : 'orange'}">${s}</span>
-      `).join('');
-
-      // Requirements
-      document.getElementById('detail-requirements').innerHTML = (conv.requirements || []).map(r => `
-        <li>${r}</li>
-      `).join('');
-
-      // Next steps
-      document.getElementById('detail-next-steps').innerHTML = (conv.nextSteps || []).map(n => `
-        <li>${n}</li>
-      `).join('');
     }
 
     // ─── ACTIONS ──────────────────────────────────────────
@@ -4868,20 +5173,33 @@
 
         if (res.ok) {
           const nowIso = new Date().toISOString();
-          conv.messages.push({
+          const newMsg = {
             role: 'assistant',
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            text: text
-          });
+            text: text,
+            timestamp: nowIso
+          };
+          conv.messages = (conv.messages || []).concat([newMsg]);
           conv.lastMsg = text;
           conv.lastMessageAt = nowIso;
-          conv.time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          conv.time = newMsg.time;
           input.value = '';
+
+          // Append directly to active chat list without rebuilding the transcript
+          const messagesList = document.getElementById('chat-messages-list');
+          const chatContainer = document.getElementById('chat-messages-container');
+          if (messagesList) {
+            messagesList.insertAdjacentHTML('beforeend', renderMessageRow(newMsg, conv.avatar));
+          } else {
+            renderTranscriptDOM(conv);
+          }
+          if (chatContainer) {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+          }
 
           // Re-sort chats so active conversation jumps to top immediately!
           allConversations.sort((a, b) => new Date(b.lastMessageAt || 0) - new Date(a.lastMessageAt || 0));
           renderConversationsList();
-          selectConversation(conv.phone);
           showToast('Message sent to customer');
         } else {
           showToast('Failed to deliver message');
@@ -5451,16 +5769,13 @@
       setInterval(() => {
         if (token) {
           loadLiveData();
-          if (selectedPhone) {
-            // refresh transcript without wiping scroll
-            fetch(`/admin/leads/${encodeURIComponent(selectedPhone)}`, {
+          if (selectedPhone && !transcriptState.isLoading) {
+            // refresh transcript and append new incoming messages smoothly without wiping scroll
+            fetch(`/admin/leads/${encodeURIComponent(selectedPhone)}?limit=15&offset=0`, {
               headers: { Authorization: `Bearer ${token}` }
             }).then(r => r.json()).then(detail => {
               if (detail && detail.history) {
-                const conv = allConversations.find(c => c.phone === selectedPhone);
-                if (conv && detail.history.length !== conv.messages?.length) {
-                  selectConversation(selectedPhone, false);
-                }
+                syncActiveChatTranscript(detail);
               }
             }).catch(() => {});
           }

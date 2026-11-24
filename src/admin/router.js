@@ -116,18 +116,37 @@ router.get('/leads/:phone', async (req, res, next) => {
     const phone = decodeURIComponent(req.params.phone);
     const store = await getStore();
 
-    const [conv, leadState, history, summary] = await Promise.all([
+    const [conv, leadState, rawHistory, summary] = await Promise.all([
       store.get(`conv:${phone}`),
       store.get(`lead:${phone}`),
       store.get(`history:${phone}`),
       store.get(`summary:${phone}`),
     ]);
 
+    const history = Array.isArray(rawHistory) ? rawHistory : [];
+    const total = history.length;
+
+    let slicedHistory = history;
+    let hasMore = false;
+
+    if (req.query.limit) {
+      const limit = parseInt(req.query.limit, 10) || 50;
+      const offset = parseInt(req.query.offset, 10) || 0;
+      // Chronological order: [oldest ... newest]
+      // offset=0, limit=30 returns the newest 30 messages
+      const startIndex = Math.max(0, total - offset - limit);
+      const endIndex = Math.max(0, total - offset);
+      slicedHistory = history.slice(startIndex, endIndex);
+      hasMore = startIndex > 0;
+    }
+
     return res.json({
       phone,
       conversation: conv ?? { phone, state: CONV_STATE.AI_ACTIVE },
       lead: leadState ?? null,
-      history: history ?? [],
+      history: slicedHistory,
+      totalMessages: total,
+      hasMore,
       summary: summary ?? conv?.summary ?? null,
     });
   } catch (err) {
