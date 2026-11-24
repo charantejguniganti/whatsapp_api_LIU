@@ -3595,8 +3595,11 @@
       }
     }
 
-    function jumpToConversation(phone) {
+    async function jumpToConversation(phone) {
       switchView('conversations');
+      if (!allConversations.some(c => c.phone === phone)) {
+        await loadLiveData();
+      }
       selectConversation(phone, true);
     }
 
@@ -4459,15 +4462,15 @@
         }
         if (statsRes.ok) {
           const stats = await statsRes.json();
-          // Accurately map each metric card to its real meaning
-          document.getElementById('stat-new').innerText = stats.newEnquiries ?? stats.pendingNotification ?? 0;
-          document.getElementById('stat-progress').innerText = stats.inProgress ?? stats.humanTakeover ?? 0;
-          document.getElementById('stat-waiting').innerText = stats.waitingForCustomer ?? stats.aiResumed ?? 0;
-          document.getElementById('stat-closed').innerText = stats.closed ?? 0;
+          const setSafe = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+          setSafe('stat-new', stats.newEnquiries ?? stats.pendingNotification ?? 0);
+          setSafe('stat-progress', stats.inProgress ?? stats.humanTakeover ?? 0);
+          setSafe('stat-waiting', stats.waitingForCustomer ?? stats.aiResumed ?? 0);
+          setSafe('stat-closed', stats.closed ?? 0);
 
-          document.getElementById('count-all').innerText = stats.total ?? 0;
-          document.getElementById('count-new').innerText = stats.newEnquiries ?? stats.pendingNotification ?? 0;
-          document.getElementById('count-prog').innerText = stats.inProgress ?? stats.humanTakeover ?? 0;
+          setSafe('count-all', stats.total ?? 0);
+          setSafe('count-new', stats.newEnquiries ?? stats.pendingNotification ?? 0);
+          setSafe('count-prog', stats.inProgress ?? stats.humanTakeover ?? 0);
         }
 
         // Fetch Live Leads from Neon PostgreSQL
@@ -4540,6 +4543,14 @@
           // Sort chats with latest message first (descending timestamp)
           allConversations.sort((a, b) => new Date(b.lastMessageAt || 0) - new Date(a.lastMessageAt || 0));
 
+          // Accurately update conversation tab pill counts directly from live leads
+          const countAll = document.getElementById('count-all');
+          if (countAll) countAll.innerText = allConversations.length;
+          const countNew = document.getElementById('count-new');
+          if (countNew) countNew.innerText = allConversations.filter(c => c.status === 'New').length;
+          const countProg = document.getElementById('count-prog');
+          if (countProg) countProg.innerText = allConversations.filter(c => c.status === 'In Progress' || c.status === 'Consultant Requested' || c.status === 'Waiting for Customer').length;
+
           renderConversationsList();
 
           if (isInitial) {
@@ -4548,16 +4559,18 @@
                 // Mobile: keep list view as the landing screen
                 setMobileView('list');
               } else {
-                selectConversation(allConversations[0].phone);
+                selectConversation(allConversations[0].phone, false);
               }
             } else {
               renderEmptyWorkspace();
             }
-          } else if (!selectedPhone && allConversations.length > 0) {
-            if (window.innerWidth > 768) {
-              selectConversation(allConversations[0].phone);
+          } else if (allConversations.length > 0) {
+            if (!selectedPhone || !allConversations.some(c => c.phone === selectedPhone)) {
+              if (window.innerWidth > 768) {
+                selectConversation(allConversations[0].phone, false);
+              }
             }
-          } else if (allConversations.length === 0) {
+          } else {
             renderEmptyWorkspace();
           }
         }
@@ -4613,18 +4626,22 @@
     // ─── RENDER CONVERSATION LIST ─────────────────────────
     function renderConversationsList() {
       const container = document.getElementById('conv-list-container');
+      if (!container) return;
+
       const filtered = allConversations.filter(c => {
         const matchesFilter = 
           currentFilter === 'all' ? true :
           currentFilter === 'new' ? c.status === 'New' :
-          currentFilter === 'progress' ? c.status === 'In Progress' : true;
+          currentFilter === 'progress' ? (c.status === 'In Progress' || c.status === 'Consultant Requested' || c.status === 'Waiting for Customer') : true;
         
-        const q = searchQuery.toLowerCase();
+        const q = (searchQuery || '').toLowerCase().trim();
+        if (!q) return matchesFilter;
+
         const matchesSearch = 
-          c.phone.toLowerCase().includes(q) ||
-          c.name.toLowerCase().includes(q) ||
-          (c.phoneDisplay && c.phoneDisplay.toLowerCase().includes(q)) ||
-          c.lastMsg.toLowerCase().includes(q);
+          (c.phone || '').toLowerCase().includes(q) ||
+          (c.name || '').toLowerCase().includes(q) ||
+          (c.phoneDisplay || '').toLowerCase().includes(q) ||
+          (c.lastMsg || '').toLowerCase().includes(q);
 
         return matchesFilter && matchesSearch;
       });

@@ -68,7 +68,7 @@ router.get('/stats', async (req, res, next) => {
     const convs = await convService.listConversations();
 
     const newEnquiries = convs.filter((c) => c.status === 'New').length;
-    const inProgress = convs.filter((c) => c.status === 'In Progress').length;
+    const inProgress = convs.filter((c) => c.status === 'In Progress' || c.status === 'Consultant Requested').length;
     const waitingForCustomer = convs.filter((c) => c.status === 'Waiting for Customer').length;
     const closed = convs.filter((c) => c.status === 'Closed').length;
 
