@@ -1632,9 +1632,11 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Fixed Viewport for Conversations workspace so page never scrolls */
+    /* Fixed Viewport for Conversations workspace & Enquiries dual-pane so page never scrolls */
     body.view-conversations,
-    body.view-conversations .main-wrapper {
+    body.view-conversations .main-wrapper,
+    body.view-enquiries,
+    body.view-enquiries .main-wrapper {
       overflow-y: hidden !important;
       overflow-x: hidden !important;
       height: 100vh !important;
@@ -1648,6 +1650,16 @@
       min-height: 0 !important;
       height: 100% !important;
       overflow: hidden !important;
+    }
+
+    #view-enquiries.active {
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 !important;
+      min-height: 0 !important;
+      height: 100% !important;
+      overflow: hidden !important;
+      gap: 14px !important;
     }
 
     #view-conversations .workspace-grid {
@@ -1712,26 +1724,29 @@
       overscroll-behavior: contain;
     }
 
-    /* ─── ENQUIRIES VIEW STYLES & APPOINTMENT CARDS ─────────── */
+    /* ─── TWO DISTINCT VISIBLE SCROLLBARS FOR ENQUIRIES ───── */
     .enquiries-scroll-container {
-      overflow-y: auto;
-      overflow-x: hidden;
-      scrollbar-width: thin;
-      scrollbar-color: #b7a99b transparent;
+      overflow-y: scroll !important;
+      overflow-x: auto;
+      scrollbar-width: thin !important;
+      scrollbar-color: #A07056 #F5EDE7 !important;
     }
     .enquiries-scroll-container::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
+      width: 8px !important;
+      height: 8px !important;
+      display: block !important;
     }
     .enquiries-scroll-container::-webkit-scrollbar-track {
-      background: transparent;
+      background: #F5EDE7 !important;
+      border-radius: 6px !important;
     }
     .enquiries-scroll-container::-webkit-scrollbar-thumb {
-      background: #b7a99b;
-      border-radius: 10px;
+      background: #A07056 !important;
+      border-radius: 6px !important;
+      border: 1.5px solid #F5EDE7 !important;
     }
     .enquiries-scroll-container::-webkit-scrollbar-thumb:hover {
-      background: #8e7f72;
+      background: #6B4938 !important;
     }
 
     .appointment-grid {
@@ -2750,20 +2765,20 @@
 
   <!-- ─── VIEW 3: ENQUIRIES MANAGEMENT ────────────────────── -->
   <div id="view-enquiries" class="crm-view">
-    <!-- SECTION 1: Chat Enquiries -->
-    <div class="crm-section-card" style="margin-bottom: 24px;">
-      <div class="crm-section-header">
+    <!-- SECTION 1: Chat Enquiries (Scrollbar 1) -->
+    <div class="crm-section-card" id="chat-enquiries-card" style="flex: 1 1 48%; min-height: 0; display: flex; flex-direction: column; margin-bottom: 0; padding: 14px 18px;">
+      <div class="crm-section-header" style="flex-shrink: 0; margin-bottom: 8px;">
         <div>
-          <div class="crm-section-title">📋 Chat Enquiries (<span id="chat-enquiries-total-count">0</span>)</div>
-          <div class="crm-section-desc">Manage, filter, and assign incoming customer consultation enquiries</div>
+          <div class="crm-section-title" style="font-size: 15px;">📋 Chat Enquiries (<span id="chat-enquiries-total-count">0</span>)</div>
+          <div class="crm-section-desc" style="font-size: 11px;">Manage, filter, and assign incoming customer consultation enquiries</div>
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
-          <input type="text" id="enquiry-filter-search" placeholder="Search customer, phone or service..." oninput="filterEnquiriesTable(this.value)" style="border:1px solid var(--border); padding:6px 12px; border-radius:8px; font-size:12px; width:220px;" />
+          <input type="text" id="enquiry-filter-search" placeholder="Search customer, phone or service..." oninput="filterEnquiriesTable(this.value)" style="border:1px solid var(--border); padding:5px 10px; border-radius:8px; font-size:12px; width:220px;" />
         </div>
       </div>
 
       <!-- Stage Filters -->
-      <div class="crm-date-pills" id="enquiries-stage-pills" style="margin-bottom:14px;">
+      <div class="crm-date-pills" id="enquiries-stage-pills" style="flex-shrink: 0; margin-bottom: 8px;">
         <button type="button" class="crm-date-pill active" onclick="setEnquiriesStageFilter('all', this)">All (<span id="eq-count-all">0</span>)</button>
         <button type="button" class="crm-date-pill" onclick="setEnquiriesStageFilter('new', this)">New (<span id="eq-count-new">0</span>)</button>
         <button type="button" class="crm-date-pill" onclick="setEnquiriesStageFilter('in_progress', this)">In Progress (<span id="eq-count-prog">0</span>)</button>
@@ -2772,8 +2787,8 @@
         <button type="button" class="crm-date-pill" onclick="setEnquiriesStageFilter('closed', this)">Closed / Converted (<span id="eq-count-closed">0</span>)</button>
       </div>
 
-      <!-- Dedicated Scrollable Container for Chat Enquiries (~38vh) with sticky header -->
-      <div class="enquiries-scroll-container" id="chat-enquiries-scroll-box" style="max-height: 38vh; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px;">
+      <!-- Dedicated Scrollable Container 1 for Chat Enquiries (Scrollbar 1) -->
+      <div class="enquiries-scroll-container" id="chat-enquiries-scroll-box" style="flex: 1; min-height: 0; overflow-y: scroll !important; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px;">
         <table class="crm-table" style="width: 100%; border-collapse: collapse;">
           <thead style="position: sticky; top: 0; background: #FAF7F2; z-index: 3; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
             <tr>
@@ -2793,20 +2808,20 @@
       </div>
     </div>
 
-    <!-- SECTION 2: Appointment Enquiries (Directly below Section 1) -->
-    <div class="crm-section-card" id="appointment-enquiries-section">
-      <div class="crm-section-header">
+    <!-- SECTION 2: Appointment Enquiries (Scrollbar 2) -->
+    <div class="crm-section-card" id="appointment-enquiries-section" style="flex: 1 1 52%; min-height: 0; display: flex; flex-direction: column; margin-bottom: 0; padding: 14px 18px;">
+      <div class="crm-section-header" style="flex-shrink: 0; margin-bottom: 8px;">
         <div>
-          <div class="crm-section-title">📅 Appointment Enquiries (<span id="apt-enquiries-total-count">0</span>)</div>
-          <div class="crm-section-desc">Review, confirm, reschedule, or cancel consultation booking requests submitted by customers</div>
+          <div class="crm-section-title" style="font-size: 15px;">📅 Appointment Enquiries (<span id="apt-enquiries-total-count">0</span>)</div>
+          <div class="crm-section-desc" style="font-size: 11px;">Review, confirm, reschedule, or cancel consultation booking requests submitted by customers</div>
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
-          <input type="text" id="apt-enquiry-search" placeholder="Search customer, phone or service..." oninput="filterAppointmentEnquiries(this.value)" style="border:1px solid var(--border); padding:6px 12px; border-radius:8px; font-size:12px; width:220px;" />
+          <input type="text" id="apt-enquiry-search" placeholder="Search customer, phone or service..." oninput="filterAppointmentEnquiries(this.value)" style="border:1px solid var(--border); padding:5px 10px; border-radius:8px; font-size:12px; width:220px;" />
         </div>
       </div>
 
       <!-- Appointment Status Filter Pills -->
-      <div class="crm-date-pills" id="apt-status-pills" style="margin-bottom:14px;">
+      <div class="crm-date-pills" id="apt-status-pills" style="flex-shrink: 0; margin-bottom: 8px;">
         <button type="button" class="crm-date-pill active" onclick="setAppointmentStatusFilter('all', this)">All (<span id="apt-count-all">0</span>)</button>
         <button type="button" class="crm-date-pill" onclick="setAppointmentStatusFilter('pending', this)">Pending (<span id="apt-count-pending">0</span>)</button>
         <button type="button" class="crm-date-pill" onclick="setAppointmentStatusFilter('confirmed', this)">Confirmed (<span id="apt-count-confirmed">0</span>)</button>
@@ -2815,20 +2830,20 @@
         <button type="button" class="crm-date-pill" onclick="setAppointmentStatusFilter('cancelled', this)">Cancelled (<span id="apt-count-cancelled">0</span>)</button>
       </div>
 
-      <!-- Dedicated Scrollable Container for Appointment Enquiries (~48vh) -->
-      <div class="enquiries-scroll-container" id="apt-enquiries-scroll-box" style="max-height: 48vh; overflow-y: auto; padding: 4px;">
+      <!-- Dedicated Scrollable Container 2 for Appointment Enquiries (Scrollbar 2) -->
+      <div class="enquiries-scroll-container" id="apt-enquiries-scroll-box" style="flex: 1; min-height: 0; overflow-y: scroll !important; overflow-x: hidden; padding: 4px;">
         <div class="appointment-grid" id="apt-cards-grid">
           <!-- Populated dynamically via renderAppointmentCards() -->
         </div>
 
         <!-- Empty State -->
-        <div id="apt-cards-empty" style="display:none; text-align:center; padding:32px 16px; color:var(--text-muted); font-size:13px; background:#FDFBF8; border:1px dashed var(--border); border-radius:8px; margin-top:8px;">
+        <div id="apt-cards-empty" style="display:none; text-align:center; padding:24px 16px; color:var(--text-muted); font-size:13px; background:#FDFBF8; border:1px dashed var(--border); border-radius:8px; margin-top:8px;">
           No appointment enquiries found matching this filter.
         </div>
 
         <!-- Load More Pagination Button -->
-        <div id="apt-load-more-box" style="display:none; text-align:center; padding:16px 0 8px 0;">
-          <button type="button" id="apt-load-more-btn" onclick="loadMoreAppointmentEnquiries()" style="background:#FFFFFF; border:1px solid var(--border); padding:7px 18px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; color:var(--primary-terra);">
+        <div id="apt-load-more-box" style="display:none; text-align:center; padding:10px 0 4px 0;">
+          <button type="button" id="apt-load-more-btn" onclick="loadMoreAppointmentEnquiries()" style="background:#FFFFFF; border:1px solid var(--border); padding:6px 16px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; color:var(--primary-terra);">
             Load More Enquiries
           </button>
         </div>
@@ -3830,6 +3845,7 @@
     function switchView(viewName, navEl) {
       currentActiveView = viewName;
       document.body.classList.toggle('view-conversations', viewName === 'conversations');
+      document.body.classList.toggle('view-enquiries', viewName === 'enquiries');
       document.querySelectorAll('.crm-view').forEach(v => v.classList.remove('active'));
       const targetView = document.getElementById(`view-${viewName}`);
       if (targetView) targetView.classList.add('active');
