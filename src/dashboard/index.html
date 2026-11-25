@@ -1712,6 +1712,72 @@
       overscroll-behavior: contain;
     }
 
+    /* ─── ENQUIRIES VIEW STYLES & APPOINTMENT CARDS ─────────── */
+    .enquiries-scroll-container {
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: #b7a99b transparent;
+    }
+    .enquiries-scroll-container::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .enquiries-scroll-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .enquiries-scroll-container::-webkit-scrollbar-thumb {
+      background: #b7a99b;
+      border-radius: 10px;
+    }
+    .enquiries-scroll-container::-webkit-scrollbar-thumb:hover {
+      background: #8e7f72;
+    }
+
+    .appointment-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    @media (max-width: 1024px) {
+      .appointment-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+    }
+    @media (max-width: 640px) {
+      .appointment-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .appointment-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .appointment-card:hover {
+      border-color: #C8BCB0;
+      box-shadow: 0 4px 12px rgba(107,73,56,0.08);
+      transform: translateY(-1px);
+    }
+
+    .tag-pending { background: #FFF8E1; color: #B78103; border: 1px solid #FFE082; }
+    .tag-confirmed { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+    .tag-rescheduled { background: #EDE7F6; color: #512DA8; border: 1px solid #D1C4E9; }
+    .tag-cancelled { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
+    .tag-completed { background: #E0F2F1; color: #00695C; border: 1px solid #B2DFDB; }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
     /* CRM Date Filter Bar */
     .crm-date-bar {
       display: flex;
@@ -2684,10 +2750,11 @@
 
   <!-- ─── VIEW 3: ENQUIRIES MANAGEMENT ────────────────────── -->
   <div id="view-enquiries" class="crm-view">
-    <div class="crm-section-card">
+    <!-- SECTION 1: Chat Enquiries -->
+    <div class="crm-section-card" style="margin-bottom: 24px;">
       <div class="crm-section-header">
         <div>
-          <div class="crm-section-title">📋 Enquiries Management</div>
+          <div class="crm-section-title">📋 Chat Enquiries (<span id="chat-enquiries-total-count">0</span>)</div>
           <div class="crm-section-desc">Manage, filter, and assign incoming customer consultation enquiries</div>
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
@@ -2696,7 +2763,7 @@
       </div>
 
       <!-- Stage Filters -->
-      <div class="crm-date-pills" id="enquiries-stage-pills" style="margin-bottom:16px;">
+      <div class="crm-date-pills" id="enquiries-stage-pills" style="margin-bottom:14px;">
         <button type="button" class="crm-date-pill active" onclick="setEnquiriesStageFilter('all', this)">All (<span id="eq-count-all">0</span>)</button>
         <button type="button" class="crm-date-pill" onclick="setEnquiriesStageFilter('new', this)">New (<span id="eq-count-new">0</span>)</button>
         <button type="button" class="crm-date-pill" onclick="setEnquiriesStageFilter('in_progress', this)">In Progress (<span id="eq-count-prog">0</span>)</button>
@@ -2705,9 +2772,10 @@
         <button type="button" class="crm-date-pill" onclick="setEnquiriesStageFilter('closed', this)">Closed / Converted (<span id="eq-count-closed">0</span>)</button>
       </div>
 
-      <div style="overflow-x:auto;">
-        <table class="crm-table">
-          <thead>
+      <!-- Dedicated Scrollable Container for Chat Enquiries (~38vh) with sticky header -->
+      <div class="enquiries-scroll-container" id="chat-enquiries-scroll-box" style="max-height: 38vh; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px;">
+        <table class="crm-table" style="width: 100%; border-collapse: collapse;">
+          <thead style="position: sticky; top: 0; background: #FAF7F2; z-index: 3; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
             <tr>
               <th>Customer Name</th>
               <th>WhatsApp Phone</th>
@@ -2719,9 +2787,51 @@
             </tr>
           </thead>
           <tbody id="enquiries-table-tbody">
-            <!-- Populated dynamically via renderEnquiriesView() -->
+            <!-- Populated dynamically via renderEnquiriesTable() -->
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- SECTION 2: Appointment Enquiries (Directly below Section 1) -->
+    <div class="crm-section-card" id="appointment-enquiries-section">
+      <div class="crm-section-header">
+        <div>
+          <div class="crm-section-title">📅 Appointment Enquiries (<span id="apt-enquiries-total-count">0</span>)</div>
+          <div class="crm-section-desc">Review, confirm, reschedule, or cancel consultation booking requests submitted by customers</div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input type="text" id="apt-enquiry-search" placeholder="Search customer, phone or service..." oninput="filterAppointmentEnquiries(this.value)" style="border:1px solid var(--border); padding:6px 12px; border-radius:8px; font-size:12px; width:220px;" />
+        </div>
+      </div>
+
+      <!-- Appointment Status Filter Pills -->
+      <div class="crm-date-pills" id="apt-status-pills" style="margin-bottom:14px;">
+        <button type="button" class="crm-date-pill active" onclick="setAppointmentStatusFilter('all', this)">All (<span id="apt-count-all">0</span>)</button>
+        <button type="button" class="crm-date-pill" onclick="setAppointmentStatusFilter('pending', this)">Pending (<span id="apt-count-pending">0</span>)</button>
+        <button type="button" class="crm-date-pill" onclick="setAppointmentStatusFilter('confirmed', this)">Confirmed (<span id="apt-count-confirmed">0</span>)</button>
+        <button type="button" class="crm-date-pill" onclick="setAppointmentStatusFilter('rescheduled', this)">Rescheduled (<span id="apt-count-rescheduled">0</span>)</button>
+        <button type="button" class="crm-date-pill" onclick="setAppointmentStatusFilter('completed', this)">Completed (<span id="apt-count-completed">0</span>)</button>
+        <button type="button" class="crm-date-pill" onclick="setAppointmentStatusFilter('cancelled', this)">Cancelled (<span id="apt-count-cancelled">0</span>)</button>
+      </div>
+
+      <!-- Dedicated Scrollable Container for Appointment Enquiries (~48vh) -->
+      <div class="enquiries-scroll-container" id="apt-enquiries-scroll-box" style="max-height: 48vh; overflow-y: auto; padding: 4px;">
+        <div class="appointment-grid" id="apt-cards-grid">
+          <!-- Populated dynamically via renderAppointmentCards() -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="apt-cards-empty" style="display:none; text-align:center; padding:32px 16px; color:var(--text-muted); font-size:13px; background:#FDFBF8; border:1px dashed var(--border); border-radius:8px; margin-top:8px;">
+          No appointment enquiries found matching this filter.
+        </div>
+
+        <!-- Load More Pagination Button -->
+        <div id="apt-load-more-box" style="display:none; text-align:center; padding:16px 0 8px 0;">
+          <button type="button" id="apt-load-more-btn" onclick="loadMoreAppointmentEnquiries()" style="background:#FFFFFF; border:1px solid var(--border); padding:7px 18px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; color:var(--primary-terra);">
+            Load More Enquiries
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -3248,6 +3358,81 @@
         <button type="button" onclick="closeReassignModal()" style="flex:1; background:#F5EDE7; color:var(--primary-terra); border:none; border-radius:8px; padding:9px; font-weight:600; font-size:12px; cursor:pointer;">Cancel</button>
         <button type="button" onclick="confirmReassignConsultant()" style="flex:1; background:var(--primary-terra); color:#fff; border:none; border-radius:8px; padding:9px; font-weight:600; font-size:12px; cursor:pointer;">Confirm Assignment</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ─── RESCHEDULE APPOINTMENT MODAL ─────────────────────── -->
+  <div id="apt-reschedule-modal" role="dialog" aria-modal="true" style="display:none; position:fixed; inset:0; background:rgba(39,33,30,0.55); backdrop-filter:blur(4px); z-index:1004; align-items:center; justify-content:center;">
+    <div class="settings-modal-box" style="max-width:440px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div>
+          <h2 style="font-family:var(--font-serif); font-size:18px; color:var(--text-main); margin:0;">Reschedule Appointment</h2>
+          <p style="font-size:11.5px; color:var(--text-muted); margin:2px 0 0 0;">Propose or confirm a new date and time for this consultation</p>
+        </div>
+        <button type="button" onclick="closeRescheduleModal()" style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted); line-height:1;">&times;</button>
+      </div>
+      <form id="apt-reschedule-form" onsubmit="event.preventDefault(); submitRescheduleAppointment();">
+        <input type="hidden" id="apt-resched-id" />
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11.5px; font-weight:600; color:var(--text-main); display:block; margin-bottom:4px;">Customer</label>
+          <div id="apt-resched-customer-display" style="font-size:13px; font-weight:600; color:var(--text-main); background:#FDFBF8; padding:8px 12px; border:1px solid var(--border); border-radius:8px;"></div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+          <div>
+            <label style="font-size:11.5px; font-weight:600; color:var(--text-main); display:block; margin-bottom:4px;">New Date</label>
+            <input type="date" id="apt-resched-date" required style="width:100%; border:1px solid var(--border); padding:8px; border-radius:8px; font-size:12.5px;" />
+          </div>
+          <div>
+            <label style="font-size:11.5px; font-weight:600; color:var(--text-main); display:block; margin-bottom:4px;">New Time</label>
+            <input type="time" id="apt-resched-time" required style="width:100%; border:1px solid var(--border); padding:8px; border-radius:8px; font-size:12.5px;" />
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11.5px; font-weight:600; color:var(--text-main); display:block; margin-bottom:4px;">Assigned Consultant</label>
+          <select id="apt-resched-consultant" style="width:100%; border:1px solid var(--border); padding:8px; border-radius:8px; font-size:12.5px; background:#fff;">
+            <option value="mam|Mam">Mam (Director & Lead Consultant)</option>
+            <option value="priya|Priya Sharma">Priya Sharma (Senior Styling & Image)</option>
+            <option value="ananya|Ananya Roy">Ananya Roy (Grooming & Etiquette)</option>
+            <option value="rahul|Rahul Verma">Rahul Verma (Executive Communication)</option>
+          </select>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:11.5px; font-weight:600; color:var(--text-main); display:block; margin-bottom:4px;">Reason / Notes (Optional)</label>
+          <textarea id="apt-resched-note" placeholder="Note why the appointment is being rescheduled..." rows="2" style="width:100%; border:1px solid var(--border); padding:8px; border-radius:8px; font-size:12px; resize:vertical; font-family:inherit;"></textarea>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button type="button" onclick="closeRescheduleModal()" style="flex:1; background:#F5EDE7; color:var(--primary-terra); border:none; border-radius:8px; padding:10px; font-weight:600; font-size:12.5px; cursor:pointer;">Cancel</button>
+          <button type="submit" id="btn-submit-resched" style="flex:1; background:var(--primary-terra); color:#fff; border:none; border-radius:8px; padding:10px; font-weight:600; font-size:12.5px; cursor:pointer;">Confirm Reschedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── CANCEL APPOINTMENT MODAL ─────────────────────────── -->
+  <div id="apt-cancel-modal" role="dialog" aria-modal="true" style="display:none; position:fixed; inset:0; background:rgba(39,33,30,0.55); backdrop-filter:blur(4px); z-index:1004; align-items:center; justify-content:center;">
+    <div class="settings-modal-box" style="max-width:400px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div>
+          <h2 style="font-family:var(--font-serif); font-size:18px; color:var(--text-main); margin:0;">Cancel Appointment</h2>
+          <p style="font-size:11.5px; color:var(--text-muted); margin:2px 0 0 0;">Notify the customer and mark this booking as cancelled</p>
+        </div>
+        <button type="button" onclick="closeCancelModal()" style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted); line-height:1;">&times;</button>
+      </div>
+      <form id="apt-cancel-form" onsubmit="event.preventDefault(); submitCancelAppointment();">
+        <input type="hidden" id="apt-cancel-id" />
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11.5px; font-weight:600; color:var(--text-main); display:block; margin-bottom:4px;">Customer</label>
+          <div id="apt-cancel-customer-display" style="font-size:13px; font-weight:600; color:var(--text-main); background:#FDFBF8; padding:8px 12px; border:1px solid var(--border); border-radius:8px;"></div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:11.5px; font-weight:600; color:var(--text-main); display:block; margin-bottom:4px;">Cancellation Reason *</label>
+          <textarea id="apt-cancel-reason" required placeholder="Please state why this appointment is being cancelled..." rows="3" style="width:100%; border:1px solid var(--border); padding:8px; border-radius:8px; font-size:12px; resize:vertical; font-family:inherit;"></textarea>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button type="button" onclick="closeCancelModal()" style="flex:1; background:#F5EDE7; color:var(--primary-terra); border:none; border-radius:8px; padding:10px; font-weight:600; font-size:12.5px; cursor:pointer;">Keep Appointment</button>
+          <button type="submit" id="btn-confirm-cancel" style="flex:1; background:#C62828; color:#fff; border:none; border-radius:8px; padding:10px; font-weight:600; font-size:12.5px; cursor:pointer;">Cancel Booking</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -4050,15 +4235,35 @@
     }
 
     // ─── VIEW 3: ENQUIRIES MANAGEMENT ───────────────────────
-    function loadEnquiriesView() {
+    let allAppointmentEnquiriesCache = [];
+    let currentAppointmentStatusFilter = 'all';
+    let currentAppointmentSearch = '';
+    let aptPage = 1;
+    let aptHasMore = false;
+    let aptIsLoading = false;
+
+    function loadEnquiriesView(isSilent = false) {
+      // 1. Load Chat Enquiries
       fetch('/admin/leads', { headers: { Authorization: `Bearer ${token}` } })
         .then(r => r.json())
         .then(data => {
           allEnquiriesCache = data.leads || [];
+          // Sort chat enquiries by latest message timestamp, newest first
+          allEnquiriesCache.sort((a, b) => {
+            const timeDifference =
+              new Date(b.lastMessageAt || b.timestamp || 0).getTime() -
+              new Date(a.lastMessageAt || a.timestamp || 0).getTime();
+            if (timeDifference !== 0) return timeDifference;
+            return String(b.phone || b.id || '').localeCompare(String(a.phone || a.id || ''));
+          });
+
           updateEnquiriesCounts();
           renderEnquiriesTable();
         })
         .catch(err => console.error('Enquiries load error:', err));
+
+      // 2. Load Appointment Enquiries
+      loadAppointmentEnquiries(isSilent);
     }
 
     function updateEnquiriesCounts() {
@@ -4070,6 +4275,7 @@
       const closed = allEnquiriesCache.filter(e => e.status === 'Closed').length;
 
       const setT = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+      setT('chat-enquiries-total-count', all);
       setT('eq-count-all', all);
       setT('eq-count-new', nw);
       setT('eq-count-prog', prog);
@@ -4106,17 +4312,17 @@
       }
 
       if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">No enquiries match this filter.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:24px;">No chat enquiries match this filter.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = list.map(e => `
         <tr>
-          <td><strong>${e.customerName}</strong></td>
-          <td><span style="font-family:monospace;">${e.verifiedPhone || e.phone}</span></td>
+          <td><strong>${e.customerName || 'Customer'}</strong></td>
+          <td><span style="font-family:monospace; color:var(--text-main);">${e.verifiedPhone || e.phone}</span></td>
           <td>${e.interest || 'General Grooming & Image'}</td>
           <td><span class="tag-pill ${e.status === 'Closed' ? 'tag-green' : e.status === 'New' ? 'tag-pink' : 'tag-orange'}">${e.status}</span></td>
-          <td><div style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${e.lastMessage || '—'}</div></td>
+          <td><div style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${e.lastMessage || '—'}</div></td>
           <td>${e.claimedBy || 'Mam (Default)'}</td>
           <td>
             <div style="display:flex; gap:6px;">
@@ -4127,6 +4333,351 @@
           </td>
         </tr>
       `).join('');
+    }
+
+    // ─── APPOINTMENT ENQUIRIES CONTROLLER ────────────────────
+    async function loadAppointmentEnquiries(isSilent = false, append = false) {
+      if (aptIsLoading) return;
+      aptIsLoading = true;
+
+      if (!append) {
+        aptPage = 1;
+      }
+
+      const params = new URLSearchParams({
+        page: aptPage,
+        limit: 12,
+        sortBy: 'createdAt',
+      });
+      if (currentAppointmentStatusFilter && currentAppointmentStatusFilter !== 'all') {
+        params.append('status', currentAppointmentStatusFilter.toUpperCase());
+      }
+      if (currentAppointmentSearch.trim()) {
+        params.append('search', currentAppointmentSearch.trim());
+      }
+
+      try {
+        const res = await fetch(`/appointments?${params.toString()}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const json = await res.json();
+        const items = json.data || json.appointments || [];
+        aptHasMore = json.pagination?.hasMore || json.pagination?.hasNextPage || false;
+
+        if (append) {
+          allAppointmentEnquiriesCache = allAppointmentEnquiriesCache.concat(items);
+        } else {
+          allAppointmentEnquiriesCache = items;
+        }
+
+        renderAppointmentCards();
+
+        // Also fetch total stats across statuses for pills
+        fetch('/appointments?limit=1000&sortBy=createdAt', {
+          headers: { Authorization: `Bearer ${token}` }
+        }).then(r => r.json()).then(allData => {
+          const list = allData.data || allData.appointments || [];
+          updateAppointmentEnquiryCounts(list);
+        }).catch(() => {});
+
+      } catch (err) {
+        console.error('Failed to load appointment enquiries:', err);
+      } finally {
+        aptIsLoading = false;
+      }
+    }
+
+    function updateAppointmentEnquiryCounts(allList = []) {
+      const all = allList.length;
+      const pending = allList.filter(a => (a.status || '').toUpperCase() === 'PENDING').length;
+      const confirmed = allList.filter(a => ['CONFIRMED', 'SCHEDULED'].includes((a.status || '').toUpperCase())).length;
+      const rescheduled = allList.filter(a => (a.status || '').toUpperCase() === 'RESCHEDULED').length;
+      const completed = allList.filter(a => (a.status || '').toUpperCase() === 'COMPLETED').length;
+      const cancelled = allList.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length;
+
+      const setT = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+      setT('apt-enquiries-total-count', all);
+      setT('apt-count-all', all);
+      setT('apt-count-pending', pending);
+      setT('apt-count-confirmed', confirmed);
+      setT('apt-count-rescheduled', rescheduled);
+      setT('apt-count-completed', completed);
+      setT('apt-count-cancelled', cancelled);
+    }
+
+    function setAppointmentStatusFilter(status, btn) {
+      currentAppointmentStatusFilter = status;
+      document.querySelectorAll('#apt-status-pills .crm-date-pill').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      loadAppointmentEnquiries(false, false);
+    }
+
+    function filterAppointmentEnquiries(val) {
+      currentAppointmentSearch = val;
+      loadAppointmentEnquiries(false, false);
+    }
+
+    function loadMoreAppointmentEnquiries() {
+      if (aptHasMore && !aptIsLoading) {
+        aptPage++;
+        loadAppointmentEnquiries(false, true);
+      }
+    }
+
+    function renderAppointmentCards() {
+      const grid = document.getElementById('apt-cards-grid');
+      const emptyBox = document.getElementById('apt-cards-empty');
+      const loadMoreBox = document.getElementById('apt-load-more-box');
+      if (!grid) return;
+
+      if (!allAppointmentEnquiriesCache || allAppointmentEnquiriesCache.length === 0) {
+        grid.innerHTML = '';
+        if (emptyBox) emptyBox.style.display = 'block';
+        if (loadMoreBox) loadMoreBox.style.display = 'none';
+        return;
+      }
+
+      if (emptyBox) emptyBox.style.display = 'none';
+      if (loadMoreBox) loadMoreBox.style.display = aptHasMore ? 'block' : 'none';
+
+      grid.innerHTML = allAppointmentEnquiriesCache.map(apt => {
+        const statusUpper = (apt.status || 'PENDING').toUpperCase();
+        let statusTagClass = 'tag-pending';
+        let statusLabel = 'Pending Approval';
+
+        if (statusUpper === 'CONFIRMED' || statusUpper === 'SCHEDULED') {
+          statusTagClass = 'tag-confirmed';
+          statusLabel = 'Confirmed';
+        } else if (statusUpper === 'RESCHEDULED') {
+          statusTagClass = 'tag-rescheduled';
+          statusLabel = 'Rescheduled';
+        } else if (statusUpper === 'CANCELLED') {
+          statusTagClass = 'tag-cancelled';
+          statusLabel = 'Cancelled';
+        } else if (statusUpper === 'COMPLETED') {
+          statusTagClass = 'tag-completed';
+          statusLabel = 'Completed';
+        }
+
+        // Format Date & Time nicely
+        const dateStr = apt.date || 'TBD';
+        const timeStr = apt.time || '10:00';
+        const phone = apt.phone || apt.customerPhone || '—';
+        const consultant = apt.consultantName || (apt.consultantId === 'mam' ? 'Mam (Director & Lead Consultant)' : apt.consultantId) || 'Mam';
+        const service = apt.service || apt.serviceName || 'Personal Consultation';
+
+        // Additional note badge if available
+        let noteBadge = '';
+        if (apt.cancellationReason) {
+          noteBadge = `<div style="font-size:11px; color:#C62828; background:#FFEBEE; padding:4px 8px; border-radius:6px; margin-top:8px;">Reason: ${escapeHtml(apt.cancellationReason)}</div>`;
+        } else if (apt.notes) {
+          noteBadge = `<div style="font-size:11px; color:var(--text-muted); background:#FDFBF8; border:1px solid #EFEAE5; padding:4px 8px; border-radius:6px; margin-top:8px;">Notes: ${escapeHtml(apt.notes)}</div>`;
+        }
+
+        // Build dynamic action buttons
+        let actionButtonsHtml = '';
+        if (statusUpper === 'PENDING') {
+          actionButtonsHtml = `
+            <button type="button" onclick="confirmAppointmentEnquiry('${apt.id}')" style="background:#2E7D32; color:#fff; border:none; border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">Confirm</button>
+            <button type="button" onclick="openRescheduleModal('${apt.id}')" style="background:#FFFFFF; border:1px solid var(--border); color:var(--primary-terra); border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">Reschedule</button>
+            <button type="button" onclick="openCancelModal('${apt.id}')" style="background:#FFEBEE; color:#C62828; border:1px solid #FFCDD2; border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">Cancel</button>
+            <button type="button" onclick="jumpToConversation('${phone}')" style="background:var(--primary-terra); color:#fff; border:none; border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">Chat</button>
+          `;
+        } else if (statusUpper === 'CONFIRMED' || statusUpper === 'SCHEDULED') {
+          actionButtonsHtml = `
+            <button type="button" onclick="openRescheduleModal('${apt.id}')" style="background:#FFFFFF; border:1px solid var(--border); color:var(--primary-terra); border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">Reschedule</button>
+            <button type="button" onclick="openCancelModal('${apt.id}')" style="background:#FFEBEE; color:#C62828; border:1px solid #FFCDD2; border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">Cancel</button>
+            <button type="button" onclick="jumpToConversation('${phone}')" style="background:var(--primary-terra); color:#fff; border:none; border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">Chat</button>
+          `;
+        } else if (statusUpper === 'RESCHEDULED') {
+          actionButtonsHtml = `
+            <button type="button" onclick="confirmAppointmentEnquiry('${apt.id}')" style="background:#2E7D32; color:#fff; border:none; border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">Confirm</button>
+            <button type="button" onclick="openRescheduleModal('${apt.id}')" style="background:#FFFFFF; border:1px solid var(--border); color:var(--primary-terra); border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">Reschedule</button>
+            <button type="button" onclick="openCancelModal('${apt.id}')" style="background:#FFEBEE; color:#C62828; border:1px solid #FFCDD2; border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">Cancel</button>
+            <button type="button" onclick="jumpToConversation('${phone}')" style="background:var(--primary-terra); color:#fff; border:none; border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:600; cursor:pointer;">Chat</button>
+          `;
+        } else {
+          // COMPLETED or CANCELLED
+          actionButtonsHtml = `
+            <button type="button" onclick="jumpToConversation('${phone}')" style="background:var(--primary-terra); color:#fff; border:none; border-radius:6px; padding:5px 12px; font-size:11.5px; font-weight:600; cursor:pointer;">Chat with Customer</button>
+          `;
+        }
+
+        return `
+          <div class="appointment-card" id="apt-card-${apt.id}">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+              <div>
+                <h4 style="margin:0 0 3px 0; font-size:14.5px; font-weight:700; color:var(--text-main); font-family:var(--font-serif);">${escapeHtml(apt.customerName || 'Valued Customer')}</h4>
+                <div style="font-family:monospace; font-size:12px; color:var(--primary-terra); display:flex; align-items:center; gap:4px;">
+                  <span>📱 ${escapeHtml(phone)}</span>
+                </div>
+              </div>
+              <span class="tag-pill ${statusTagClass}">${statusLabel}</span>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--text-main); margin-bottom:12px;">
+              <div><strong style="color:var(--text-muted);">Service:</strong> ${escapeHtml(service)}</div>
+              <div><strong style="color:var(--text-muted);">Date & Time:</strong> 📅 ${escapeHtml(dateStr)} at ⏰ ${escapeHtml(timeStr)}</div>
+              <div><strong style="color:var(--text-muted);">Consultant:</strong> ${escapeHtml(consultant)}</div>
+              ${noteBadge}
+            </div>
+
+            <div style="margin-top:auto; padding-top:10px; border-top:1px solid #F5EDE7; display:flex; gap:6px; flex-wrap:wrap;">
+              ${actionButtonsHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Helper to escape HTML characters
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // ─── APPOINTMENT ACTION MODALS & HANDLERS ────────────────
+    async function confirmAppointmentEnquiry(id) {
+      if (!confirm('Are you sure you want to confirm this appointment? This will send a WhatsApp confirmation notice to the customer.')) {
+        return;
+      }
+      try {
+        const res = await fetch(`/appointments/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ status: 'CONFIRMED' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast('✅ Appointment successfully confirmed!');
+          loadAppointmentEnquiries(true);
+          loadCalendarView();
+        } else {
+          showToast(data.error || 'Failed to confirm appointment');
+        }
+      } catch (err) {
+        showToast('Network error while confirming appointment');
+      }
+    }
+
+    function openRescheduleModal(id) {
+      const apt = allAppointmentEnquiriesCache.find(a => a.id === id);
+      if (!apt) return;
+
+      document.getElementById('apt-resched-id').value = id;
+      document.getElementById('apt-resched-customer-display').innerText = `${apt.customerName} (${apt.phone || apt.customerPhone})`;
+      document.getElementById('apt-resched-date').value = apt.date || new Date().toISOString().split('T')[0];
+      document.getElementById('apt-resched-time').value = apt.time || '11:00';
+      document.getElementById('apt-resched-note').value = '';
+
+      const consultantSelect = document.getElementById('apt-resched-consultant');
+      if (consultantSelect && apt.consultantId) {
+        for (let opt of consultantSelect.options) {
+          if (opt.value.startsWith(apt.consultantId)) {
+            consultantSelect.value = opt.value;
+            break;
+          }
+        }
+      }
+
+      document.getElementById('apt-reschedule-modal').style.display = 'flex';
+    }
+
+    function closeRescheduleModal() {
+      document.getElementById('apt-reschedule-modal').style.display = 'none';
+    }
+
+    async function submitRescheduleAppointment() {
+      const id = document.getElementById('apt-resched-id').value;
+      const date = document.getElementById('apt-resched-date').value;
+      const time = document.getElementById('apt-resched-time').value;
+      const [consultantId, consultantName] = document.getElementById('apt-resched-consultant').value.split('|');
+      const note = document.getElementById('apt-resched-note').value;
+
+      try {
+        const res = await fetch(`/appointments/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            status: 'RESCHEDULED',
+            date,
+            time,
+            consultantId,
+            consultantName,
+            notes: note
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast('📅 Appointment rescheduled successfully!');
+          closeRescheduleModal();
+          loadAppointmentEnquiries(true);
+          loadCalendarView();
+        } else {
+          showToast(data.error || 'Failed to reschedule appointment');
+        }
+      } catch (err) {
+        showToast('Network error while rescheduling appointment');
+      }
+    }
+
+    function openCancelModal(id) {
+      const apt = allAppointmentEnquiriesCache.find(a => a.id === id);
+      if (!apt) return;
+
+      document.getElementById('apt-cancel-id').value = id;
+      document.getElementById('apt-cancel-customer-display').innerText = `${apt.customerName} (${apt.phone || apt.customerPhone})`;
+      document.getElementById('apt-cancel-reason').value = '';
+      document.getElementById('apt-cancel-modal').style.display = 'flex';
+    }
+
+    function closeCancelModal() {
+      document.getElementById('apt-cancel-modal').style.display = 'none';
+    }
+
+    async function submitCancelAppointment() {
+      const id = document.getElementById('apt-cancel-id').value;
+      const cancellationReason = document.getElementById('apt-cancel-reason').value;
+      if (!cancellationReason.trim()) {
+        showToast('Please provide a reason for cancellation');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/appointments/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            status: 'CANCELLED',
+            cancellationReason
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast('Appointment cancelled');
+          closeCancelModal();
+          loadAppointmentEnquiries(true);
+          loadCalendarView();
+        } else {
+          showToast(data.error || 'Failed to cancel appointment');
+        }
+      } catch (err) {
+        showToast('Network error while cancelling appointment');
+      }
     }
 
     // ─── VIEW 4: APPOINTMENT CALENDAR ───────────────────────
@@ -5769,6 +6320,9 @@
       setInterval(() => {
         if (token) {
           loadLiveData();
+          if (currentActiveView === 'enquiries') {
+            loadEnquiriesView(true);
+          }
           if (selectedPhone && !transcriptState.isLoading) {
             // refresh transcript and append new incoming messages smoothly without wiping scroll
             fetch(`/admin/leads/${encodeURIComponent(selectedPhone)}?limit=15&offset=0`, {

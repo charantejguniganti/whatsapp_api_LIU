@@ -15,6 +15,7 @@ import adminRouter from './admin/router.js';
 import chatsRouter from './routes/chats.js';
 import pushRouter from './routes/push.js';
 import crmRouter from './routes/crm.js';
+import appointmentsRouter from './routes/appointments.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -50,6 +51,8 @@ export function createApp() {
   app.use('/api/chats', chatsRouter);
   app.use('/api/push', pushRouter);
   app.use('/api/crm', crmRouter);
+  app.use('/appointments', appointmentsRouter);
+  app.use('/api/appointments', appointmentsRouter);
 
   // Serve PWA Manifest & Service Worker with root scope permissions
   app.get(['/manifest.json', '/manifest.webmanifest'], (_req, res) => {
