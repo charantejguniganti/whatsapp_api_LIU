@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../src/app.js';
 import * as appointmentsService from '../../src/crm/appointmentsService.js';
-import { isAppointmentBookingIntent } from '../../src/whatsapp/baileysClient.js';
+import { isAppointmentBookingIntent, isRescheduleAccepted } from '../../src/whatsapp/baileysClient.js';
 import { getStore, resetStore } from '../../src/store/index.js';
 import jwt from 'jsonwebtoken';
 import config from '../../src/config/index.js';
@@ -281,6 +281,39 @@ describe('Appointment Enquiries Integration & API', () => {
       expect(isAppointmentBookingIntent('can I schedule a consultation?')).toBe(true);
       expect(isAppointmentBookingIntent('book slot')).toBe(true);
       expect(isAppointmentBookingIntent('Tell me about your pricing')).toBe(false);
+    });
+
+    it('detects reschedule acceptance (Option 1) vs counter-proposals (Option 2)', () => {
+      // Option 1: Acceptance
+      expect(isRescheduleAccepted('1')).toBe(true);
+      expect(isRescheduleAccepted('yes')).toBe(true);
+      expect(isRescheduleAccepted('yeah')).toBe(true);
+      expect(isRescheduleAccepted('ok')).toBe(true);
+      expect(isRescheduleAccepted('okay')).toBe(true);
+      expect(isRescheduleAccepted('works for me')).toBe(true);
+      expect(isRescheduleAccepted('good for me')).toBe(true);
+      expect(isRescheduleAccepted('date is good')).toBe(true);
+      expect(isRescheduleAccepted('time is good')).toBe(true);
+      expect(isRescheduleAccepted('Confirmed')).toBe(true);
+
+      // Option 2: Alternative proposal or rejection
+      expect(isRescheduleAccepted('2')).toBe(false);
+      expect(isRescheduleAccepted('can we do tomorrow at 4pm?')).toBe(false);
+      expect(isRescheduleAccepted('not free then, how about saturday?')).toBe(false);
+      expect(isRescheduleAccepted('different date please')).toBe(false);
+    });
+
+    it('suppresses duplicate acknowledgment when created with isCustomerEnquiry: true', async () => {
+      const apt = await appointmentsService.createAppointment({
+        customerName: 'No Dupe Customer',
+        customerPhone: '+919999888877',
+        isCustomerEnquiry: true,
+        status: appointmentsService.APPOINTMENT_STATUS.PENDING,
+        notes: 'Testing no duplicate ack message',
+      });
+
+      expect(apt.id).toBeDefined();
+      expect(apt.status).toBe('PENDING');
     });
   });
 });

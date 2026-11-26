@@ -356,6 +356,14 @@ export function isAppointmentBookingIntent(text = '') {
   );
 }
 
+export function isRescheduleAccepted(text = '') {
+  const lower = text.trim().toLowerCase();
+  return (
+    /^(1|yes|yeah|yep|sure|ok|okay|perfect|good|fine|confirmed|confirm|works|great|approved|agreed|agree)[\s!.,]*$/i.test(lower) ||
+    /\b(works for me|good for me|date is good|time is good|sounds good|that works|perfect for me|i am good|i'm good|fine with me|see you then|confirm slot|confirmed)\b/i.test(lower)
+  );
+}
+
 async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, text, store, meta = {}) {
   const { pushName = null, msgTimestamp = new Date().toISOString(), isGroup = false, groupName = null } = meta;
   const leadService = createLeadService(store);
@@ -382,6 +390,7 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
           isCustomerEnquiry: true,
           status: appointmentsService.APPOINTMENT_STATUS.PENDING,
           notes: `Customer WhatsApp Request: "${text}"`,
+          skipWhatsAppAck: true,
         });
       } catch (e) {
         logger.warn({ err: e, phone: customerPhone }, 'Appointment booking enquiry already exists or conflict handled');
@@ -431,7 +440,123 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
     }
   }
 
-  // ── 2. FOLLOW-UP TO PENDING APPOINTMENT ENQUIRY ────────────────────────────
+  // ── 2. RESCHEDULE NEGOTIATION RESPONSE (OPTION 1 vs OPTION 2) ───────────
+  // If the consultant proposed a rescheduled date/time, customer can:
+  // Option 1: Confirm proposed date & time ("1", "yes", "good for me", "works")
+  // Option 2: Suggest an alternative date & time ("2", "tomorrow 4pm", etc.)
+  try {
+    const aptIndex = (await store.get('appointments:index')) || [];
+    let reschedApt = null;
+    let reschedAptId = null;
+    for (const aptId of aptIndex) {
+      const a = await store.get(`appointment:${aptId}`);
+      if (!a || a.isArchived) continue;
+      const aPhone = (a.phone || a.customerPhone || '').replace(/\D/g, '');
+      const cPhone = customerPhone.replace(/\D/g, '');
+      if (aPhone === cPhone || aPhone.endsWith(cPhone) || cPhone.endsWith(aPhone)) {
+        if (a.status === appointmentsService.APPOINTMENT_STATUS.RESCHEDULED) {
+          reschedApt = a;
+          reschedAptId = aptId;
+          break;
+        }
+      }
+    }
+
+    if (reschedApt) {
+      if (isRescheduleAccepted(text)) {
+        // Option 1: Customer accepts the proposed rescheduled slot
+        await appointmentsService.confirmAppointment(reschedApt.id, {
+          confirmedBy: 'Customer (via WhatsApp)',
+          notes: `Customer accepted proposed slot (${reschedApt.date} at ${reschedApt.time}) via WhatsApp: "${text}"`,
+        });
+
+        const reply =
+          `🎉 Wonderful! Your consultation appointment has been *CONFIRMED*.\n\n` +
+          `🗓 *Date:* ${reschedApt.date}\n` +
+          `⏰ *Time:* ${reschedApt.time}\n` +
+          `👤 *Consultant:* ${reschedApt.consultantName || 'Mam'}\n` +
+          `✨ *Service:* ${reschedApt.service || 'Personal Consultation'}\n\n` +
+          `We look forward to welcoming you! Feel free to reach out anytime if you need anything before your session. ✨\n\n` +
+          `Team Live It Up`;
+
+        await socket.sendMessage(remoteJid, { text: reply });
+
+        const replyTime = new Date().toISOString();
+        const updatedHistory = [
+          ...history,
+          { role: 'user', content: text, timestamp: msgTimestamp },
+          { role: 'assistant', content: reply, timestamp: replyTime },
+        ].slice(-20);
+        await store.set(historyKey, updatedHistory);
+
+        await saveConversationRecord(store, customerPhone, meta, {
+          lastMessage: text,
+          lastMessageTimestamp: replyTime,
+          lastMessageRole: 'assistant',
+          status: 'In Progress',
+          appointmentId: reschedApt.id,
+          updatedAt: replyTime,
+        });
+
+        return;
+      } else {
+        // Option 2: Customer proposes an alternative date or time
+        reschedApt.notes = reschedApt.notes
+          ? `${reschedApt.notes}\nCustomer requested alternative: "${text}"`
+          : `Customer requested alternative: "${text}"`;
+        reschedApt.updatedAt = new Date().toISOString();
+        const auditEntry = {
+          action: 'CUSTOMER_COUNTER_PROPOSAL',
+          status: appointmentsService.APPOINTMENT_STATUS.RESCHEDULED,
+          timestamp: new Date().toISOString(),
+          by: customerPhone,
+          notes: `Customer proposed alternative timing: "${text}"`,
+        };
+        reschedApt.history = (reschedApt.history || []).concat([auditEntry]);
+        reschedApt.auditHistory = (reschedApt.auditHistory || reschedApt.history || []).concat([auditEntry]);
+        await store.set(`appointment:${reschedAptId}`, reschedApt);
+
+        const reply =
+          `Thank you for letting us know! 📝\n\n` +
+          `We have received your requested alternative timing:\n` +
+          `*\"${text}\"*\n\n` +
+          `Our team is reviewing the consultant's schedule and will propose an updated time slot shortly. We will coordinate until we find the perfect date and time for you! 🤝✨\n\n` +
+          `Team Live It Up`;
+
+        await socket.sendMessage(remoteJid, { text: reply });
+
+        const replyTime = new Date().toISOString();
+        const updatedHistory = [
+          ...history,
+          { role: 'user', content: text, timestamp: msgTimestamp },
+          { role: 'assistant', content: reply, timestamp: replyTime },
+        ].slice(-20);
+        await store.set(historyKey, updatedHistory);
+
+        await saveConversationRecord(store, customerPhone, meta, {
+          lastMessage: text,
+          lastMessageTimestamp: replyTime,
+          lastMessageRole: 'assistant',
+          status: 'Consultant Requested',
+          appointmentId: reschedApt.id,
+          updatedAt: replyTime,
+        });
+
+        await pushService.notifyConsultantRequest({
+          customerPhone,
+          customerName: reschedApt.customerName || customerPhone,
+          messageText: `🔄 Appointment Reschedule Request from Customer: "${text}"`,
+          timestamp: msgTimestamp,
+        }).catch(() => {});
+
+        return;
+      }
+    }
+  } catch (err) {
+    logger.warn({ err, customerPhone }, 'Error in customer reschedule response handling');
+  }
+
+  // ── 3. FOLLOW-UP TO PENDING APPOINTMENT ENQUIRY ────────────────────────────
   // If customer already has a PENDING appointment enquiry and sends their slot/preference
   try {
     const aptIndex = (await store.get('appointments:index')) || [];

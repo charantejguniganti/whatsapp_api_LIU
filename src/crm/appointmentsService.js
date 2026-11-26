@@ -388,8 +388,8 @@ export async function createAppointment(data) {
       logger.warn({ err: e }, 'Could not link appointment to conversation');
     }
 
-    // Customer acknowledgement via WhatsApp (if newly requested as PENDING)
-    if (status === APPOINTMENT_STATUS.PENDING) {
+    // Customer acknowledgement via WhatsApp (only if newly requested as PENDING from external web form without interactive bot)
+    if (status === APPOINTMENT_STATUS.PENDING && !data.skipWhatsAppAck && !data.isCustomerEnquiry) {
       const ackMsg =
         `🙏 Thank you for submitting your appointment request!\n\n` +
         `Your booking is *NOT CONFIRMED* yet.\n\n` +
@@ -568,14 +568,18 @@ export async function rescheduleAppointment(id, updates = {}) {
       // ignore
     }
 
-    // Customer notification via WhatsApp
+    // Customer notification via WhatsApp with 2 clear options
     const reschedMsg =
-      `ℹ️ Your LIU consultation appointment has been *RESCHEDULED*.\n\n` +
-      `📅 *New Date:* ${newDate}\n` +
-      `⏰ *New Time:* ${newTime}\n` +
-      `👤 *Consultant:* ${newConsultantName}\n` +
-      `✨ *Service:* ${updated.service}\n\n` +
-      `If this new time works for you, please reply to confirm, or let us know your preferred alternative.\n\nTeam Live It Up`;
+      `📅 *Live It Up — Consultation Reschedule Request*\n\n` +
+      `We have proposed a new slot for your *${updated.service}* consultation:\n\n` +
+      `🗓 *Proposed Date:* ${newDate}\n` +
+      `⏰ *Proposed Time:* ${newTime}\n` +
+      `👤 *Consultant:* ${newConsultantName}\n\n` +
+      `Please let us know if this works for you:\n` +
+      `👉 *Reply 1* (or "Yes"): If this date & time is good for you.\n` +
+      `👉 *Reply 2* (or suggest your preferred time): If you prefer a different date or time.\n\n` +
+      `We will coordinate with you until we confirm the perfect date and time! ✨\n\n` +
+      `Team Live It Up`;
 
     safeSendWhatsApp(updated.phone, reschedMsg).catch(() => {});
   }
