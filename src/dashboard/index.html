@@ -4647,15 +4647,36 @@
       if (!confirm('Are you sure you want to delete this appointment enquiry? It will be permanently removed from the system.')) {
         return;
       }
+      const activeToken = (typeof token !== 'undefined' && token && token !== 'null') ? token : (localStorage.getItem('liu_admin_token') || '');
+      const headers = { 'Content-Type': 'application/json' };
+      if (activeToken) {
+        headers['Authorization'] = `Bearer ${activeToken}`;
+      }
+
       try {
-        const res = await fetch(`/appointments/${id}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+        // Try POST /appointments/:id/delete first (most compatible across all proxies/browsers)
+        let res = await fetch(`/appointments/${encodeURIComponent(id)}/delete`, {
+          method: 'POST',
+          headers,
+          credentials: 'same-origin',
+          body: JSON.stringify({ id })
         });
-        const data = await res.json();
-        if (res.ok && data.success) {
+
+        // Fallback to DELETE /appointments/:id if needed
+        if (!res.ok && res.status !== 401) {
+          res = await fetch(`/appointments/${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+            headers,
+            credentials: 'same-origin'
+          });
+        }
+
+        let data = {};
+        try {
+          data = await res.json();
+        } catch (e) {}
+
+        if (res.ok && data.success !== false) {
           showToast('🗑️ Appointment deleted successfully!');
           allAppointmentEnquiriesCache = allAppointmentEnquiriesCache.filter(a => a.id !== id);
           renderAppointmentCards();
@@ -4666,6 +4687,7 @@
           showToast(data.error || data.message || 'Failed to delete appointment');
         }
       } catch (err) {
+        console.error('Delete error:', err);
         showToast('Network error while deleting appointment');
       }
     }

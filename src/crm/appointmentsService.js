@@ -344,8 +344,8 @@ export async function createAppointment(data) {
     rescheduledFrom: null,
     rescheduledAt: null,
     timezone: 'Asia/Kolkata',
-    createdAt: now,
-    updatedAt: now,
+    createdAt: data.createdAt || now,
+    updatedAt: data.updatedAt || data.createdAt || now,
     history: [
       {
         action: 'SUBMITTED',

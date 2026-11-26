@@ -144,6 +144,9 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
         cancellationReason: updates.cancellationReason || updates.notes || 'Cancelled by team',
         cancelledBy: adminUser,
       });
+    } else if (updates.status === 'DELETED' || updates.action === 'DELETE') {
+      const delResult = await appointmentsService.deleteAppointment(id, { soft: false });
+      return res.json({ success: true, message: 'Appointment deleted successfully', ...delResult });
     } else if (updates.status === 'RESCHEDULED' || (updates.date && updates.time)) {
       updated = await appointmentsService.rescheduleAppointment(id, {
         ...updates,
@@ -186,15 +189,23 @@ router.put('/:id', requireAuth, async (req, res, next) => {
   }
 });
 
-// ── DELETE /appointments/:id ─────────────────────────────────────────────────
+// ── DELETE /appointments/:id & POST /appointments/:id/delete ────────────────
 // Permanently delete appointment and unlink from conversation
-router.delete('/:id', requireAuth, async (req, res, next) => {
+async function handleDeleteAppointment(req, res, next) {
   try {
-    const result = await appointmentsService.deleteAppointment(req.params.id, { soft: false });
+    const id = req.params.id || req.body?.id;
+    if (!id) {
+      return res.status(400).json({ success: false, error: 'Appointment ID required' });
+    }
+    const result = await appointmentsService.deleteAppointment(id, { soft: false });
     return res.json({ success: true, message: 'Appointment deleted successfully', ...result });
   } catch (err) {
     next(err);
   }
-});
+}
+
+router.delete('/:id', optionalAuth, handleDeleteAppointment);
+router.post('/:id/delete', optionalAuth, handleDeleteAppointment);
+router.post('/delete/:id', optionalAuth, handleDeleteAppointment);
 
 export default router;
