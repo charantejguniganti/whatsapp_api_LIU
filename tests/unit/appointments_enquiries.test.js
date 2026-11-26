@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../src/app.js';
 import * as appointmentsService from '../../src/crm/appointmentsService.js';
+import { isAppointmentBookingIntent } from '../../src/whatsapp/baileysClient.js';
 import { getStore, resetStore } from '../../src/store/index.js';
 import jwt from 'jsonwebtoken';
 import config from '../../src/config/index.js';
@@ -265,6 +266,21 @@ describe('Appointment Enquiries Integration & API', () => {
       expect(res.body.pagination.totalPages).toBe(3);
       expect(res.body.pagination.hasMore).toBe(true);
       expect(res.body.data.length).toBe(2);
+    });
+  });
+
+  describe('5. WhatsApp Appointment Booking Intent & Timings', () => {
+    it('detects appointment booking requests and timing inquiries accurately', () => {
+      expect(isAppointmentBookingIntent('I want to book an appointment')).toBe(true);
+      expect(isAppointmentBookingIntent('book appointment')).toBe(true);
+      expect(isAppointmentBookingIntent('timings')).toBe(true);
+      expect(isAppointmentBookingIntent('available timings')).toBe(true);
+      expect(isAppointmentBookingIntent('when are you open')).toBe(true);
+      expect(isAppointmentBookingIntent('if they asked for apponitmement')).toBe(true);
+      expect(isAppointmentBookingIntent('apointment please')).toBe(true);
+      expect(isAppointmentBookingIntent('can I schedule a consultation?')).toBe(true);
+      expect(isAppointmentBookingIntent('book slot')).toBe(true);
+      expect(isAppointmentBookingIntent('Tell me about your pricing')).toBe(false);
     });
   });
 });
