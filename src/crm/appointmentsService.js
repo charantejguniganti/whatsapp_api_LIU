@@ -689,12 +689,30 @@ export async function updateAppointment(id, updates) {
 /**
  * Delete / Archive an appointment.
  */
-export async function deleteAppointment(id, { soft = true } = {}) {
+export async function deleteAppointment(id, { soft = false } = {}) {
   const store = await getStore();
   const existing = await store.get(`appointment:${id}`);
   if (!existing) {
     return { success: true };
   }
+
+  // Unlink from conversation if linked
+  const phone = existing.phone || existing.customerPhone;
+  if (phone) {
+    try {
+      const conv = await store.get(`conv:${phone}`);
+      if (conv && conv.appointmentId === id) {
+        conv.appointmentId = null;
+        conv.appointmentDate = null;
+        await store.set(`conv:${phone}`, conv);
+      }
+    } catch (e) {}
+  }
+
+  // Remove from index
+  const index = (await store.get(INDEX_KEY)) || [];
+  const filtered = index.filter((x) => x !== id);
+  await store.set(INDEX_KEY, filtered);
 
   if (soft) {
     existing.isArchived = true;
@@ -706,9 +724,6 @@ export async function deleteAppointment(id, { soft = true } = {}) {
   }
 
   await store.delete(`appointment:${id}`);
-  const index = (await store.get(INDEX_KEY)) || [];
-  const filtered = index.filter((x) => x !== id);
-  await store.set(INDEX_KEY, filtered);
   logger.info({ id }, 'Permanently deleted appointment');
   return { success: true, deleted: true };
 }

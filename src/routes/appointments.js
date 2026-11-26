@@ -187,11 +187,11 @@ router.put('/:id', requireAuth, async (req, res, next) => {
 });
 
 // ── DELETE /appointments/:id ─────────────────────────────────────────────────
-// Soft-delete / Archive appointment to preserve historical records
+// Permanently delete appointment and unlink from conversation
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
-    const result = await appointmentsService.deleteAppointment(req.params.id, { soft: true });
-    return res.json({ success: true, message: 'Appointment archived successfully', ...result });
+    const result = await appointmentsService.deleteAppointment(req.params.id, { soft: false });
+    return res.json({ success: true, message: 'Appointment deleted successfully', ...result });
   } catch (err) {
     next(err);
   }

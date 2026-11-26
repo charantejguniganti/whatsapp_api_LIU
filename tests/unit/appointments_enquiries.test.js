@@ -333,5 +333,29 @@ describe('Appointment Enquiries Integration & API', () => {
       expect(p4.time).toBe('17:00');
       expect(p4.date).toBeDefined();
     });
+
+    it('deletes an appointment permanently via DELETE /appointments/:id and unlinks conversation', async () => {
+      const apt = await appointmentsService.createAppointment({
+        customerName: 'Delete Me',
+        customerPhone: '+919876549999',
+        serviceName: 'Consultation',
+        date: '2026-12-20',
+        time: '14:00',
+        status: appointmentsService.APPOINTMENT_STATUS.PENDING,
+      });
+
+      const delRes = await request(app)
+        .delete(`/appointments/${apt.id}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(delRes.status).toBe(200);
+      expect(delRes.body.success).toBe(true);
+
+      const checkRes = await request(app)
+        .get(`/appointments/${apt.id}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(checkRes.status).toBe(404);
+    });
   });
 });
