@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>LIU — Live It Up | Mam's Concierge Dashboard</title>
+  <title>LIVE IT UP — Concierge CRM & WhatsApp Dashboard</title>
 
   <!-- Progressive Web App (PWA) Meta & Icons -->
   <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#6B4938" />
+  <meta name="theme-color" content="#111111" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="LIU Concierge" />
-  <meta name="application-name" content="LIU Concierge" />
+  <meta name="apple-mobile-web-app-title" content="LIVE IT UP" />
+  <meta name="application-name" content="LIVE IT UP" />
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
   <link rel="icon" type="image/png" sizes="64x64" href="/icons/favicon.png" />
   <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
@@ -23,20 +23,36 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #F7F3EE;
+      /* LIVE IT UP Master Red, Black & White Brand Tokens */
+      --primary-red: #E53935;
+      --dark-red: #B71C1C;
+      --black: #111111;
+      --deep-black: #080808;
+      --white: #FFFFFF;
+      --off-white: #FAFAFA;
+      --light-grey: #F5F5F5;
+      --medium-grey: #777777;
+      --border-grey: #E0E0E0;
+      --dark-text: #171717;
+      --muted-text: #555555;
+
+      /* Semantic UI Mappings */
+      --bg: #FAFAFA;
       --card-bg: #FFFFFF;
-      --card-subtle: #FDFBF8;
-      --text-main: #27211E;
-      --text-muted: #847C76;
-      --text-light: #A49D97;
-      --border: #ECE5DC;
-      --border-light: #F4EFEA;
-      --primary-terra: #6B4938;
-      --primary-hover: #54392B;
-      --pill-active: #EFE7DE;
+      --card-subtle: #F5F5F5;
+      --text-main: #171717;
+      --text-muted: #555555;
+      --text-light: #777777;
+      --border: #E0E0E0;
+      --border-light: #EEEEEE;
+      --primary-terra: #E53935; /* Backward compatibility */
+      --primary-hover: #B71C1C;
+      --pill-active: #111111;
+
+      /* Functional Badges */
       --tag-green-bg: #E8F5E9;
       --tag-green-text: #2E7D32;
       --tag-blue-bg: #E3F2FD;
@@ -45,13 +61,16 @@
       --tag-amber-text: #E65100;
       --tag-purple-bg: #F3E5F5;
       --tag-purple-text: #7B1FA2;
-      --shadow-sm: 0 2px 6px rgba(45, 30, 20, 0.03);
-      --shadow-md: 0 4px 16px rgba(45, 30, 20, 0.05);
-      --radius-lg: 18px;
-      --radius-md: 12px;
-      --radius-sm: 8px;
-      --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      --font-serif: 'Playfair Display', serif;
+      --tag-red-bg: #FFEBEE;
+      --tag-red-text: #C62828;
+
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-serif: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -80,25 +99,30 @@
     }
 
     .brand-container {
-      text-align: center;
-      margin-bottom: 36px;
+      text-align: left;
+      margin-bottom: 32px;
       padding-top: 4px;
     }
 
     .brand-title {
-      font-family: var(--font-serif);
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      color: #2D231E;
-      line-height: 1;
+      font-family: var(--font-sans);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--black);
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
+
+    .brand-title .brand-accent {
+      color: var(--primary-red);
     }
 
     .brand-subtitle {
-      font-size: 8.5px;
-      font-weight: 600;
-      letter-spacing: 2.5px;
-      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      color: var(--medium-grey);
       margin-top: 4px;
       text-transform: uppercase;
     }
@@ -116,49 +140,53 @@
       gap: 12px;
       padding: 10px 14px;
       border-radius: var(--radius-md);
-      font-size: 13.5px;
-      font-weight: 500;
-      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted-text);
       cursor: pointer;
       transition: all 0.2s ease;
       text-decoration: none;
     }
 
     .nav-item:hover {
-      color: var(--text-main);
-      background: rgba(220, 210, 200, 0.4);
+      color: var(--black);
+      background: var(--light-grey);
     }
 
     .nav-item.active {
-      background: #FFFFFF;
-      color: var(--primary-terra);
-      font-weight: 600;
+      background: var(--black);
+      color: var(--white);
+      font-weight: 700;
       box-shadow: var(--shadow-sm);
+    }
+
+    .nav-item.active .nav-icon {
+      color: var(--primary-red);
+      stroke: var(--primary-red);
     }
 
     .nav-icon {
       width: 18px;
       height: 18px;
-      opacity: 0.85;
+      opacity: 0.95;
     }
 
     .sidebar-footer {
       position: relative;
       padding: 16px 8px 8px 8px;
-    }
-
-    .leaf-watermark {
-      position: absolute;
-      bottom: -15px;
-      left: -20px;
-      width: 140px;
-      height: 140px;
-      opacity: 0.12;
-      pointer-events: none;
-      filter: sepia(0.5);
+      border-top: 1px solid var(--border-grey);
     }
 
     .brand-taglines {
+      position: relative;
+      z-index: 1;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--medium-grey);
+      line-height: 1.6;
+      font-weight: 700;
+    }
       position: relative;
       z-index: 1;
       font-size: 10px;
@@ -280,7 +308,7 @@
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: #2D231E;
+      background: #171717;
       color: #FFFFFF;
       display: flex;
       align-items: center;
@@ -453,7 +481,7 @@
     }
 
     .filter-pill.active {
-      background: #6B4938;
+      background: #E53935;
       color: #FFFFFF;
       font-weight: 600;
     }
@@ -505,7 +533,7 @@
       justify-content: center;
       font-weight: 600;
       font-size: 14px;
-      color: #6B4938;
+      color: #E53935;
     }
 
     .conv-info {
@@ -636,12 +664,12 @@
       justify-content: center;
       font-size: 11px;
       font-weight: 600;
-      color: #6B4938;
+      color: #E53935;
       flex-shrink: 0;
     }
 
     .msg-avatar.ai {
-      background: #6B4938;
+      background: #E53935;
       color: #FFFFFF;
       font-size: 9px;
       letter-spacing: 0.5px;
@@ -702,7 +730,7 @@
     }
 
     .chat-send-btn {
-      background: #6B4938;
+      background: #E53935;
       color: #FFFFFF;
       border: none;
       border-radius: 50%;
@@ -716,7 +744,7 @@
     }
 
     .chat-send-btn:hover {
-      background: #54392B;
+      background: #B71C1C;
     }
 
     /* ── COLUMN 3: DETAILS & CONCIERGE ACTIONS ── */
@@ -794,7 +822,7 @@
     }
 
     .btn-takeover-main {
-      background: #6B4938;
+      background: #E53935;
       color: #FFFFFF;
       border: none;
       border-radius: var(--radius-sm);
@@ -811,13 +839,13 @@
     }
 
     .btn-takeover-main:hover {
-      background: #54392B;
+      background: #B71C1C;
     }
 
     .btn-resume-main {
-      background: #EFE7DE;
-      color: #6B4938;
-      border: 1px solid #D8C7B5;
+      background: #F5F5F5;
+      color: #E53935;
+      border: 1px solid #E0E0E0;
       border-radius: var(--radius-sm);
       padding: 10px 14px;
       font-size: 13px;
@@ -901,7 +929,7 @@
       position: fixed;
       bottom: 24px;
       right: 28px;
-      background: #2D231E;
+      background: #171717;
       color: #FFFFFF;
       padding: 12px 20px;
       border-radius: 10px;
@@ -943,7 +971,7 @@
       font-family: var(--font-serif);
       font-size: 24px;
       margin-bottom: 6px;
-      color: #2D231E;
+      color: #171717;
     }
     .modal-box p {
       font-size: 12.5px;
@@ -964,7 +992,7 @@
       color: var(--text-main);
     }
     .modal-box input:focus {
-      border-color: #6B4938;
+      border-color: #E53935;
       background: #FFFFFF;
     }
     .password-wrap {
@@ -996,11 +1024,11 @@
       color: var(--text-main);
     }
     .password-toggle-btn:focus-visible {
-      outline: 2px solid #6B4938;
+      outline: 2px solid #E53935;
     }
     .modal-box button.btn-submit {
       width: 100%;
-      background: #6B4938;
+      background: #E53935;
       color: #FFFFFF;
       border: none;
       border-radius: 8px;
@@ -1015,7 +1043,7 @@
       transition: background 0.15s, opacity 0.15s;
     }
     .modal-box button.btn-submit:hover:not(:disabled) {
-      background: #54392B;
+      background: #B71C1C;
     }
     .modal-box button.btn-submit:disabled {
       opacity: 0.65;
@@ -1341,15 +1369,194 @@
         padding: 12px 14px !important;
       }
       #chat-enquiries-scroll-box {
-        max-height: 280px !important;
-        min-height: 180px !important;
+        display: none !important;
+      }
+      #chat-enquiries-cards-mobile {
+        display: flex !important;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 480px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .chat-enquiry-card {
+        background: #FFFFFF;
+        border: 1px solid var(--border-grey);
+        border-radius: var(--radius-md);
+        padding: 14px 16px;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .chat-enquiry-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .chat-enquiry-card-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--dark-text);
+      }
+      .chat-enquiry-card-phone {
+        font-size: 14px;
+        font-family: monospace;
+        color: var(--muted-text);
+      }
+      .chat-enquiry-card-detail {
+        font-size: 14px;
+        color: var(--dark-text);
+      }
+      .chat-enquiry-card-msg {
+        font-size: 13.5px;
+        color: var(--muted-text);
+        background: var(--light-grey);
+        padding: 8px 10px;
+        border-radius: 6px;
+      }
+      .chat-enquiry-card-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .chat-enquiry-card-actions button {
+        flex: 1;
+        min-height: 38px;
+        font-size: 13.5px;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
       }
       #apt-enquiries-scroll-box {
-        max-height: 380px !important;
+        max-height: 420px !important;
         min-height: 220px !important;
+      }
+      #calendar-appointments-table-wrap {
+        display: none !important;
+      }
+      #calendar-appointments-cards-mobile {
+        display: flex !important;
+        flex-direction: column;
+        gap: 12px;
       }
       .crm-section-desc {
         display: none !important;
+      }
+
+      /* Enhanced typography for mobile readability */
+      .welcome-text h1 {
+        font-size: 22px !important;
+        font-weight: 800 !important;
+      }
+      .crm-section-title {
+        font-size: 18px !important;
+        font-weight: 800 !important;
+      }
+      .panel-card h2, .conversations-header h2 {
+        font-size: 18px !important;
+        font-weight: 800 !important;
+      }
+      .crm-kpi-title {
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        color: var(--dark-text) !important;
+      }
+      .crm-kpi-val {
+        font-size: 24px !important;
+        font-weight: 800 !important;
+      }
+
+      /* Bottom Navigation & Viewport Safe Padding */
+      .main-wrapper {
+        padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+      }
+
+      .mobile-bottom-nav {
+        display: flex !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: #FFFFFF;
+        border-top: 1px solid var(--border-grey);
+        z-index: 999;
+        justify-content: space-around;
+        align-items: center;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      }
+      .mobile-nav-tab {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        color: var(--medium-grey);
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 600;
+        flex: 1;
+        height: 100%;
+        transition: color 0.15s ease;
+      }
+      .mobile-nav-tab svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--medium-grey);
+      }
+      .mobile-nav-tab.active {
+        color: var(--primary-red);
+        font-weight: 700;
+      }
+      .mobile-nav-tab.active svg {
+        stroke: var(--primary-red);
+      }
+
+      /* Mobile More Sheet */
+      .mobile-more-sheet {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1050;
+        display: flex;
+        align-items: flex-end;
+      }
+      .mobile-more-content {
+        background: #FFFFFF;
+        width: 100%;
+        border-radius: 16px 16px 0 0;
+        padding: 20px 20px calc(24px + env(safe-area-inset-bottom, 0px)) 20px;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+      }
+      .mobile-more-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-grey);
+      }
+      .mobile-more-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .mobile-more-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--dark-text);
+        text-decoration: none;
+        padding: 12px 14px;
+        background: var(--light-grey);
+        border-radius: var(--radius-md);
       }
     }
 
@@ -1358,22 +1565,24 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: linear-gradient(135deg, #6B4938 0%, #54392B 100%);
-      color: #FFFFFF;
-      border: 1px solid #483023;
+      background: var(--black);
+      color: var(--white);
+      border: 1px solid var(--black);
       padding: 6px 14px;
       border-radius: 20px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(107, 73, 56, 0.25);
+      box-shadow: var(--shadow-sm);
       transition: all 0.2s ease;
       flex-shrink: 0;
       white-space: nowrap;
     }
     .btn-install-pwa:hover {
+      background: var(--primary-red);
+      border-color: var(--primary-red);
       transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(107, 73, 56, 0.35);
+      box-shadow: 0 4px 12px rgba(229, 57, 53, 0.25);
     }
     .btn-install-pwa.installed {
       background: #E8F5E9 !important;
@@ -1387,15 +1596,15 @@
     .sidebar-install-card {
       margin: 14px 6px 6px 6px;
       padding: 12px 14px;
-      background: #FAF6F0;
-      border: 1px solid var(--border);
+      background: var(--light-grey);
+      border: 1px solid var(--border-grey);
       border-radius: var(--radius-md);
       text-align: left;
     }
     .sidebar-install-card h4 {
       font-size: 12px;
-      font-weight: 700;
-      color: var(--primary-terra);
+      font-weight: 800;
+      color: var(--black);
       margin-bottom: 4px;
       display: flex;
       align-items: center;
@@ -1577,7 +1786,7 @@
       position: fixed;
       inset: 0;
       z-index: 9999;
-      background: linear-gradient(145deg, #7B5441 0%, #54392B 100%);
+      background: linear-gradient(145deg, #7B5441 0%, #B71C1C 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1602,7 +1811,7 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.35);
       margin-bottom: 18px;
       overflow: hidden;
-      background: #6B4938;
+      background: #E53935;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1780,7 +1989,7 @@
       border: 1.5px solid #F5EDE7 !important;
     }
     .enquiries-scroll-container::-webkit-scrollbar-thumb:hover {
-      background: #6B4938 !important;
+      background: #E53935 !important;
     }
 
     .appointment-grid {
@@ -1813,7 +2022,7 @@
     }
     .appointment-card:hover {
       border-color: #C8BCB0;
-      box-shadow: 0 4px 12px rgba(107,73,56,0.08);
+      box-shadow: 0 4px 12px rgba(229, 57, 53,0.08);
       transform: translateY(-1px);
     }
 
@@ -1901,17 +2110,17 @@
       margin-bottom: 24px;
     }
     @media (max-width: 1200px) {
-      .crm-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .crm-kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
     }
     @media (max-width: 600px) {
-      .crm-kpi-grid { grid-template-columns: 1fr; }
+      .crm-kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     }
 
     .crm-kpi-card {
       background: #FFFFFF;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
+      border: 1px solid var(--border-grey);
+      border-radius: 12px;
+      padding: 14px 16px;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
       position: relative;
@@ -1920,7 +2129,7 @@
     .crm-kpi-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 16px rgba(0,0,0,0.06);
-      border-color: var(--accent-gold);
+      border-color: var(--primary-red);
     }
     .crm-kpi-header {
       display: flex;
@@ -2018,7 +2227,7 @@
       transition: background 0.15s;
     }
     .funnel-stage-row:hover {
-      background: #FAF7F2;
+      background: #FAFAFA;
     }
     .funnel-stage-label {
       width: 190px;
@@ -2242,10 +2451,10 @@
   <div id="pwa-splash-screen" class="pwa-splash-screen">
     <div class="splash-content">
       <div class="splash-logo-wrap">
-        <img src="/icons/icon-192.png" alt="LIU Logo" class="splash-logo-img" />
+        <img src="/icons/icon-192.png" alt="LIVE IT UP Logo" class="splash-logo-img" />
       </div>
-      <div class="splash-title">LIU</div>
-      <div class="splash-sub">LIVE IT UP</div>
+      <div class="splash-title">LIVE IT <span style="color:var(--primary-red);">UP.</span></div>
+      <div class="splash-sub">UNLEASH YOUR BEST</div>
       <div class="splash-spinner"></div>
     </div>
   </div>
@@ -2264,8 +2473,8 @@
     <div>
       <div class="brand-container" style="display:flex; justify-content:space-between; align-items:flex-start;">
         <div>
-          <div class="brand-title">LIU</div>
-          <div class="brand-subtitle">LIVE IT UP</div>
+          <div class="brand-title">LIVE IT <span class="brand-accent">UP.</span></div>
+          <div class="brand-subtitle">UNLEASH YOUR BEST</div>
         </div>
         <button type="button" class="sidebar-close-btn" onclick="closeMobileMenu()" aria-label="Close Menu">✕</button>
       </div>
@@ -2334,7 +2543,7 @@
       <!-- PWA Install / Download Option in Sidebar Drawer -->
       <div class="sidebar-install-card" id="sidebar-install-card">
         <h4>📱 Mobile App</h4>
-        <p>Install LIU Concierge on your home screen for quick, fullscreen mobile access.</p>
+        <p>Install LIVE IT UP on your home screen for quick, fullscreen mobile access.</p>
         <button type="button" class="btn-install-pwa" id="btn-install-pwa-side" onclick="triggerPWAInstall()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="5" y="2" width="14" height="20" rx="3" ry="3"></rect>
@@ -2348,14 +2557,9 @@
     </div>
 
     <div class="sidebar-footer">
-      <svg class="leaf-watermark" viewBox="0 0 100 100" fill="currentColor">
-        <path d="M20,90 Q40,40 85,20 Q65,60 20,90 Z" />
-        <path d="M30,90 Q50,55 90,40 Q70,75 30,90 Z" />
-      </svg>
       <div class="brand-taglines">
-        <div>CONFIDENCE</div>
-        <div>WELLNESS</div>
-        <div>YOU</div>
+        <div style="font-size:12px; font-weight:800; color:var(--black); letter-spacing:1px;">LIVE IT <span style="color:var(--primary-red);">UP.</span></div>
+        <div style="font-size:9px; font-weight:700; color:var(--medium-grey); margin-top:3px; letter-spacing:1.5px;">UNLEASH YOUR BEST</div>
       </div>
     </div>
   </aside>
@@ -2375,7 +2579,7 @@
           </button>
           <div class="welcome-text">
             <h1>Good Morning, Mam! ☀️</h1>
-            <p>Here's what's happening with your enquiries today.</p>
+            <p><strong style="font-weight:800; letter-spacing:0.5px; color:var(--black);">LIVE IT UP</strong> Consultation & WhatsApp CRM</p>
           </div>
         </div>
 
@@ -2658,7 +2862,7 @@
             </button>
             <div class="avatar-sm" id="active-chat-avatar">P</div>
             <div class="chat-title-info">
-              <h3 id="active-chat-name" style="font-size:15px; font-weight:700; margin:0 0 2px 0; color:#2D231E;">No conversation selected</h3>
+              <h3 id="active-chat-name" style="font-size:15px; font-weight:700; margin:0 0 2px 0; color:#171717;">No conversation selected</h3>
               <p id="active-chat-phone" style="font-size:11.5px; color:var(--text-muted); margin:0 0 2px 0;">—</p>
               <p id="active-chat-lastseen" style="font-size:10.5px; color:var(--text-light); margin:0;">—</p>
             </div>
@@ -2790,7 +2994,7 @@
           <!-- Next Steps -->
           <div class="next-steps-card">
             <div class="next-steps-header">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B4938" stroke-width="2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
                 <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -2835,7 +3039,7 @@
       <!-- Dedicated Scrollable Container 1 for Chat Enquiries (Scrollbar 1) -->
       <div class="enquiries-scroll-container" id="chat-enquiries-scroll-box" style="flex: 1; min-height: 0; overflow-y: scroll !important; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px;">
         <table class="crm-table" style="width: 100%; border-collapse: collapse;">
-          <thead style="position: sticky; top: 0; background: #FAF7F2; z-index: 3; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+          <thead style="position: sticky; top: 0; background: #FAFAFA; z-index: 3; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
             <tr>
               <th>Customer Name</th>
               <th>WhatsApp Phone</th>
@@ -2850,6 +3054,11 @@
             <!-- Populated dynamically via renderEnquiriesTable() -->
           </tbody>
         </table>
+      </div>
+
+      <!-- Mobile Responsive Cards for Chat Enquiries (Clean readable cards on phones) -->
+      <div id="chat-enquiries-cards-mobile" class="chat-enquiries-cards-mobile" style="display:none;">
+        <!-- Populated dynamically via renderEnquiriesTable() -->
       </div>
     </div>
 
@@ -2902,7 +3111,7 @@
       <div class="calendar-controls">
         <div>
           <div class="crm-section-title">📅 Consultation Appointment Calendar</div>
-          <div class="crm-section-desc">Schedule, track, and manage one-on-one appointments across all LIU consultants</div>
+          <div class="crm-section-desc">Schedule, track, and manage one-on-one appointments across all LIVE IT UP consultants</div>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
           <select id="cal-consultant-select" onchange="loadCalendarView()" style="border:1px solid var(--border); padding:6px 12px; border-radius:8px; font-size:12px; background:#fff;">
@@ -2928,9 +3137,9 @@
         </div>
       </div>
 
-      <!-- Upcoming Appointments Table -->
-      <div style="font-size:13.5px; font-weight:700; color:var(--text-main); margin:18px 0 10px 0;">Upcoming Scheduled Consultations</div>
-      <div style="overflow-x:auto;">
+      <!-- Upcoming Appointments Table (Desktop) & Cards (Mobile) -->
+      <div style="font-size:16px; font-weight:800; color:var(--dark-text); margin:20px 0 12px 0;">Upcoming Scheduled Consultations</div>
+      <div id="calendar-appointments-table-wrap" style="overflow-x:auto;">
         <table class="crm-table">
           <thead>
             <tr>
@@ -2946,6 +3155,11 @@
             <!-- Injected dynamically -->
           </tbody>
         </table>
+      </div>
+
+      <!-- Mobile Upcoming Appointments Cards -->
+      <div id="calendar-appointments-cards-mobile" style="display:none;">
+        <!-- Injected dynamically via renderUpcomingAppointmentsTable() -->
       </div>
     </div>
   </div>
@@ -3006,13 +3220,75 @@
   </div>
   </main>
 
+  <!-- Fixed Bottom Navigation for Mobile -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <a href="#dashboard" class="mobile-nav-tab active" id="mob-tab-dashboard" onclick="switchView('dashboard'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span>Home</span>
+    </a>
+    <a href="#conversations" class="mobile-nav-tab" id="mob-tab-conversations" onclick="switchView('conversations'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <span>Chats</span>
+    </a>
+    <a href="#enquiries" class="mobile-nav-tab" id="mob-tab-enquiries" onclick="switchView('enquiries'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+      </svg>
+      <span>Enquiries</span>
+    </a>
+    <a href="#calendar" class="mobile-nav-tab" id="mob-tab-calendar" onclick="switchView('calendar'); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+      <span>Calendar</span>
+    </a>
+    <a href="#more" class="mobile-nav-tab" id="mob-tab-more" onclick="toggleMobileMoreMenu(); return false;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="1.5"></circle>
+        <circle cx="19" cy="12" r="1.5"></circle>
+        <circle cx="5" cy="12" r="1.5"></circle>
+      </svg>
+      <span>More</span>
+    </a>
+  </nav>
+
+  <!-- Mobile "More" Sheet Overlay -->
+  <div class="mobile-more-sheet" id="mobile-more-sheet" style="display:none;" onclick="toggleMobileMoreMenu()">
+    <div class="mobile-more-content" onclick="event.stopPropagation()">
+      <div class="mobile-more-header">
+        <span style="font-weight:800; font-size:15px; color:var(--dark-text); letter-spacing:0.5px;">LIVE IT <span style="color:var(--primary-red);">UP.</span></span>
+        <button type="button" onclick="toggleMobileMoreMenu()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--dark-text);">✕</button>
+      </div>
+      <div class="mobile-more-list">
+        <a href="#reports" onclick="switchView('reports'); toggleMobileMoreMenu(); return false;" class="mobile-more-item">
+          📊 Reports & Analytics
+        </a>
+        <a href="#settings" onclick="openSettingsModal(); toggleMobileMoreMenu(); return false;" class="mobile-more-item">
+          ⚙️ Settings & Consultants
+        </a>
+        <a href="#whatsapp" onclick="openWhatsAppModal(); toggleMobileMoreMenu(); return false;" class="mobile-more-item">
+          📱 WhatsApp Status & QR
+        </a>
+      </div>
+    </div>
+  </div>
+
   <div id="toast">Takeover confirmed!</div>
 
   <!-- ─── LOGIN OVERLAY MODAL ─────────────────────────────── -->
   <div id="login-modal" role="dialog" aria-modal="true" aria-labelledby="login-title">
     <div class="modal-box">
-      <h2 id="login-title">Mam Admin Sign In</h2>
-      <p>Enter your credentials to access the concierge dashboard.</p>
+      <h2 id="login-title">LIVE IT UP Mam Sign In</h2>
+      <p>Enter your credentials to access the LIVE IT UP concierge dashboard.</p>
 
       <div id="login-error" class="login-error-msg" role="alert"></div>
 
@@ -3067,7 +3343,7 @@
   <!-- ─── WHATSAPP LINK MODAL (QR CODE & PHONE PAIRING CODE) ─── -->
   <div id="whatsapp-modal" role="dialog" aria-modal="true" style="display:none; position:fixed; inset:0; background:rgba(39,33,30,0.55); backdrop-filter:blur(4px); z-index:1001; align-items:center; justify-content:center; overflow-y:auto; padding:16px;">
     <div class="modal-box" style="width:420px; max-width:96vw; text-align:center; background:#FFFFFF; border-radius:16px; padding:24px; box-shadow:0 12px 36px rgba(0,0,0,0.2);">
-      <h2 style="font-family:var(--font-serif); font-size:22px; margin-bottom:4px; color:#2D231E;">Link WhatsApp Account</h2>
+      <h2 style="font-family:var(--font-serif); font-size:22px; margin-bottom:4px; color:#171717;">Link WhatsApp Account</h2>
       <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">
         Connect your WhatsApp account to enable Liv AI concierge and live messages.
       </p>
@@ -3132,7 +3408,7 @@
       <div id="wa-tab-qr" style="display:none;">
         <div id="wa-qr-container" style="min-height:220px; display:flex; align-items:center; justify-content:center; background:#FAF8F5; border:1px dashed #D0C5BA; border-radius:12px; margin-bottom:16px; padding:16px;">
           <div id="wa-qr-loading" style="font-size:13px; color:var(--text-muted);">
-            <div class="btn-spinner" style="margin:0 auto 10px auto; border-top-color:#6B4938; border-color:rgba(107,73,56,0.2); width:24px; height:24px;"></div>
+            <div class="btn-spinner" style="margin:0 auto 10px auto; border-top-color:#E53935; border-color:rgba(229, 57, 53,0.2); width:24px; height:24px;"></div>
             Generating QR code...
           </div>
           <img id="wa-qr-img" src="" alt="WhatsApp QR Code" style="display:none; width:220px; height:220px; border-radius:8px;" />
@@ -3148,10 +3424,10 @@
       </div>
 
       <div style="display:flex; gap:10px;">
-        <button type="button" id="btn-refresh-wa-conn" onclick="refreshWhatsAppQR()" style="flex:1; background:#EFE7DE; color:#6B4938; border:1px solid #D8C7B5; border-radius:8px; padding:10px; font-weight:600; font-size:13px; cursor:pointer;">
+        <button type="button" id="btn-refresh-wa-conn" onclick="refreshWhatsAppQR()" style="flex:1; background:#F5F5F5; color:#E53935; border:1px solid #E0E0E0; border-radius:8px; padding:10px; font-weight:600; font-size:13px; cursor:pointer;">
           ↻ Restart Connection
         </button>
-        <button type="button" onclick="closeWhatsAppModal()" style="flex:1; background:#6B4938; color:#FFFFFF; border:none; border-radius:8px; padding:10px; font-weight:600; font-size:13px; cursor:pointer;">
+        <button type="button" onclick="closeWhatsAppModal()" style="flex:1; background:#E53935; color:#FFFFFF; border:none; border-radius:8px; padding:10px; font-weight:600; font-size:13px; cursor:pointer;">
           Close
         </button>
       </div>
@@ -3163,7 +3439,7 @@
     <div class="modal-box" style="width:420px; text-align:left; background:#FFFFFF; border-radius:14px; padding:24px; box-shadow:0 12px 32px rgba(0,0,0,0.2);">
       <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
         <div style="background:#FFEBEE; color:#C62828; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px;">🗑</div>
-        <h2 style="font-family:var(--font-serif); font-size:19px; margin:0; color:#2D231E;">Delete Conversation</h2>
+        <h2 style="font-family:var(--font-serif); font-size:19px; margin:0; color:#171717;">Delete Conversation</h2>
       </div>
       <p style="font-size:13px; color:#5D4037; line-height:1.5; margin-bottom:14px;">
         Are you sure you want to delete the conversation with <strong id="delete-chat-target-name">—</strong> (<span id="delete-chat-target-phone">—</span>)?
@@ -3172,7 +3448,7 @@
         ℹ️ <strong>Database-only deletion:</strong> All locally stored messages and records for this chat will be permanently deleted from this application's database. Your original WhatsApp messages and chat history on your phone will <strong>remain completely untouched</strong>.
       </div>
       <div style="display:flex; gap:10px; justify-content:flex-end;">
-        <button type="button" onclick="closeDeleteChatModal()" style="background:#EFE7DE; color:#6B4938; border:1px solid #D8C7B5; border-radius:8px; padding:9px 16px; font-weight:600; font-size:13px; cursor:pointer;">
+        <button type="button" onclick="closeDeleteChatModal()" style="background:#F5F5F5; color:#E53935; border:1px solid #E0E0E0; border-radius:8px; padding:9px 16px; font-weight:600; font-size:13px; cursor:pointer;">
           Cancel
         </button>
         <button type="button" id="btn-confirm-delete-chat" onclick="confirmDeleteSingleChat()" style="background:#C62828; color:#FFFFFF; border:none; border-radius:8px; padding:9px 18px; font-weight:600; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;">
@@ -3197,7 +3473,7 @@
         🔒 <strong>WhatsApp is Safe:</strong> This only clears this dashboard's local PostgreSQL database. It <strong>never</strong> deletes messages from WhatsApp, does not modify your original WhatsApp history, and does not disconnect your session.
       </div>
       <div style="display:flex; gap:10px; justify-content:flex-end;">
-        <button type="button" onclick="closeDeleteAllModal()" style="background:#EFE7DE; color:#6B4938; border:1px solid #D8C7B5; border-radius:8px; padding:9px 16px; font-weight:600; font-size:13px; cursor:pointer;">
+        <button type="button" onclick="closeDeleteAllModal()" style="background:#F5F5F5; color:#E53935; border:1px solid #E0E0E0; border-radius:8px; padding:9px 16px; font-weight:600; font-size:13px; cursor:pointer;">
           Cancel
         </button>
         <button type="button" id="btn-confirm-delete-all" onclick="confirmDeleteAllChats()" style="background:#C62828; color:#FFFFFF; border:none; border-radius:8px; padding:9px 18px; font-weight:600; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;">
@@ -3212,9 +3488,9 @@
   <div id="ios-install-modal" role="dialog" aria-modal="true" style="display:none; position:fixed; inset:0; background:rgba(39,33,30,0.55); backdrop-filter:blur(4px); z-index:1003; align-items:center; justify-content:center;">
     <div class="ios-modal-box">
       <div style="width:64px; height:64px; border-radius:16px; overflow:hidden; margin:0 auto 12px auto; box-shadow:0 6px 18px rgba(0,0,0,0.22); border:2px solid #E5A869;">
-        <img src="/icons/icon-192.png" alt="LIU Logo" style="width:100%; height:100%; object-fit:cover;" />
+        <img src="/icons/icon-192.png" alt="LIVE IT UP Logo" style="width:100%; height:100%; object-fit:cover;" />
       </div>
-      <h2 style="font-family:var(--font-serif); font-size:20px; color:#2D231E; margin-bottom:4px;">Install LIU App on iPhone</h2>
+      <h2 style="font-family:var(--font-serif); font-size:20px; color:#171717; margin-bottom:4px;">Install LIVE IT UP App on iPhone</h2>
       <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px; line-height:1.4;">
         Install this application to your iPhone home screen to run in full-screen standalone mode without any Safari browser bars:
       </p>
@@ -3231,7 +3507,7 @@
 
       <div class="ios-step-row">
         <div class="ios-step-num">3</div>
-        <div class="ios-step-text">Tap <strong>Add</strong> in the top right corner. The LIU icon will appear on your phone home screen!</div>
+        <div class="ios-step-text">Tap <strong>Add</strong> in the top right corner. The LIVE IT UP icon will appear on your phone home screen!</div>
       </div>
 
       <button type="button" onclick="closeIOSInstallModal()" style="margin-top:14px; width:100%; background:var(--primary-terra); color:#fff; border:none; border-radius:10px; padding:11px; font-weight:600; font-size:13px; cursor:pointer;">
@@ -3253,7 +3529,7 @@
           </div>
           <div>
             <h2 style="font-family:var(--font-serif); font-size:18px; color:var(--text-main); margin:0;">Notification Settings</h2>
-            <p style="font-size:11.5px; color:var(--text-muted); margin:2px 0 0 0;">Mobile push alerts for Live It Up (LIU)</p>
+            <p style="font-size:11.5px; color:var(--text-muted); margin:2px 0 0 0;">Mobile push alerts for LIVE IT UP</p>
           </div>
         </div>
         <button type="button" onclick="closeSettingsModal()" style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted); line-height:1;">&times;</button>
@@ -3283,7 +3559,7 @@
 
         <div class="settings-row">
           <div>
-            <div class="settings-label">LIU Consultant Requests</div>
+            <div class="settings-label">LIVE IT UP Consultant Requests</div>
             <div class="settings-desc">Alert immediately when a customer says 'Yes' to speaking with a consultant</div>
           </div>
           <label class="switch">
@@ -3542,7 +3818,7 @@
       if (topBtn) {
         topBtn.classList.add('installed');
         topBtn.innerHTML = `<span>✓ Installed</span>`;
-        topBtn.onclick = () => showToast('LIU Concierge is running as an installed app.');
+        topBtn.onclick = () => showToast('LIVE IT UP is running as an installed app.');
       }
       if (mobileBtn) {
         mobileBtn.style.display = 'none';
@@ -3550,7 +3826,7 @@
       if (sideCard) {
         sideCard.innerHTML = `
           <h4>✓ App Installed</h4>
-          <p style="margin:0; font-size:11px; color:var(--text-muted);">Access LIU directly from your mobile home screen anytime.</p>
+          <p style="margin:0; font-size:11px; color:var(--text-muted);">Access LIVE IT UP directly from your mobile home screen anytime.</p>
         `;
       }
     }
@@ -3579,7 +3855,7 @@
       deferredPrompt = null;
       isAppInstalled = true;
       markAppAsInstalled();
-      showToast('🎉 LIU Concierge app successfully installed to your home screen!');
+      showToast('🎉 LIVE IT UP app successfully installed to your home screen!');
     });
 
     function isIOSDevice() {
@@ -3887,6 +4163,12 @@
     }
 
     // ─── CRM VIEW SWITCHING & ROUTING ─────────────────────
+    function toggleMobileMoreMenu() {
+      const sheet = document.getElementById('mobile-more-sheet');
+      if (!sheet) return;
+      sheet.style.display = sheet.style.display === 'none' ? 'flex' : 'none';
+    }
+
     function switchView(viewName, navEl) {
       currentActiveView = viewName;
       document.body.classList.toggle('view-conversations', viewName === 'conversations');
@@ -3898,6 +4180,10 @@
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       const activeNav = navEl || document.getElementById(`nav-${viewName}`);
       if (activeNav) activeNav.classList.add('active');
+
+      document.querySelectorAll('.mobile-nav-tab').forEach(t => t.classList.remove('active'));
+      const activeMobTab = document.getElementById(`mob-tab-${viewName}`);
+      if (activeMobTab) activeMobTab.classList.add('active');
 
       window.location.hash = viewName;
       closeMobileMenu();
@@ -3990,16 +4276,21 @@
     function renderDashboardKPIs(cards) {
       const container = document.getElementById('crm-kpi-cards-container');
       if (!container) return;
-      container.innerHTML = cards.map(c => `
+      container.innerHTML = cards.map(c => {
+        const isNew = c.change === 'New' || c.previous === 0;
+        const badgeText = isNew && c.current > 0 ? '★ New' : (c.direction === 'up' ? '↑' : c.direction === 'down' ? '↓' : '•') + ' ' + c.change;
+        const footerText = c.previous === 0 ? (c.current > 0 ? 'Baseline established' : 'No activity yet') : `vs previous period: <strong>${c.previous.toLocaleString()}</strong>`;
+        return `
         <div class="crm-kpi-card" onclick="handleKpiCardClick('${c.filter}')">
           <div class="crm-kpi-header">
             <div class="crm-kpi-title">${c.title}</div>
-            <span class="crm-kpi-badge ${c.direction}">${c.direction === 'up' ? '↑' : c.direction === 'down' ? '↓' : '•'} ${c.change}</span>
+            <span class="crm-kpi-badge ${c.direction}">${badgeText}</span>
           </div>
           <div class="crm-kpi-val">${c.current.toLocaleString()}</div>
-          <div class="crm-kpi-footer">vs previous period: <strong>${c.previous.toLocaleString()}</strong></div>
+          <div class="crm-kpi-footer">${footerText}</div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function handleKpiCardClick(filter) {
@@ -4215,11 +4506,11 @@
               <line x1="20" y1="80" x2="${w}" y2="80" stroke="#EAE4DC" stroke-dasharray="3" />
               <line x1="20" y1="${h}" x2="${w}" y2="${h}" stroke="#D6CEC5" />
               <!-- Starts Polyline -->
-              <polyline fill="none" stroke="#6B4938" stroke-width="2.5" points="${startsPts}" />
+              <polyline fill="none" stroke="#E53935" stroke-width="2.5" points="${startsPts}" />
               <!-- Completions Polyline -->
               <polyline fill="none" stroke="#2E7D32" stroke-width="2.5" points="${compPts}" />
               <!-- Legend -->
-              <text x="30" y="15" font-size="10" fill="#6B4938" font-weight="700">● Starts</text>
+              <text x="30" y="15" font-size="10" fill="#E53935" font-weight="700">● Starts</text>
               <text x="100" y="15" font-size="10" fill="#2E7D32" font-weight="700">● Completions</text>
             </svg>
           `;
@@ -4372,8 +4663,13 @@
         list = list.filter(e => (e.customerName && e.customerName.toLowerCase().includes(q)) || (e.phone && e.phone.includes(q)) || (e.interest && e.interest.toLowerCase().includes(q)));
       }
 
+      const mobileCardsContainer = document.getElementById('chat-enquiries-cards-mobile');
+
       if (list.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:24px;">No chat enquiries match this filter.</td></tr>`;
+        if (mobileCardsContainer) {
+          mobileCardsContainer.innerHTML = `<div style="text-align:center; color:var(--muted-text); padding:24px; font-size:14px; background:#fff; border-radius:10px; border:1px dashed var(--border-grey);">No chat enquiries match this filter.</div>`;
+        }
         return;
       }
 
@@ -4390,17 +4686,42 @@
           <td>${escapeHtml(e.claimedBy || 'Mam (Default)')}</td>
           <td>
             <div style="display:flex; gap:6px; align-items:center;">
-              <button type="button" onclick="jumpToConversation('${e.phone}')" style="background:var(--primary-terra); color:#fff; border:none; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; cursor:pointer;">Chat</button>
+              <button type="button" onclick="jumpToConversation('${e.phone}')" style="background:var(--primary-red); color:#fff; border:none; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; cursor:pointer;">Chat</button>
               ${e.appointmentId ? `
                 <button type="button" onclick="filterAppointmentEnquiries('${e.phone}')" style="background:#FFF8E1; border:1px solid #FFE082; color:#B78103; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; cursor:pointer;" title="View in Appointment Enquiries">View Apt</button>
               ` : `
-                <button type="button" onclick="openAppointmentModal({customerPhone:'${e.phone}', customerName:'${e.customerName}'})" style="background:#FFFFFF; border:1px solid var(--border); color:var(--primary-terra); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; cursor:pointer;">Book</button>
+                <button type="button" onclick="openAppointmentModal({customerPhone:'${e.phone}', customerName:'${e.customerName}'})" style="background:#FFFFFF; border:1px solid var(--border); color:var(--text-main); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; cursor:pointer;">Book</button>
               `}
-              <button type="button" onclick="openReassignModal('${e.phone}')" style="background:#F5EDE7; color:var(--primary-terra); border:none; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; cursor:pointer;">Assign</button>
+              <button type="button" onclick="openReassignModal('${e.phone}')" style="background:var(--light-grey); color:var(--text-main); border:1px solid var(--border-grey); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; cursor:pointer;">Assign</button>
             </div>
           </td>
         </tr>
       `).join('');
+
+      if (mobileCardsContainer) {
+        mobileCardsContainer.innerHTML = list.map(e => `
+          <div class="chat-enquiry-card">
+            <div class="chat-enquiry-card-top">
+              <span class="chat-enquiry-card-name">${escapeHtml(e.customerName || 'Customer')}</span>
+              <span class="tag-pill ${e.status === 'Closed' ? 'tag-green' : e.status === 'New' ? 'tag-pink' : 'tag-orange'}" style="font-size:12px; font-weight:700;">${escapeHtml(e.status)}</span>
+            </div>
+            <div class="chat-enquiry-card-phone">📞 ${escapeHtml(e.verifiedPhone || e.phone)}</div>
+            <div class="chat-enquiry-card-detail"><strong>Service:</strong> ${escapeHtml(e.interest || 'General Grooming & Image')}</div>
+            ${e.appointmentDate ? `<div style="font-size:13px; color:#B78103; font-weight:700; background:#FFF8E1; border:1px solid #FFE082; padding:4px 8px; border-radius:6px;">📅 Apt: ${escapeHtml(e.appointmentDate)}</div>` : ''}
+            <div class="chat-enquiry-card-msg">💬 "${escapeHtml(e.lastMessage || 'No recent messages')}"</div>
+            <div style="font-size:12px; color:var(--muted-text);">Assigned Consultant: <strong>${escapeHtml(e.claimedBy || 'Mam (Default)')}</strong></div>
+            <div class="chat-enquiry-card-actions">
+              <button type="button" onclick="jumpToConversation('${e.phone}')" style="background:var(--primary-red); color:#fff; border:none; padding:8px 12px; font-weight:700;">Chat</button>
+              ${e.appointmentId ? `
+                <button type="button" onclick="filterAppointmentEnquiries('${e.phone}')" style="background:#FFF8E1; border:1px solid #FFE082; color:#B78103; padding:8px 12px; font-weight:700;">View Apt</button>
+              ` : `
+                <button type="button" onclick="openAppointmentModal({customerPhone:'${e.phone}', customerName:'${e.customerName}'})" style="background:#FFFFFF; border:1px solid var(--border-grey); color:var(--dark-text); padding:8px 12px; font-weight:700;">Book</button>
+              `}
+              <button type="button" onclick="openReassignModal('${e.phone}')" style="background:var(--light-grey); color:var(--dark-text); border:1px solid var(--border-grey); padding:8px 12px; font-weight:600;">Assign</button>
+            </div>
+          </div>
+        `).join('');
+      }
     }
 
     // ─── APPOINTMENT ENQUIRIES CONTROLLER ────────────────────
@@ -4867,10 +5188,14 @@
 
     function renderUpcomingAppointmentsTable(appointments) {
       const tbody = document.getElementById('calendar-appointments-tbody');
+      const mobileCards = document.getElementById('calendar-appointments-cards-mobile');
       if (!tbody) return;
 
       if (appointments.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:20px;">No appointments booked yet. Click "+ Book Appointment" above.</td></tr>`;
+        if (mobileCards) {
+          mobileCards.innerHTML = `<div style="text-align:center; color:var(--muted-text); padding:20px; font-size:14px; background:#fff; border-radius:10px; border:1px dashed var(--border-grey);">No upcoming appointments.</div>`;
+        }
         return;
       }
 
@@ -4889,11 +5214,33 @@
               ` : `
                 <span style="font-size:11px; color:var(--text-light);">Archived</span>
               `}
-              <button type="button" onclick="jumpToConversation('${a.customerPhone}')" style="background:var(--primary-terra); color:#fff; border:none; border-radius:6px; padding:3px 7px; font-size:11px; font-weight:600; cursor:pointer;">Chat</button>
+              <button type="button" onclick="jumpToConversation('${a.customerPhone}')" style="background:var(--primary-red); color:#fff; border:none; border-radius:6px; padding:3px 7px; font-size:11px; font-weight:600; cursor:pointer;">Chat</button>
             </div>
           </td>
         </tr>
       `).join('');
+
+      if (mobileCards) {
+        mobileCards.innerHTML = appointments.slice(0, 10).map(a => `
+          <div class="chat-enquiry-card">
+            <div class="chat-enquiry-card-top">
+              <span class="chat-enquiry-card-name">${escapeHtml(a.customerName || 'Customer')}</span>
+              <span class="tag-pill ${a.status === 'COMPLETED' ? 'tag-green' : a.status === 'CANCELLED' ? 'tag-pink' : 'tag-orange'}" style="font-size:12px; font-weight:700;">${a.status}</span>
+            </div>
+            <div style="font-size:14px; font-weight:700; color:var(--dark-text);">📅 ${a.date} at ${a.time}</div>
+            <div class="chat-enquiry-card-phone">📞 ${escapeHtml(a.customerPhone)}</div>
+            <div class="chat-enquiry-card-detail"><strong>Service:</strong> ${escapeHtml(a.serviceName)}</div>
+            <div style="font-size:12px; color:var(--muted-text);">Consultant: <strong>${escapeHtml(a.consultantName || 'Mam')}</strong></div>
+            <div class="chat-enquiry-card-actions">
+              ${a.status === 'SCHEDULED' ? `
+                <button type="button" onclick="updateAppointmentStatus('${a.id}', 'COMPLETED')" style="background:#E8F5E9; color:#2E7D32; border:1px solid #C8E6C9;">Complete</button>
+                <button type="button" onclick="updateAppointmentStatus('${a.id}', 'CANCELLED')" style="background:#FFEBEE; color:#C62828; border:1px solid #FFCDD2;">Cancel</button>
+              ` : ''}
+              <button type="button" onclick="jumpToConversation('${a.customerPhone}')" style="background:var(--primary-red); color:#fff; border:none;">Chat</button>
+            </div>
+          </div>
+        `).join('');
+      }
     }
 
     function openAppointmentModal(prefill = {}) {
@@ -5461,7 +5808,7 @@
       return `
         <div class="chat-row ${isUser ? 'incoming' : 'outgoing'}" data-msg-role="${m.role || ''}">
           <div class="msg-avatar ${m.role === 'assistant' ? 'ai' : ''}">
-            ${m.role === 'assistant' ? 'LIU' : avatar}
+            ${m.role === 'assistant' ? 'LIVE IT UP' : avatar}
           </div>
           <div class="bubble-wrap">
             <div class="chat-bubble">${escapeHtml(m.text || m.content || '').replace(/\n/g, '<br>')}</div>
@@ -5540,7 +5887,7 @@
       const rowsHtml = msgs.map(m => renderMessageRow(m, conv.avatar)).join('');
       const loaderHtml = `
         <div id="chat-older-loader" style="display:none; text-align:center; padding:8px 0; font-size:11.5px; color:var(--text-muted);">
-          <div class="btn-spinner" style="display:inline-block; vertical-align:middle; width:14px; height:14px; margin-right:6px; border-top-color:#6B4938; border-color:rgba(107,73,56,0.2);"></div>
+          <div class="btn-spinner" style="display:inline-block; vertical-align:middle; width:14px; height:14px; margin-right:6px; border-top-color:#E53935; border-color:rgba(229, 57, 53,0.2);"></div>
           Loading older messages...
         </div>
       `;
@@ -5719,7 +6066,7 @@
         } else {
           chatContainer.innerHTML = `
             <div style="padding: 40px; text-align: center; color: var(--text-muted); font-size: 13px;">
-              <div class="btn-spinner" style="margin:0 auto 10px auto; border-top-color:#6B4938; border-color:rgba(107,73,56,0.2); width:20px; height:20px;"></div>
+              <div class="btn-spinner" style="margin:0 auto 10px auto; border-top-color:#E53935; border-color:rgba(229, 57, 53,0.2); width:20px; height:20px;"></div>
               Loading conversation...
             </div>
           `;
@@ -6236,7 +6583,7 @@
         if (pairingBox) pairingBox.style.display = 'none';
         if (qrLoading) {
           qrLoading.style.display = 'block';
-          qrLoading.innerHTML = '<div class="btn-spinner" style="margin:0 auto 10px auto; border-top-color:#6B4938; border-color:rgba(107,73,56,0.2); width:24px; height:24px;"></div>Starting fresh WhatsApp connection...';
+          qrLoading.innerHTML = '<div class="btn-spinner" style="margin:0 auto 10px auto; border-top-color:#E53935; border-color:rgba(229, 57, 53,0.2); width:24px; height:24px;"></div>Starting fresh WhatsApp connection...';
         }
         if (qrImg) qrImg.style.display = 'none';
         if (statusLbl) statusLbl.innerHTML = '<span style="color:#B25D25;">Restarting connection session...</span>';

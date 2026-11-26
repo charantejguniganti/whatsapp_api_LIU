@@ -90,7 +90,7 @@ export function parseDateRange(timeRange = '7d', customFrom = null, customTo = n
 function calculatePercentChange(current, previous) {
   if (previous === 0) {
     if (current === 0) return { changeStr: '0%', direction: 'neutral' };
-    return { changeStr: `+${current * 100}%`, direction: 'up' };
+    return { changeStr: 'New', direction: 'up' };
   }
   const pct = Math.round(((current - previous) / previous) * 100);
   if (pct > 0) return { changeStr: `+${pct}%`, direction: 'up' };
