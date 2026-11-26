@@ -364,6 +364,53 @@ export function isRescheduleAccepted(text = '') {
   );
 }
 
+export function parseSlotPreference(text = '') {
+  const lower = text.trim().toLowerCase();
+  let time = null;
+  let date = null;
+
+  // 1. Check 12-hour with am/pm FIRST: 11 am, 11:00 am, 3 pm, 3:30pm
+  const match12 = lower.match(/\b(1[0-2]|0?[1-9])(?::([0-5]\d))?\s*(am|pm)\b/i);
+  if (match12) {
+    let hour = parseInt(match12[1], 10);
+    const min = match12[2] || '00';
+    const ampm = match12[3].toLowerCase();
+    if (ampm === 'pm' && hour < 12) hour += 12;
+    if (ampm === 'am' && hour === 12) hour = 0;
+    time = String(hour).padStart(2, '0') + ':' + min;
+  } else {
+    // 2. Check 24-hour format: 13:00, 14:30
+    const match24 = lower.match(/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/);
+    if (match24) {
+      time = match24[1].padStart(2, '0') + ':' + match24[2];
+    }
+  }
+
+  // 2. Date extraction
+  const now = new Date();
+  if (lower.includes('today')) {
+    date = now.toISOString().split('T')[0];
+  } else if (lower.includes('tomorrow')) {
+    const tmrw = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    date = tmrw.toISOString().split('T')[0];
+  } else {
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    for (let i = 0; i < days.length; i++) {
+      if (lower.includes(days[i])) {
+        const targetDay = i;
+        const currentDay = now.getDay();
+        let diff = targetDay - currentDay;
+        if (diff < 0) diff += 7;
+        const targetDate = new Date(now.getTime() + diff * 24 * 60 * 60 * 1000);
+        date = targetDate.toISOString().split('T')[0];
+        break;
+      }
+    }
+  }
+
+  return { time, date };
+}
+
 async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, text, store, meta = {}) {
   const { pushName = null, msgTimestamp = new Date().toISOString(), isGroup = false, groupName = null } = meta;
   const leadService = createLeadService(store);
@@ -382,18 +429,39 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
       const serviceInterest = existingConv.interest || 'Personal Consultation';
 
       let apt = null;
-      try {
-        apt = await appointmentsService.createAppointment({
-          customerPhone,
-          customerName,
-          serviceName: serviceInterest,
-          isCustomerEnquiry: true,
-          status: appointmentsService.APPOINTMENT_STATUS.PENDING,
-          notes: `Customer WhatsApp Request: "${text}"`,
-          skipWhatsAppAck: true,
-        });
-      } catch (e) {
-        logger.warn({ err: e, phone: customerPhone }, 'Appointment booking enquiry already exists or conflict handled');
+      // DEDUPLICATION: Look for an existing active PENDING appointment for this customer
+      const aptIndex = (await store.get('appointments:index')) || [];
+      for (const aptId of aptIndex) {
+        const a = await store.get(`appointment:${aptId}`);
+        if (!a || a.isArchived) continue;
+        const aPhone = (a.phone || a.customerPhone || '').replace(/\D/g, '');
+        const cPhone = customerPhone.replace(/\D/g, '');
+        if (aPhone === cPhone || aPhone.endsWith(cPhone) || cPhone.endsWith(aPhone)) {
+          if (a.status === appointmentsService.APPOINTMENT_STATUS.PENDING) {
+            apt = a;
+            break;
+          }
+        }
+      }
+
+      if (!apt) {
+        try {
+          apt = await appointmentsService.createAppointment({
+            customerPhone,
+            customerName,
+            serviceName: serviceInterest,
+            isCustomerEnquiry: true,
+            status: appointmentsService.APPOINTMENT_STATUS.PENDING,
+            notes: `Customer WhatsApp Request: "${text}"`,
+            skipWhatsAppAck: true,
+          });
+        } catch (e) {
+          logger.warn({ err: e, phone: customerPhone }, 'Appointment booking enquiry already exists or conflict handled');
+        }
+      } else {
+        apt.notes = `Customer WhatsApp Request: "${text}"`;
+        apt.updatedAt = new Date().toISOString();
+        await store.set(`appointment:${apt.id}`, apt);
       }
 
       const reply =
@@ -584,6 +652,17 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
         );
 
       if (hasSlotPreference) {
+        // Parse time and date from text (e.g. "Thursday 13:00", "Tomorrow at 11 AM")
+        const parsed = parseSlotPreference(text);
+        if (parsed.time) {
+          pendingApt.time = parsed.time;
+        }
+        if (parsed.date) {
+          pendingApt.date = parsed.date;
+        }
+        pendingApt.appointmentDateTime = `${pendingApt.date}T${pendingApt.time}:00`;
+        pendingApt.requestedDateTime = pendingApt.appointmentDateTime;
+
         pendingApt.notes = pendingApt.notes ? `${pendingApt.notes} | Preferred slot: "${text}"` : `Preferred slot: "${text}"`;
         pendingApt.updatedAt = new Date().toISOString();
         await store.set(`appointment:${pendingAptId}`, pendingApt);
@@ -609,6 +688,7 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
           lastMessageRole: 'assistant',
           status: 'Consultant Requested',
           appointmentId: pendingApt.id,
+          appointmentDate: `${pendingApt.date} ${pendingApt.time}`,
           updatedAt: replyTime,
         });
 

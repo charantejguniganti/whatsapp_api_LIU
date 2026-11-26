@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../src/app.js';
 import * as appointmentsService from '../../src/crm/appointmentsService.js';
-import { isAppointmentBookingIntent, isRescheduleAccepted } from '../../src/whatsapp/baileysClient.js';
+import { isAppointmentBookingIntent, isRescheduleAccepted, parseSlotPreference } from '../../src/whatsapp/baileysClient.js';
 import { getStore, resetStore } from '../../src/store/index.js';
 import jwt from 'jsonwebtoken';
 import config from '../../src/config/index.js';
@@ -314,6 +314,24 @@ describe('Appointment Enquiries Integration & API', () => {
 
       expect(apt.id).toBeDefined();
       expect(apt.status).toBe('PENDING');
+    });
+
+    it('parses customer slot preferences accurately (time and date)', () => {
+      const p1 = parseSlotPreference('Thursday 13:00');
+      expect(p1.time).toBe('13:00');
+      expect(p1.date).toBeDefined();
+
+      const p2 = parseSlotPreference('Tomorrow at 11:00 AM');
+      expect(p2.time).toBe('11:00');
+      expect(p2.date).toBeDefined();
+
+      const p3 = parseSlotPreference('Saturday at 3:00 PM');
+      expect(p3.time).toBe('15:00');
+      expect(p3.date).toBeDefined();
+
+      const p4 = parseSlotPreference('today 5 pm');
+      expect(p4.time).toBe('17:00');
+      expect(p4.date).toBeDefined();
     });
   });
 });
