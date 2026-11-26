@@ -25,6 +25,7 @@ import {
 } from '../conversations/service.js';
 import { createQuestionnaireManager } from '../questionnaire/stateManager.js';
 import * as pushService from '../push/pushService.js';
+import * as appointmentsService from '../crm/appointmentsService.js';
 import {
   resolveSenderIdentity,
   handleContactsSync,
@@ -343,6 +344,16 @@ async function saveConversationRecord(store, customerPhone, meta, update) {
   return updatedRecord;
 }
 
+function isAppointmentBookingIntent(text = '') {
+  const lower = text.trim().toLowerCase();
+  return (
+    /\b(book|booking|schedule|reserve|set up|fix)\b.*\b(appointment|consultation|session|slot|meeting)\b/i.test(lower) ||
+    /\b(want|need|like|interested in)\b.*\b(appointment|consultation)\b/i.test(lower) ||
+    /\b(book an appointment|book appointment|schedule appointment|consultation booking|schedule a time|book a slot)\b/i.test(lower) ||
+    /^(book|appointment|consultation|schedule|book slot|book session)[\s!.,]*$/i.test(lower)
+  );
+}
+
 async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, text, store, meta = {}) {
   const { pushName = null, msgTimestamp = new Date().toISOString(), isGroup = false, groupName = null } = meta;
   const leadService = createLeadService(store);
@@ -434,12 +445,87 @@ async function handleInboundBaileysMessage(socket, remoteJid, customerPhone, tex
           messageText: text,
           timestamp: msgTimestamp,
         });
+
+        // Automatically create a pending appointment enquiry if customer completed quiz and requested consultant
+        try {
+          const session = await (await getStore()).get(`quiz:${customerPhone}`);
+          const quizService = session?.answers?.q1 || session?.analysis?.primaryRecommendation?.title || 'Personal Consultation';
+          await appointmentsService.createAppointment({
+            customerPhone,
+            customerName,
+            serviceName: quizService,
+            isCustomerEnquiry: true,
+            status: appointmentsService.APPOINTMENT_STATUS.PENDING,
+            notes: `Customer completed questionnaire and requested consultation (${text})`,
+          });
+        } catch (e) {
+          logger.warn({ err: e, phone: customerPhone }, 'Quiz appointment auto-creation skipped or duplicate');
+        }
       } catch (err) {
         logger.error({ err, phone: customerPhone }, 'Failed to send consultant push notification in Baileys');
       }
     }
 
     return; // questionnaire handled this message
+  }
+
+  // ── Appointment Booking Intent Detector ─────────────────────────────────
+  if (isAppointmentBookingIntent(text)) {
+    try {
+      const customerName = pushName || (await convService.getCustomerName(customerPhone)) || customerPhone;
+      const existingConv = (await store.get(`conv:${customerPhone}`)) ?? {};
+      const serviceInterest = existingConv.interest || 'Personal Consultation';
+
+      let apt = null;
+      try {
+        apt = await appointmentsService.createAppointment({
+          customerPhone,
+          customerName,
+          serviceName: serviceInterest,
+          isCustomerEnquiry: true,
+          status: appointmentsService.APPOINTMENT_STATUS.PENDING,
+          notes: `Customer requested via WhatsApp: "${text}"`,
+        });
+      } catch (e) {
+        logger.warn({ err: e, phone: customerPhone }, 'Appointment booking enquiry already exists or error handled');
+      }
+
+      const reply =
+        `Thank you for reaching out to Live It Up! 🌟\n\n` +
+        `We have received your appointment booking request (*Status: Pending Confirmation*).\n\n` +
+        `Our LIU team is reviewing your request and will reach out shortly to confirm your consultation schedule.\n\n` +
+        `Which service are you most interested in exploring (e.g. Personal Styling & Image, Executive Grooming, or Communication Skills)?`;
+
+      await socket.sendMessage(remoteJid, { text: reply });
+
+      const replyTime = new Date().toISOString();
+      const updatedHistory = [
+        ...history,
+        { role: 'user', content: text, timestamp: msgTimestamp },
+        { role: 'assistant', content: reply, timestamp: replyTime },
+      ].slice(-20);
+      await store.set(historyKey, updatedHistory);
+
+      await saveConversationRecord(store, customerPhone, meta, {
+        lastMessage: text,
+        lastMessageTimestamp: replyTime,
+        lastMessageRole: 'assistant',
+        status: 'Consultant Requested',
+        appointmentId: apt ? apt.id : existingConv.appointmentId,
+        updatedAt: replyTime,
+      });
+
+      await pushService.notifyConsultantRequest({
+        customerPhone,
+        customerName,
+        messageText: `📅 New Appointment Request: "${text}"`,
+        timestamp: msgTimestamp,
+      }).catch(() => {});
+
+      return;
+    } catch (err) {
+      logger.error({ err, customerPhone }, 'Error processing appointment booking intent');
+    }
   }
 
   // Classify message

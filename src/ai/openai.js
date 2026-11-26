@@ -16,6 +16,11 @@ import logger from '../logger.js';
  */
 const MOCK_RESPONSES = [
   {
+    keywords: ['book', 'appointment', 'consultation', 'reserve', 'session slot'],
+    reply:
+      "Thank you for wanting to book an appointment with Live It Up! 🌟 We'd be delighted to schedule your consultation session. Which service would you like to explore (e.g. Personal Styling & Image, Executive Grooming, or Communication Skills), and what days or times suit you best?",
+  },
+  {
     keywords: ['human', 'agent', 'person', 'someone', 'team', 'representative', 'speak to', 'talk to', 'call me', 'manager', 'escalate'],
     reply:
       "Thanks for reaching out to Live It Up! 🌟 Our team will contact you soon.",

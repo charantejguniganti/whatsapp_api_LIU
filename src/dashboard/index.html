@@ -1317,6 +1317,40 @@
         max-width: 92vw;
         padding: 20px 16px;
       }
+
+      /* Mobile Enquiries Dual Section Layout */
+      body.view-enquiries,
+      body.view-enquiries .main-wrapper {
+        overflow-y: auto !important;
+        height: auto !important;
+        min-height: 100vh !important;
+        min-height: 100dvh !important;
+      }
+      #view-enquiries.active {
+        height: auto !important;
+        overflow: visible !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 14px !important;
+      }
+      #chat-enquiries-card,
+      #appointment-enquiries-section {
+        flex: none !important;
+        width: 100% !important;
+        margin-bottom: 0 !important;
+        padding: 12px 14px !important;
+      }
+      #chat-enquiries-scroll-box {
+        max-height: 280px !important;
+        min-height: 180px !important;
+      }
+      #apt-enquiries-scroll-box {
+        max-height: 380px !important;
+        min-height: 220px !important;
+      }
+      .crm-section-desc {
+        display: none !important;
+      }
     }
 
     /* ─── PWA & NATIVE MOBILE APP STYLES ──────────────────── */
@@ -1811,7 +1845,14 @@
       display: flex;
       gap: 6px;
       align-items: center;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 3px;
+    }
+    .crm-date-pills::-webkit-scrollbar {
+      display: none;
     }
     .crm-date-pill {
       background: #FDFBF8;
@@ -1823,6 +1864,8 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .crm-date-pill:hover {
       border-color: var(--primary-terra);
